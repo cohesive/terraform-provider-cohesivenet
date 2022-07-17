@@ -5,6 +5,6 @@ provider "cohesive.net/vns3/cohesivenet" {
   version     = "0.1.0"
   constraints = "0.1.0"
   hashes = [
-    "h1:qqkcDK+C9P3BjgpO9oQt+Gsotj9m6a87MghXKR6HMmU=",
+    "h1:cTb2r/YWoGAzRqcyAPkQSdnElkAL9HH25geVbhf5UBg=",
   ]
 }

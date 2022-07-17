@@ -11,6 +11,7 @@ provider "cohesivenet" {
   username = ""
   password = ""
   token = ""
+  hosturl = ""
 }
 
 //data "cohesivenet_endpoints" all {}
