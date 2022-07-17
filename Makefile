@@ -3,7 +3,7 @@ HOSTNAME=cohesive.net
 NAMESPACE=vns3
 NAME=cohesivenet
 BINARY=terraform-provider-${NAME}
-VERSION=1
+VERSION=0.1.0
 OS_ARCH=darwin_amd64
 
 default: install
