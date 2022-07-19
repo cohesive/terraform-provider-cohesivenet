@@ -8,10 +8,10 @@ terraform {
 }
 
 provider "cohesivenet" {
-  username = ""
-  password = ""
-  token = ""
-  hosturl = ""
+  username = "vnscubed"
+  password = "vnscontroller!"
+  token = "771c844ecf0a2e0a9dd2c2a3071cfa7c1a06d7eed1f8664ce0995ec1b0824bee"
+  hosturl = "https://3.127.171.216:8000/api"
 }
 
 //data "cohesivenet_endpoints" all {}
@@ -19,7 +19,6 @@ provider "cohesivenet" {
 ///output "all_endpoints" {
 //   value = data.cohesivenet_endpoints.all
 //}
-
 
 data "cohesivenet_config" all {}
 
@@ -33,8 +32,8 @@ output "all_container_networks" {
   value = data.cohesivenet_container_network.all 
 }
 
-//data "cohesivenet_routes" routes {}
+data "cohesivenet_routes" routes {}
 
-//output "all_routes" {
-//   value = data.cohesivenet_routes.routes 
-//}
+output "all_routes" {
+   value = data.cohesivenet_routes.routes 
+}
