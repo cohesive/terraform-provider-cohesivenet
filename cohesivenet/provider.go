@@ -36,9 +36,11 @@ func Provider() *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("CN_HOSTURL", nil),
 			},
 		},
-		ResourcesMap: map[string]*schema.Resource{},
+		ResourcesMap: map[string]*schema.Resource{
+			"cohesivenet_endpoints": resourceEndpoints(),
+		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"cohesivenet_endpoints":         dataSourceEndpoint(),
+			"cohesivenet_endpoints":         dataSourceEndpoints(),
 			"cohesivenet_config":            dataSourceConfig(),
 			"cohesivenet_container_network": dataSourceContainerNetwork(),
 			"cohesivenet_routes":            dataSourceRoutes(),

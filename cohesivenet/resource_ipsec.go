@@ -7,14 +7,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceIpsec() *schema.Resource {
+func resourceEndpoints() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceIpsecCreate,
-		ReadContext:   resourceIpsecRead,
-		UpdateContext: resourceIpsecUpdate,
-		DeleteContext: resourceIpsecDelete,
+		CreateContext: resourceEndpointsCreate,
+		ReadContext:   resourceEndpointsRead,
+		UpdateContext: resourceEndpointsUpdate,
+		DeleteContext: resourceEndpointsDelete,
 		Schema: map[string]*schema.Schema{
-			"ipsec": &schema.Schema{
+			"last_updated": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"endpoints": &schema.Schema{
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
@@ -51,6 +56,22 @@ func resourceIpsec() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"vpn_type": &schema.Schema{
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"route_based_int_address": &schema.Schema{
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"route_based_local": &schema.Schema{
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"route_based_remote": &schema.Schema{
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 					},
 				},
 			},
@@ -58,62 +79,66 @@ func resourceIpsec() *schema.Resource {
 	}
 }
 
-func resourceIpsecCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceEndpointsCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
 	return diags
-}
-
-/*
-func resourceIpsecCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+} /*
+func resourceEndpointsCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*cn.Client)
 
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
-	ipsec := d.Get("ipsec").([]interface{})
-	ois := []cn.OrderItem{}
+	endpoints := d.Get("endpoints").(interface{})
 
-	for _, ipsec := range ipsecs {
-		i := ipsec.(map[string]interface{})
+	newEndpoint := c.CreateEndpoints(endpoints)
 
-		co := i["coffee"].([]interface{})[0]
-		coffee := co.(map[string]interface{})
+	/*
+		eps := []cn.EndpointResponse{}
 
-		oi := cn.OrderItem{
-			Coffee: cn.Coffee{
-				ID: coffee["id"].(int),
-			},
-			Quantity: i["quantity"].(int),
+		for _, endpoint := range endpoints {
+			ep := endpoint.(map[string]interface{})
+
+			co := i["coffee"].([]interface{})[0]
+			coffee := co.(map[string]interface{})
+
+			oi := cn.OrderItem{
+				Coffee: cn.Coffee{
+					ID: coffee["id"].(int),
+				},
+				Quantity: i["quantity"].(int),
+			}
+
+			ois = append(ois, oi)
 		}
 
-		ois = append(ois, oi)
-	}
+		o, err := c.CreateOrder(ois)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 
-	o, err := c.CreateOrder(ois)
-	if err != nil {
-		return diag.FromErr(err)
-	}
 
-	d.SetId(strconv.Itoa(o.ID))
+		d.SetId(strconv.Itoa(o.ID))
 
+
+	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
 	return diags
 }
 */
-
-func resourceIpsecRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceEndpointsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
 	return diags
 }
 
-func resourceIpsecUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	return resourceIpsecRead(ctx, d, m)
+func resourceEndpointsUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	return resourceEndpointsRead(ctx, d, m)
 }
 
-func resourceIpsecDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceEndpointsDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 

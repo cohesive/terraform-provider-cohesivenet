@@ -19,55 +19,7 @@ func dataSourceFirewall() *schema.Resource {
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"private_ipaddress": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"public_ipaddress": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"subnet_gateway": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"topology_checksum": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"vns3_version": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"topology_name": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"ntp_hosts": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"licensed": &schema.Schema{
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"peered": &schema.Schema{
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"asn": &schema.Schema{
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						"manager_id": &schema.Schema{
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						"overlay_ipaddress": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"security_token": &schema.Schema{
+						"rule": &schema.Schema{
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -89,15 +41,27 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 
-	resp := make([]interface{}, 1, 1)
-	row := make(map[string]interface{})
+	//rules := firewallResponse.Firewall
 
-	row["private_ipaddress"] = firewallResponse.Firewall[0]
-	row["public_ipaddress"] = firewallResponse.Firewall[1]
+	/*
+		rulesMap := make(map[string]string)
 
-	resp[0] = row
+		i := 0
+		for _, rl := range rules {
+			row := make(map[string]interface{})
+			//rt_data := rl.(interface{})
+			row["rule"] = rl
 
-	if err := d.Set("response", resp); err != nil {
+			rulesMap[] = row
+			i++
+		}
+	*/
+	//	rules := make([]interface{}, 1, 1)
+	rules := firewallResponse.Firewall
+	//row := make(map[string]interface{})
+	//row["rule"] = firewallResponse.Firewall[0]
+
+	if err := d.Set("response", rules); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -105,3 +69,35 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, m inter
 
 	return diags
 }
+
+/*
+func flattenRules(routeResponse map[string]interface{}) interface{} {
+	if routeResponse != nil {
+		routes := make([]interface{}, len(routeResponse), len(routeResponse))
+
+		i := 0
+		for id, rt := range routeResponse {
+			row := make(map[string]interface{})
+			rt_data := rt.(map[string]interface{})
+
+			row["cidr"] = rt_data["cidr"]
+			row["id"] = id
+			row["description"] = rt_data["description"]
+			row["advertise"] = rt_data["advertise"].(bool)
+			row["metric"] = rt_data["metric"].(float64)
+			row["enabled"] = rt_data["enabled"].(bool)
+			row["netmask"] = rt_data["netmask"]
+			row["editable"] = rt_data["editable"].(bool)
+			row["table"] = rt_data["table"]
+			row["interface"] = rt_data["interface"]
+
+			routes[i] = row
+			i++
+		}
+
+		return routes
+	}
+
+	return make([]interface{}, 0)
+}
+*/
