@@ -8,18 +8,19 @@ terraform {
 }
 
 provider "cohesivenet" {
-  username = ""
+  username = "vnscubed"
   password = ""
   token = ""
   hosturl = ""
 }
 
+/*
 data "cohesivenet_endpoints" all {}
 
 output "all_endpoints" {
    value = data.cohesivenet_endpoints.all
 }
-
+*/
 /*
 data "cohesivenet_config" config {}
 
@@ -51,15 +52,15 @@ output "all_rules" {
 }
 */
 
-/*
+
  resource "cohesivenet_endpoints" "endpoint_vf" {
   endpoint {
-      endpoint_name = "route_based_vf"
-      description = "routebased_api"
-      peer_ip = "3.64.150.23"
+      name = "routebasedvf"
+      description = "routebasedapi"
+      ipaddress = "33.64.150.23"
       secret =  "biglongstring"
       pfs = true
-      ike_version= 2
+      ike_version = 2
       nat_t_enabled = true
       extra_config = "phase1=aes256-sha1-dh14"
       vpn_type = "vti"
@@ -68,7 +69,24 @@ output "all_rules" {
       route_based_remote = "0.0.0.0/0"
     }
  }
-*/
+
+  resource "cohesivenet_endpoints" "endpoint_vf2" {
+  endpoint {
+      name = "routebasedvf2"
+      description = "routebasedapi2"
+      ipaddress = "33.64.150.230"
+      secret =  "biglongstring"
+      pfs = true
+      ike_version = 2
+      nat_t_enabled = true
+      extra_config = "phase1=aes256-sha1-dh14"
+      vpn_type = "vti"
+      route_based_int_address = "168.254.0.70/30"
+      route_based_local =  "0.0.0.0/0"
+      route_based_remote = "0.0.0.0/0"
+    }
+ }
+
 
 
 
