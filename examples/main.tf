@@ -56,7 +56,7 @@ output "all_rules" {
  resource "cohesivenet_endpoints" "endpoint_vf" {
   endpoint {
       name = "routebasedvf"
-      description = "routebasedapi"
+      description = "routebased"
       ipaddress = "33.64.150.23"
       secret =  "biglongstring"
       pfs = true
@@ -69,7 +69,8 @@ output "all_rules" {
       route_based_remote = "0.0.0.0/0"
     }
  }
-
+ 
+ /*
   resource "cohesivenet_endpoints" "endpoint_vf2" {
   endpoint {
       name = "routebasedvf2"
@@ -86,7 +87,7 @@ output "all_rules" {
       route_based_remote = "0.0.0.0/0"
     }
  }
-
+*/
 
 
 

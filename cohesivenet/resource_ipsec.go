@@ -3,6 +3,8 @@ package cohesivenet
 import (
 	"context"
 	"strconv"
+	"strings"
+	"time"
 
 	cn "github.com/cohesive/cohesivenet-client-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -16,6 +18,11 @@ func resourceEndpoints() *schema.Resource {
 		UpdateContext: resourceEndpointsUpdate,
 		DeleteContext: resourceEndpointsDelete,
 		Schema: map[string]*schema.Schema{
+			"last_updated": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"endpoint": &schema.Schema{
 				Type:     schema.TypeList,
 				Optional: true,
@@ -24,73 +31,61 @@ func resourceEndpoints() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"name": &schema.Schema{
 							Type:     schema.TypeString,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
 						"description": &schema.Schema{
 							Type:     schema.TypeString,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
 						"ipaddress": &schema.Schema{
 							Type:     schema.TypeString,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
 						"secret": &schema.Schema{
 							Type:     schema.TypeString,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
 						"pfs": &schema.Schema{
 							Type:     schema.TypeBool,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
 						"ike_version": &schema.Schema{
 							Type:     schema.TypeInt,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
 						"nat_t_enabled": &schema.Schema{
 							Type:     schema.TypeBool,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
 						"extra_config": &schema.Schema{
 							Type:     schema.TypeString,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
 						"vpn_type": &schema.Schema{
 							Type:     schema.TypeString,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
 						"route_based_int_address": &schema.Schema{
 							Type:     schema.TypeString,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
 						"route_based_local": &schema.Schema{
 							Type:     schema.TypeString,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
 						"route_based_remote": &schema.Schema{
 							Type:     schema.TypeString,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
@@ -137,6 +132,7 @@ func resourceEndpointsCreate(ctx context.Context, d *schema.ResourceData, m inte
 	return diags
 }
 
+/*
 func resourceEndpointsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
@@ -144,7 +140,7 @@ func resourceEndpointsRead(ctx context.Context, d *schema.ResourceData, m interf
 	return diags
 }
 
-/*
+*/
 func resourceEndpointsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*cn.Client)
 	// Warning or errors can be collected in a slice type
@@ -157,82 +153,97 @@ func resourceEndpointsRead(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
-	newEndpoint := endpoint.Response
-	//endpoints := flattenEndpointData(newEndpoint)
+	//newEndpoint := endpoints.Response.(map[string]interface{})
+	flatEndpoint := flattenEndpointData(endpoint)
 
-	if err := d.Set("response", newEndpoint); err != nil {
+	if err := d.Set("endpoint", flatEndpoint); err != nil {
 		return diag.FromErr(err)
 	}
 
 	// always run
-	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
+	//d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
+	d.SetId(strconv.Itoa(endpoint.Response.ID))
 
 	return diags
 }
-*/
+
+/*
 func resourceEndpointsUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	return resourceEndpointsRead(ctx, d, m)
+}
+*/
+
+func resourceEndpointsUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	c := m.(*cn.Client)
+
+	endpointId := d.Id()
+
+	if d.HasChange("endpoint") {
+
+		endp := d.Get("endpoint").([]interface{})[0]
+		endpoint := endp.(map[string]interface{})
+
+		ep := cn.Endpoint{
+			Name:                    endpoint["name"].(string),
+			Description:             endpoint["description"].(string),
+			Ipaddress:               endpoint["ipaddress"].(string),
+			Secret:                  endpoint["secret"].(string),
+			Pfs:                     endpoint["pfs"].(bool),
+			Ike_version:             endpoint["ike_version"].(int),
+			Nat_t_enabled:           endpoint["nat_t_enabled"].(bool),
+			Extra_config:            endpoint["extra_config"].(string),
+			Vpn_type:                endpoint["vpn_type"].(string),
+			Route_based_int_address: endpoint["route_based_int_address"].(string),
+			Route_based_local:       endpoint["route_based_local"].(string),
+			Route_based_remote:      endpoint["route_based_remote"].(string),
+		}
+
+		_, err := c.UpdateEndpoint(endpointId, &ep)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		d.Set("last_updated", time.Now().Format(time.RFC850))
+	}
+
 	return resourceEndpointsRead(ctx, d, m)
 }
 
 func resourceEndpointsDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	c := m.(*cn.Client)
+
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
+
+	endpointId := d.Id()
+
+	err := c.DeleteEndpoint(endpointId)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId("")
 
 	return diags
 }
 
-func flattenEndpointData(endpointResponse map[string]interface{}) []interface{} {
-	if endpointResponse != nil {
-		endpoints := make([]interface{}, len(endpointResponse), len(endpointResponse))
+func flattenEndpointData(newEndpoint cn.NewEndpoint) []interface{} {
+	endpoint := make([]interface{}, 1, 1)
+	row := make(map[string]interface{})
 
-		i := 0
-		for _, ep := range endpointResponse {
-			row := make(map[string]interface{})
-			ep_data := ep.(map[string]interface{})
+	row["name"] = newEndpoint.Response.Name
+	row["description"] = newEndpoint.Response.Description
+	row["ipaddress"] = newEndpoint.Response.Ipaddress
+	row["secret"] = newEndpoint.Response.Psk
+	row["pfs"] = newEndpoint.Response.Pfs
+	row["nat_t_enabled"] = newEndpoint.Response.NatTEnabled
+	row["vpn_type"] = newEndpoint.Response.VpnType
+	row["ike_version"] = newEndpoint.Response.IkeVersion
+	row["route_based_int_address"] = newEndpoint.Response.RouteBasedIntAddress
+	row["route_based_local"] = newEndpoint.Response.RouteBasedLocal
+	row["route_based_remote"] = newEndpoint.Response.RouteBasedRemote
+	row["extra_config"] = strings.Join(newEndpoint.Response.ExtraConfig, ", ")
+	endpoint[0] = row
 
-			row["local_subnet"] = ep_data["local_subnet"]
-			row["remote_subnet"] = ep_data["remote_subnet"]
-			row["endpointid"] = ep_data["endpointid"]
-			row["endpoint_name"] = ep_data["endpoint_name"]
-			row["active"] = ep_data["active"].(bool)
-			row["enabled"] = ep_data["enabled"].(bool)
-			row["connected"] = ep_data["connected"].(bool)
-
-			endpoints[i] = row
-			i++
-		}
-
-		return endpoints
-	}
-
-	return make([]interface{}, 0)
+	return endpoint
 }
-
-/*
-func flattenEndpointData(endpointResponse map[string]interface{}) []interface{} {
-	if endpointResponse != nil {
-		endpoints := make([]interface{}, len(endpointResponse), len(endpointResponse))
-
-		i := 0
-		for _, ep := range endpointResponse {
-			row := make(map[string]interface{})
-			ep_data := ep.(map[string]interface{})
-
-			row["local_subnet"] = ep_data["local_subnet"]
-			row["remote_subnet"] = ep_data["remote_subnet"]
-			row["endpointid"] = ep_data["endpointid"]
-			row["endpoint_name"] = ep_data["endpoint_name"]
-			row["active"] = ep_data["active"].(bool)
-			row["enabled"] = ep_data["enabled"].(bool)
-			row["connected"] = ep_data["connected"].(bool)
-
-			endpoints[i] = row
-			i++
-		}
-
-		return endpoints
-	}
-
-	return make([]interface{}, 0)
-}
-*/
