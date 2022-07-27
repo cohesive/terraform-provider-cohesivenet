@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "cohesivenet" {
-  username = "vnscubed"
+  username = ""
   password = ""
   token = ""
   hosturl = ""
