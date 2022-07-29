@@ -44,7 +44,9 @@ data "cohesivenet_routes" route {}
 
 output "all_routes" {
    value = data.cohesivenet_routes.route 
+
 }
+
 data "cohesivenet_firewall" rules {}
 
 output "all_rules" {
@@ -52,7 +54,7 @@ output "all_rules" {
 }
 */
 
-
+/*
  resource "cohesivenet_endpoints" "endpoint_vf" {
   endpoint {
       name = "routebasedvf"
@@ -69,7 +71,7 @@ output "all_rules" {
       route_based_remote = "0.0.0.0/0"
     }
  }
- 
+ */
  /*
   resource "cohesivenet_endpoints" "endpoint_vf2" {
   endpoint {
@@ -89,5 +91,14 @@ output "all_rules" {
  }
 */
 
-
+ resource "cohesivenet_routes" "route" {
+  route {
+    cidr = "1.1.3.16/32"
+    description = "api"
+    interface = "tun0"
+    gateway = "1.1.3.1"
+    advertise = true
+    metric = 500
+  }
+ }
 

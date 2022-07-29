@@ -76,9 +76,7 @@ func dataSourceRoutesRead(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(err)
 	}
 
-	newRoutes := routeResponse.Response.(map[string]interface{})
-
-	routes := flattenRoutes(newRoutes)
+	routes := flattenRoutes(routeResponse)
 
 	if err := d.Set("response", routes); err != nil {
 		return diag.FromErr(err)
@@ -89,32 +87,28 @@ func dataSourceRoutesRead(ctx context.Context, d *schema.ResourceData, m interfa
 	return diags
 }
 
-func flattenRoutes(routeResponse map[string]interface{}) interface{} {
-	if routeResponse != nil {
-		routes := make([]interface{}, len(routeResponse), len(routeResponse))
+func flattenRoutes(routeResponse cn.RouteResponse) interface{} {
+	routes := make([]interface{}, len(routeResponse.Routes), len(routeResponse.Routes))
 
-		i := 0
-		for id, rt := range routeResponse {
-			row := make(map[string]interface{})
-			rt_data := rt.(map[string]interface{})
+	i := 0
+	for _, rt := range routeResponse.Routes {
+		row := make(map[string]interface{})
 
-			row["cidr"] = rt_data["cidr"]
-			row["id"] = id
-			row["description"] = rt_data["description"]
-			row["advertise"] = rt_data["advertise"].(bool)
-			row["metric"] = rt_data["metric"].(float64)
-			row["enabled"] = rt_data["enabled"].(bool)
-			row["netmask"] = rt_data["netmask"]
-			row["editable"] = rt_data["editable"].(bool)
-			row["table"] = rt_data["table"]
-			row["interface"] = rt_data["interface"]
+		row["cidr"] = rt.Cidr
+		row["id"] = rt.ID
+		row["description"] = rt.Description
+		row["advertise"] = rt.Advertise
+		row["metric"] = rt.Metric
+		row["enabled"] = rt.Enabled
+		row["netmask"] = rt.Netmask
+		row["editable"] = rt.Editable
+		row["table"] = rt.Table
+		row["interface"] = rt.Interface
 
-			routes[i] = row
-			i++
-		}
-
-		return routes
+		routes[i] = row
+		i++
 	}
 
-	return make([]interface{}, 0)
+	return routes
+
 }

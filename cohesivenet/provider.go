@@ -38,13 +38,14 @@ func Provider() *schema.Provider {
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"cohesivenet_endpoints": resourceEndpoints(),
+			"cohesivenet_routes":    resourceRoutes(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"cohesivenet_endpoints":         dataSourceEndpoints(),
 			"cohesivenet_config":            dataSourceConfig(),
 			"cohesivenet_container_network": dataSourceContainerNetwork(),
 			"cohesivenet_routes":            dataSourceRoutes(),
-			"cohesivenet_firewall":          dataSourceFirewall(),
+			//"cohesivenet_firewall":          dataSourceFirewall(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
