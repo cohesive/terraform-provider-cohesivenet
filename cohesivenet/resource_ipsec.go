@@ -99,7 +99,6 @@ func resourceEndpoints() *schema.Resource {
 func resourceEndpointsCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*cn.Client)
 
-	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
 	endp := d.Get("endpoint").([]interface{})[0]
@@ -132,18 +131,9 @@ func resourceEndpointsCreate(ctx context.Context, d *schema.ResourceData, m inte
 	return diags
 }
 
-/*
-func resourceEndpointsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	// Warning or errors can be collected in a slice type
-	var diags diag.Diagnostics
-
-	return diags
-}
-
-*/
 func resourceEndpointsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*cn.Client)
-	// Warning or errors can be collected in a slice type
+
 	var diags diag.Diagnostics
 
 	endpointId := d.Id()
@@ -153,25 +143,16 @@ func resourceEndpointsRead(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
-	//newEndpoint := endpoints.Response.(map[string]interface{})
 	flatEndpoint := flattenEndpointData(endpoint)
 
 	if err := d.Set("endpoint", flatEndpoint); err != nil {
 		return diag.FromErr(err)
 	}
 
-	// always run
-	//d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
 	d.SetId(strconv.Itoa(endpoint.Response.ID))
 
 	return diags
 }
-
-/*
-func resourceEndpointsUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	return resourceEndpointsRead(ctx, d, m)
-}
-*/
 
 func resourceEndpointsUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*cn.Client)
@@ -212,7 +193,6 @@ func resourceEndpointsUpdate(ctx context.Context, d *schema.ResourceData, m inte
 func resourceEndpointsDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*cn.Client)
 
-	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
 	endpointId := d.Id()
