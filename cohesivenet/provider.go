@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"context"
 
-	cn "github.com/cohesive/cohesivenet-client-go"
+	cn "github.com/cohesive/cohesivenet-client-go/cohesivenet"
+	cnv1 "github.com/cohesive/cohesivenet-client-go/cohesivenet/v1"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -41,6 +42,7 @@ func Provider() *schema.Provider {
 			"cohesivenet_endpoints": resourceEndpoints(),
 			"cohesivenet_routes":    resourceRoutes(),
 			"cohesivenet_firewall":  resourceRules(),
+			// "cohesivenet_vns3_config":  resourceVns3Config(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"cohesivenet_endpoints":         dataSourceEndpoints(),
@@ -65,42 +67,39 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	fmt.Printf("%+v\n", username)
 	fmt.Printf("%+v\n", password)
 
-	if token != nil && token != "" {
-		auth := context.WithValue(context.Background(), cohesivenet.ContextAccessToken, token)
+	var cfg *cn.Configuration
+	if token != "" {
+		cfg = cn.NewConfigurationWithAuth(host, cn.ContextAccessToken, token)
 	} else {
-		auth := context.WithValue(context.Background(), cohesivenet.ContextBasicAuth, cohesivenet.BasicAuth{
+		cfg = cn.NewConfigurationWithAuth(host, cn.ContextBasicAuth, cn.BasicAuth{
 			UserName: username,
 			Password: password,
 		})
 	}
-
-    vns3 := cohesivenet.NewVNS3Client(cohesivenet.NewConfiguration(host), cohesivenet.ClientParams{
-        Timeout: 10,
+    vns3 := cn.NewVNS3Client(cfg, cn.ClientParams{
+        Timeout: 3,
         TLS: false,
     })
 
-	c := make(map[string]interface{})
+	Logger := NewLogger(ctx)
+	vns3.Log = Logger
 
-	c["vns3_auth"] = auth
-	c["vns3"] = vns3
+	meta := make(map[string]interface{})
 
-	return c, diags
+	if (username != "") && (password != "") {
+		c, err := cnv1.NewClient(&username, &password, &token, &host)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+		return c, diags
+	}
+	clientv1, err := cnv1.NewClient(nil, nil, nil, nil)
+	if err != nil {
+		return nil, diag.FromErr(err)
+	}
 
-	// // cohesivenet.VNS3Client
+	meta["vns3"] = vns3
+	meta["clientv1"] = clientv1
 
-    // req := vns3.ConfigurationApi.GetConfig(auth)
-
-	// if (username != "") && (password != "") {
-	// 	c, err := cn.NewClient(&username, &password, &token, &hostUrl)
-	// 	if err != nil {
-	// 		return nil, diag.FromErr(err)
-	// 	}
-	// 	return c, diags
-	// }
-	// c, err := cn.NewClient(nil, nil, nil, nil)
-	// if err != nil {
-	// 	return nil, diag.FromErr(err)
-	// }
-
-	// return c, diags
+	return meta, diags
 }
