@@ -42,7 +42,7 @@ func Provider() *schema.Provider {
 			"cohesivenet_endpoints": resourceEndpoints(),
 			"cohesivenet_routes":    resourceRoutes(),
 			"cohesivenet_firewall":  resourceRules(),
-			// "cohesivenet_vns3_config":  resourceVns3Config(),
+			"cohesivenet_vns3_config":  resourceVns3Config(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"cohesivenet_endpoints":         dataSourceEndpoints(),
@@ -86,20 +86,13 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 
 	meta := make(map[string]interface{})
 
-	if (username != "") && (password != "") {
-		c, err := cnv1.NewClient(&username, &password, &token, &host)
-		if err != nil {
-			return nil, diag.FromErr(err)
-		}
-		return c, diags
-	}
-	clientv1, err := cnv1.NewClient(nil, nil, nil, nil)
+	clientv1, err := cnv1.NewClient(&username, &password, &token, &host)
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}
 
-	meta["vns3"] = vns3
 	meta["clientv1"] = clientv1
+	meta["vns3"] = vns3
 
 	return meta, diags
 }

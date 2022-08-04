@@ -3,7 +3,7 @@ module terraform-provider-cohesivenet
 go 1.18
 
 require (
-	github.com/cohesive/cohesivenet-client-go v0.0.0-20220804045946-a49296282dbc
+	github.com/cohesive/cohesivenet-client-go v0.0.0-20220804170559-8bc30f864d79
 	github.com/hashicorp/terraform-plugin-log v0.7.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.19.0
 )

@@ -1,9 +1,8 @@
-variable "user" {
-  type = string
-}
-
 variable "topology_name" {
     default = "bens-test-tf-launch"
+}
+variable "controller_name" {
+    default = "ctrl1"
 }
 
 variable "vns3_account_owner" {
@@ -31,7 +30,7 @@ variable "vns3_license_type" {
 }
 
 variable "vns3_instance_type" {
-  default = "t3.medium"
+  default = "t3.small"
 }
 
 variable "common_tags" {
@@ -48,4 +47,8 @@ variable "subnet_ids" {
     default = [
         "subnet-06b9fc6a85df6e3c7"
     ]
+}
+
+variable "security_group_id" {
+    default = "sg-011082922b0f4915f"
 }

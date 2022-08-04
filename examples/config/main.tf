@@ -16,12 +16,7 @@ provider "aws" {
   region = "us-east-1"
 }
 
-provider "cohesivenet" {
-  username = ""
-  password = ""
-  token = ""
-  hosturl = ""
-}
+provider "cohesivenet" {}
 
 locals {
     vns3_version_parts = split("-", var.vns3_version)
@@ -41,24 +36,31 @@ data "aws_ami" "vnscubed" {
 }
 
 resource "aws_network_interface" "vns3controller_eni_primary" {
-  count             = "${length(var.subnet_ids)}"
-  subnet_id         = "${element(var.subnet_ids, count.index)}"
+  count             = length(var.subnet_ids)
+  subnet_id         = element(var.subnet_ids, count.index)
   private_ips_count = 1
   source_dest_check = false
   security_groups   = [
-      "${aws_security_group.vns3_server_sg.id}"
+      var.security_group_id
   ] 
-  tags              = "${merge(var.common_tags, map("Name", format("%s-controller-eni-%d", var.topology_name, count.index)))}"
+  tags              = merge(
+                        var.common_tags,
+                        {
+                          Name = format("%s-controller-eni-%d", var.topology_name, count.index)
+                        }
+                      )
 }
 
 resource "aws_instance" "vns3controller" {
-    ami               = "${data.aws_ami.vnscubed.id}"
-    count             = "${length(var.subnet_ids)}"
-    instance_type     = "${var.vns3_instance_type}"
-    tags              = "${merge(
-                            var.common_tags,
-                            map("Name", format("%s-vns3-%d", var.topology_name, count.index))
-                        )}"
+  ami               = data.aws_ami.vnscubed.id
+  count             = length(var.subnet_ids)
+  instance_type     = var.vns3_instance_type
+  tags              = merge(
+                        var.common_tags,
+                        {
+                          Name = format("%s-vns3-%d", var.topology_name, count.index)
+                        }
+                      )
 
     network_interface {
         network_interface_id = "${element(aws_network_interface.vns3controller_eni_primary.*.id, count.index)}"
@@ -66,23 +68,24 @@ resource "aws_instance" "vns3controller" {
     }
 
     depends_on = [
-        "aws_network_interface.vns3controller_eni_primary"
+        aws_network_interface.vns3controller_eni_primary
     ]
+    
 }
 
 resource "aws_eip" "vns3_ip" {
   vpc               = true
-  instance          = aws_instance.vns3controller.id
-  network_interface = aws_network_interface.vns3controller_eni_primary.id
+  instance          = aws_instance.vns3controller[0].id
+  network_interface = aws_network_interface.vns3controller_eni_primary[0].id
 }
 
-resource "vns3_config" "vns3" {
+resource "cohesivenet_vns3_config" "vns3" {
     host = aws_eip.vns3_ip.public_ip
-    password = aws_instance.vns3controller.id
+    password = aws_instance.vns3controller[0].id
     topology_name = var.topology_name
     controller_name = var.controller_name
     license_file = var.vns3_license_file
-    license_params = {
+    license_params {
         default = true
     }
     keyset_params {

@@ -1,249 +1,273 @@
 package cohesivenet
 
-// import (
-// 	"context"
-// 	"strconv"
-// 	"strings"
-// 	"time"
-// 	"fmt"
+import (
+	"context"
+	"strconv"
+	"time"
+	"fmt"
 
-// 	cn "github.com/cohesive/cohesivenet-client-go/cohesivenet"
-// 	macros "github.com/cohesive/cohesivenet-client-go/cohesivenet/macros"
-// 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-// 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-// )
-
-
-// func resourceVns3Config() *schema.Resource {
-// 	return &schema.Resource{
-// 		CreateContext: resourceConfigCreate,
-// 		ReadContext:   resourceConfigRead,
-// 		UpdateContext: resourceConfigUpdate,
-// 		DeleteContext: resourceConfigDelete,
-// 		Schema: map[string]*schema.Schema{
-// 			"last_updated": &schema.Schema{
-// 				Type:     schema.TypeString,
-// 				Optional: true,
-// 				Computed: true,
-// 			},
-// 			"host": &schema.Schema{
-// 				Type:     schema.TypeString,
-// 				Optional: true,
-// 			},
-// 			"password": &schema.Schema{
-// 				Type:     schema.TypeString,
-// 				Optional: true,
-// 			},
-// 			"token": &schema.Schema{
-// 				Type:     schema.TypeString,
-// 				Optional: true,
-// 			},
-// 			"license_file": &schema.Schema{
-// 				Type:     schema.TypeString,
-// 				Required: true,
-// 			},
-// 			"topology_name": &schema.Schema{
-// 				Type:     schema.TypeString,
-// 				Required: true,
-// 			},
-// 			"controller_name": &schema.Schema{
-// 				Type:     schema.TypeString,
-// 				Required: false,
-// 			},
-// 			"license_params": map[string]*schema.Schema{
-// 				"default": &schema.Schema{
-// 					Type:    schema.TypeBool,
-// 					Default: true
-// 				},
-// 			},
-// 			"keyset_params": map[string]*schema.Schema{
-// 				"token": &schema.Schema{
-// 					Type:     schema.TypeString,
-// 					Required: true
-// 				},
-// 			},
-// 			"peer_id": &schema.Schema{
-// 				Type:     schema.TypeInt,
-// 				Required: true,
-// 			},
-// 			"topology_checksum": &schema.Schema{
-// 				Type:     schema.TypeString,
-// 				Computed: true,
-// 			},
-// 			"keyset_checksum": &schema.Schema{
-// 				Type:     schema.TypeString,
-// 				Computed: true,
-// 			},
-// 			"licensed": &schema.Schema{
-// 				Type:    schema.TypeBool,
-// 				Computed: true,
-// 			},
-// 		},
-// 	}
-// }
-
-// func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-// 	var vns3 cohesivenet.VNS3Client
-// 	// vns3 := m["vns3"].(cohesivenet.VNS3Client)
-
-// 	// Warning or errors can be collected in a slice type
-// 	var diags diag.Diagnostics
-
-// 	host := d.Get("host").(string)
-// 	password := d.Get("password").(string)
-// 	token := d.Get("token").(string)
-
-// 	// this is a lot of code to just determine vns3 client
-// 	if host != "" || password != "" || token != "" {
-// 		invalid := host == "" || (password == "" && token == "")
-// 		if invalid {
-// 			return diag.FromErr(fmt.Errorf("host and auth is required if host, password or token are passed"))
-// 		}
-
-// 		var cfg cohesivenet.Configuration
-// 		if token != "" {
-// 			cfg = cohesivenet.NewConfigurationWithAuth(host, cohesivenet.ContextAccessToken, token)
-// 		} else {
-// 			cfg = cohesivenet.NewConfigurationWithAuth(host, cohesivenet.ContextBasicAuth, cohesivenet.BasicAuth{
-// 				UserName: "api",
-// 				Password: password,
-// 			})
-// 		}
-
-// 		vns3 = cohesivenet.NewVNS3Client(cfg, cohesivenet.ClientParams{
-// 			Timeout: 3,
-// 			TLS: false,
-// 		})
-// 		Logger := NewLogger(ctx)
-// 		vns3.Log = Logger
-
-// 	} else {
-// 		vns3 = m["vns3"].(cohesivenet.VNS3Client)
-// 	}
-
-//     setupReq := macros.SetupRequest{
-//         TopologyName: d.Get("topology_name").(string),
-//         ControllerName: d.Get("controller_name").(string),
-//         LicenseParams: cohesivenet.NewSetLicenseParametersRequest(true),
-//         LicenseFile: "/Users/benplatta/code/cohesive/vns3-functional-testing/test-assets/license.txt",
-//         PeerId: 1,
-//         KeysetParams: cohesivenet.SetKeysetParamsRequest{
-//             Token: "token",
-//         },
-//         WaitTimeout: 60*5,
-//         KeysetTimeout: 60*5,
-//     }
-
-//     configDetail, setupErr := macros.SetupController(vns3, setupReq)
-
-//     if setupErr != nil {
-// 		Logger.Info(fmt.Sprintf("VNS3 Setup error: %+v", setupErr))
-//     } else {
-//         c := *configDetail
-//         d, _ := c.MarshalJSON()
-//         log.Printf("Setup success: %v", string(d))
-// 		Logger.Info("VNS3 Setup success")
-//     }
+	cn "github.com/cohesive/cohesivenet-client-go/cohesivenet"
+	macros "github.com/cohesive/cohesivenet-client-go/cohesivenet/macros"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
 
 
-// 	d.SetId(strconv.Itoa(newEndpoint.ID))
+func resourceVns3Config() *schema.Resource {
+	return &schema.Resource{
+		CreateContext: resourceConfigCreate,
+		ReadContext:   resourceConfigRead,
+		UpdateContext: resourceConfigUpdate,
+		DeleteContext: resourceConfigDelete,
+		Schema: map[string]*schema.Schema{
+			"last_updated": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"host": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"password": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"apitoken": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"license_file": &schema.Schema{
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"topology_name": &schema.Schema{
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"controller_name": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"license_params": &schema.Schema{
+				Type:     schema.TypeSet,
+				MaxItems: 1,
+				Optional: true,
+				ForceNew: true,
+				Elem:     &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"default": &schema.Schema{
+							Type:    schema.TypeBool,
+							Default: true,
+							Optional: true,
+						},
+					},
+				},
+			},
+			"keyset_params": &schema.Schema{
+				Type:     schema.TypeSet,
+				Required: true,
+				MaxItems: 1,
+				ForceNew: true,
+				Elem:     &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"token": &schema.Schema{
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+			},
+			"peer_id": &schema.Schema{
+				Type:     schema.TypeInt,
+				ForceNew: true,
+				Required: true,
+			},
+			"topology_checksum": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"keyset_checksum": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"licensed": &schema.Schema{
+				Type:    schema.TypeBool,
+				Computed: true,
+			},
+		},
+	}
+}
 
-// 	resourceConfigRead(ctx, d, m)
+func getVns3Client(ctx context.Context, d *schema.ResourceData, m interface{}) (*cn.VNS3Client, error) {
+	host, _ := d.Get("host").(string)
+	password, _ := d.Get("password").(string)
+	token, _ := d.Get("token").(string)
 
-// 	return diags
-// }
+	var vns3 *cn.VNS3Client
+	// this is a lot of code to just determine vns3 client
+	if host != "" || password != "" || token != "" {
+		invalid := host == "" || (password == "" && token == "")
+		if invalid {
+			return nil, fmt.Errorf("host and auth is required if host, password or token are passed")
+		}
 
-// /*
-// func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-// 	// Warning or errors can be collected in a slice type
-// 	var diags diag.Diagnostics
+		var cfg *cn.Configuration
+		if token != "" {
+			cfg = cn.NewConfigurationWithAuth(host, cn.ContextAccessToken, token)
+		} else {
+			cfg = cn.NewConfigurationWithAuth(host, cn.ContextBasicAuth, cn.BasicAuth{
+				UserName: "api",
+				Password: password,
+			})
+		}
 
-// 	return diags
-// }
+		vns3 = cn.NewVNS3Client(cfg, cn.ClientParams{
+			Timeout: 3,
+			TLS: false,
+		})
+		Logger := NewLogger(ctx)
+		vns3.Log = Logger
 
-// */
-// func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-// 	c := m.(map[string]interface{})["clientv1"].(cn.Client)
-// 	// Warning or errors can be collected in a slice type
-// 	var diags diag.Diagnostics
+	} else {
+		vns3_ := m.(map[string]interface{})["vns3"].(cn.VNS3Client)
+		vns3 = &vns3_
+	}
 
-// 	endpointId := d.Id()
+	return vns3, nil
+}
 
-// 	endpoint, err := c.GetEndpoint(endpointId)
-// 	if err != nil {
-// 		return diag.FromErr(err)
-// 	}
+func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	// Warning or errors can be collected in a slice type
+	var diags diag.Diagnostics
 
-// 	//newEndpoint := endpoints.Response.(map[string]interface{})
-// 	flatEndpoint := flattenEndpointData(endpoint)
+	vns3, clienterror := getVns3Client(ctx, d, m)
+	if clienterror != nil {
+		return diag.FromErr(clienterror)
+	}
 
-// 	if err := d.Set("endpoint", flatEndpoint); err != nil {
-// 		return diag.FromErr(err)
-// 	}
+	licenseParamsSet, hasParams := d.Get("license_params").(*schema.Set)
 
-// 	// always run
-// 	//d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
-// 	d.SetId(strconv.Itoa(endpoint.Response.ID))
+	if hasParams {
+		licenseParams := licenseParamsSet.List()[0]
+		vns3.Log.Info(fmt.Sprintf("License params passed %+v", licenseParams))		
+	}
 
-// 	return diags
-// }
+	// Keyset params are required so will eist.
+	keysetParams := d.Get("keyset_params").(*schema.Set).List()[0].(map[string]interface{})
 
-// /*
-// func resourceConfigUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-// 	return resourceConfigRead(ctx, d, m)
-// }
-// */
+	licenseParamsRequest := cn.NewSetLicenseParametersRequest(true)
+	// TODO, set other keyset params if there
+	keysetParamsRequest := cn.SetKeysetParamsRequest{
+		Token: keysetParams["token"].(string),
+	}
+	
+	vns3.Log.Debug(fmt.Sprintf("keysetparams config %+v", keysetParams))
 
-// func resourceConfigUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-// 	c := m.(map[string]interface{})["clientv1"].(cn.Client)
+	topologyName := d.Get("topology_name").(string)
+	controllerName, ctrlNameExists := d.Get("controller_name").(string)
+	if !ctrlNameExists {
+		controllerName = "ctrl"
+	}
 
-// 	endpointId := d.Id()
+    setupReq := macros.SetupRequest{
+        TopologyName: topologyName,
+        ControllerName: controllerName,
+        LicenseParams: licenseParamsRequest,
+        LicenseFile: "/Users/benplatta/code/cohesive/vns3-functional-testing/test-assets/license.txt",
+        PeerId: 1,
+        KeysetParams: keysetParamsRequest,
+        WaitTimeout: 60*5,
+        KeysetTimeout: 60*5,
+    }
 
-// 	if d.HasChange("endpoint") {
+	// wait for a while if still coming up
+	_, err :=  vns3.ConfigurationApi.WaitForApi(&ctx, 60*10, 3, 5)
+    configDetail, setupErr := macros.SetupController(vns3, setupReq)
 
-// 		endp := d.Get("endpoint").([]interface{})[0]
-// 		endpoint := endp.(map[string]interface{})
+    if setupErr != nil {
+		vns3.Log.Error(fmt.Sprintf("VNS3 Setup error: %+v", setupErr))
+		return diag.FromErr(fmt.Errorf("VNS3 Setup error: %+v", setupErr))
+    } else {
+        c := *configDetail
+        d, _ := c.MarshalJSON()
+		vns3.Log.Info(fmt.Sprintf("VNS3 Setup success %+v", string(d)))
+    }
 
-// 		ep := cn.Endpoint{
-// 			Name:                    endpoint["name"].(string),
-// 			Description:             endpoint["description"].(string),
-// 			Ipaddress:               endpoint["ipaddress"].(string),
-// 			Secret:                  endpoint["secret"].(string),
-// 			Pfs:                     endpoint["pfs"].(bool),
-// 			Ike_version:             endpoint["ike_version"].(int),
-// 			Nat_t_enabled:           endpoint["nat_t_enabled"].(bool),
-// 			Extra_config:            endpoint["extra_config"].(string),
-// 			Vpn_type:                endpoint["vpn_type"].(string),
-// 			Route_based_int_address: endpoint["route_based_int_address"].(string),
-// 			Route_based_local:       endpoint["route_based_local"].(string),
-// 			Route_based_remote:      endpoint["route_based_remote"].(string),
-// 		}
+	configData := configDetail.GetResponse()
+	topologyChecksum := configData.GetTopologyChecksum()
+	d.Set("topology_checksum", topologyChecksum)
+	d.Set("licensed", configData.GetLicensed())
 
-// 		_, err := c.UpdateEndpoint(endpointId, &ep)
-// 		if err != nil {
-// 			return diag.FromErr(err)
-// 		}
+	keysetDetail, _, err := vns3.ConfigurationApi.GetKeyset(vns3.ConfigurationApi.GetKeysetRequest(ctx))
 
-// 		d.Set("last_updated", time.Now().Format(time.RFC850))
-// 	}
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("VNS3 Keyset check error: %+v", err))
+	}
 
-// 	return resourceConfigRead(ctx, d, m)
-// }
+	keysetData := keysetDetail.GetResponse()
+	keysetChecksum := keysetData.GetChecksum()
+	d.Set("keyset_checksum", keysetChecksum)
 
-// func resourceConfigDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-// 	c := m.(map[string]interface{})["clientv1"].(cn.Client)
+	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
 
-// 	// Warning or errors can be collected in a slice type
-// 	var diags diag.Diagnostics
+	return diags
+}
 
-// 	endpointId := d.Id()
+/*
+func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	// Warning or errors can be collected in a slice type
+	var diags diag.Diagnostics
 
-// 	err := c.DeleteEndpoint(endpointId)
-// 	if err != nil {
-// 		return diag.FromErr(err)
-// 	}
+	return diags
+}
 
-// 	d.SetId("")
+*/
+func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	// Warning or errors can be collected in a slice type
+	var diags diag.Diagnostics
 
-// 	return diags
-// }
+	vns3, clienterror := getVns3Client(ctx, d, m)
+	if clienterror != nil {
+		return diag.FromErr(clienterror)
+	}
+
+	configDetail, _, err := vns3.ConfigurationApi.GetConfig(vns3.ConfigurationApi.GetConfigRequest(ctx))
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("VNS3 Config check error: %+v", err))
+	}
+
+	configData := configDetail.GetResponse()
+	topologyChecksum := configData.GetTopologyChecksum()
+	d.Set("topology_checksum", topologyChecksum)
+	d.Set("licensed", configData.GetLicensed())
+
+	keysetDetail, _, err := vns3.ConfigurationApi.GetKeyset(vns3.ConfigurationApi.GetKeysetRequest(ctx))
+
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("VNS3 Keyset check error: %+v", err))
+	}
+
+	keysetData := keysetDetail.GetResponse()
+	keysetChecksum := keysetData.GetChecksum()
+	d.Set("keyset_checksum", keysetChecksum)
+
+	return diags
+}
+
+
+func resourceConfigUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	return resourceConfigRead(ctx, d, m)
+}
+
+
+func resourceConfigDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	// Warning or errors can be collected in a slice type
+	var diags diag.Diagnostics
+	// Basically we just lie and say it was deleted.
+	d.SetId("")
+
+	return diags
+}
