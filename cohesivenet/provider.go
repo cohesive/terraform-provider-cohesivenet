@@ -55,6 +55,35 @@ func Provider() *schema.Provider {
 	}
 }
 
+// func commonAuthSchema() *schema.Schema {
+// 	return &schema.Schema{
+// 		Type:     schema.TypeSet,
+// 		MaxItems: 1,
+// 		Optional: true,
+// 		Elem:     &schema.Resource{
+// 			Schema: map[string]*schema.Schema{
+// 				"host": &schema.Schema{
+// 					Type:    schema.TypeString,
+// 					Optional: true,
+// 				},
+// 				"username": &schema.Schema{
+// 					Type:    schema.TypeString,
+// 					Optional: true,
+// 				},
+// 				"password": &schema.Schema{
+// 					Type:    schema.TypeString,
+// 					Optional: true,
+// 				},
+// 				"token": &schema.Schema{
+// 					Type:    schema.TypeString,
+// 					Optional: true,
+// 				},
+// 			},
+// 		},
+// 	}
+// }
+
+
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)

@@ -70,7 +70,7 @@ resource "aws_instance" "vns3controller" {
     depends_on = [
         aws_network_interface.vns3controller_eni_primary
     ]
-    
+
 }
 
 resource "aws_eip" "vns3_ip" {
@@ -93,3 +93,15 @@ resource "cohesivenet_vns3_config" "vns3" {
     }
     peer_id = 1
 }
+
+
+#  resource "cohesivenet_routes" "route" {
+#   route {
+#     cidr = "192.168.54.0/24"
+#     description = "cohesive_to_watford_secondary"
+#     interface = "tun0"
+#     gateway = "192.168.54.1/32"
+#     advertise = true
+#     metric = 300
+#   }
+#  }

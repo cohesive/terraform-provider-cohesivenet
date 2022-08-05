@@ -9,7 +9,7 @@ terraform {
 
 
 provider "cohesivenet" {
-  username = ""
+  username = "api"
   password = ""
   token = ""
   hosturl = ""

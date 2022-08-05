@@ -33,6 +33,7 @@ func resourceVns3Config() *schema.Resource {
 			"password": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
+				Sensitive:   true,
 			},
 			"apitoken": &schema.Schema{
 				Type:     schema.TypeString,
@@ -259,7 +260,10 @@ func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface
 
 
 func resourceConfigUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	return resourceConfigRead(ctx, d, m)
+	// TODO: we could allow topology name and controller name to be reset and only fail 
+	// when license params or keyset params change
+	notsupportederror := fmt.Errorf("VNS3 config resource cannot be updated. Please redeploy a new server or reset defaults and edit terraform state")
+	return diag.FromErr(notsupportederror)
 }
 
 
