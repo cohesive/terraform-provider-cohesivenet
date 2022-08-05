@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	cn "github.com/cohesive/cohesivenet-client-go"
+	cn "github.com/cohesive/cohesivenet-client-go/cohesivenet/v1"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -67,7 +67,7 @@ func dataSourceRoutes() *schema.Resource {
 }
 
 func dataSourceRoutesRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(*cn.Client)
+	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
 
 	var diags diag.Diagnostics
 

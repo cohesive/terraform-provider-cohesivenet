@@ -3,7 +3,8 @@ module terraform-provider-cohesivenet
 go 1.18
 
 require (
-	github.com/cohesive/cohesivenet-client-go v0.0.0-20220725162745-6ef8aec7cf2a
+	github.com/cohesive/cohesivenet-client-go v0.0.0-20220804170559-8bc30f864d79
+	github.com/hashicorp/terraform-plugin-log v0.7.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.19.0
 )
 
@@ -23,7 +24,6 @@ require (
 	github.com/hashicorp/hcl/v2 v2.13.0 // indirect
 	github.com/hashicorp/logutils v1.0.0 // indirect
 	github.com/hashicorp/terraform-plugin-go v0.12.0 // indirect
-	github.com/hashicorp/terraform-plugin-log v0.7.0 // indirect
 	github.com/hashicorp/terraform-registry-address v0.0.0-20220623143253-7d51757b572c // indirect
 	github.com/hashicorp/terraform-svchost v0.0.0-20200729002733-f050f53b9734 // indirect
 	github.com/hashicorp/yamux v0.1.0 // indirect
@@ -40,6 +40,7 @@ require (
 	github.com/vmihailenco/tagparser v0.1.2 // indirect
 	github.com/zclconf/go-cty v1.10.0 // indirect
 	golang.org/x/net v0.0.0-20220722155237-a158d28d115b // indirect
+	golang.org/x/oauth2 v0.0.0-20210323180902-22b0adad7558 // indirect
 	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
