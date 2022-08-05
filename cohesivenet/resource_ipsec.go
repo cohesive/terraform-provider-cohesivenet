@@ -97,7 +97,7 @@ func resourceEndpoints() *schema.Resource {
 }
 
 func resourceEndpointsCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(map[string]interface{})["clientv1"].(cn.Client)
+	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
 
 	var diags diag.Diagnostics
 
@@ -132,7 +132,7 @@ func resourceEndpointsCreate(ctx context.Context, d *schema.ResourceData, m inte
 }
 
 func resourceEndpointsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(map[string]interface{})["clientv1"].(cn.Client)
+	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
 
 	var diags diag.Diagnostics
 
@@ -155,7 +155,7 @@ func resourceEndpointsRead(ctx context.Context, d *schema.ResourceData, m interf
 }
 
 func resourceEndpointsUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(map[string]interface{})["clientv1"].(cn.Client)
+	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
 
 	endpointId := d.Id()
 
@@ -191,7 +191,7 @@ func resourceEndpointsUpdate(ctx context.Context, d *schema.ResourceData, m inte
 }
 
 func resourceEndpointsDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(map[string]interface{})["clientv1"].(cn.Client)
+	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
 
 	var diags diag.Diagnostics
 

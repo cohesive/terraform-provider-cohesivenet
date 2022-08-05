@@ -47,7 +47,7 @@ func resourceRules() *schema.Resource {
 }
 
 func resourceRulesCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(map[string]interface{})["clientv1"].(cn.Client)
+	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
 
 	var diags diag.Diagnostics
 
@@ -82,7 +82,7 @@ func resourceRulesUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 }
 
 func resourceRulesDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(map[string]interface{})["clientv1"].(cn.Client)
+	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
 
 	var diags diag.Diagnostics
 

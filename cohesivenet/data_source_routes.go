@@ -67,7 +67,7 @@ func dataSourceRoutes() *schema.Resource {
 }
 
 func dataSourceRoutesRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(map[string]interface{})["clientv1"].(cn.Client)
+	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
 
 	var diags diag.Diagnostics
 

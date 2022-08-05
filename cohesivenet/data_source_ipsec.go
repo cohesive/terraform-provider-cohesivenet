@@ -59,7 +59,7 @@ func dataSourceEndpoints() *schema.Resource {
 }
 
 func dataSourceEndpointsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(map[string]interface{})["clientv1"].(cn.Client)
+	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
 
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
