@@ -9,10 +9,10 @@ terraform {
 
 
 provider "cohesivenet" {
-  username = "api"
-  password = "i-079bcc544af484eeb"
-  token = ""
-  host = "18.205.182.63"
+  username = "vnscubed"
+  password = "vnscontroller!"
+  token = "771c844ecf0a2e0a9dd2c2a3071cfa7c1a06d7eed1f8664ce0995ec1b0824bee"
+  host = "https://3.127.171.216:8000/api"
 }
 
 /*
@@ -44,8 +44,8 @@ data "cohesivenet_firewall" rules {}
 output "all_rules" {
    value = data.cohesivenet_firewall.rules
 }
+*/
 
-/*
  resource "cohesivenet_endpoints" "endpoint_vf" {
   endpoint {
       name = "cohesive_to_watford_secondary"
@@ -63,6 +63,7 @@ output "all_rules" {
     }
  }
 
+
   resource "cohesivenet_endpoints" "endpoint_vf2" {
   endpoint {
       name = "cohesive_to_workload_secondary"
@@ -79,8 +80,9 @@ output "all_rules" {
       route_based_remote = "0.0.0.0/0"
     }
  }
-*/
 
+
+/*
  resource "cohesivenet_routes" "route" {
   route {
     cidr = "192.168.54.0/24"
@@ -91,7 +93,7 @@ output "all_rules" {
     metric = 300
   }
  }
-
+*/
 /*
 resource "cohesivenet_firewall" "rule" {
   rules {
@@ -109,3 +111,31 @@ resource "cohesivenet_firewall" "rule1" {
   
 }
 */
+
+
+resource "cohesivenet_ipsec_ebpg" "peer" {
+  endpoint_id = 1
+  ebgp_peer {
+    ipaddress = "169.254.164.177"
+    asn = 64512
+    local_asn_alias = 65007
+    access_list = "in permit any"
+    bgp_password = "password"
+    add_network_distance = true
+    add_network_distance_direction = "in"
+    add_network_distance_hops = 10
+  }
+}
+resource "cohesivenet_ipsec_ebpg" "peer2" {
+  endpoint_id = 2
+  ebgp_peer {
+    ipaddress = "169.254.164.178"
+    asn = 64512
+    local_asn_alias = 65007
+    access_list = "in permit any"
+    bgp_password = "password"
+    add_network_distance = true
+    add_network_distance_direction = "in"
+    add_network_distance_hops = 10
+  }
+}
