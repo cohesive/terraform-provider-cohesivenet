@@ -46,7 +46,7 @@ output "all_rules" {
 }
 */
 
- resource "cohesivenet_endpoints" "endpoint_vf" {
+ resource "cohesivenet_ipsec_endpoints" "endpoint_vf" {
   endpoint {
       name = "cohesive_to_watford_secondary"
       description = "cohesive_to_watford_secondary"
@@ -63,8 +63,8 @@ output "all_rules" {
     }
  }
 
-
-  resource "cohesivenet_endpoints" "endpoint_vf2" {
+/*
+  resource "cohesivenet_ipsec_endpoints" "endpoint_vf2" {
   endpoint {
       name = "cohesive_to_workload_secondary"
       description = "cohesive_to_workload_secondary"
@@ -80,7 +80,7 @@ output "all_rules" {
       route_based_remote = "0.0.0.0/0"
     }
  }
-
+*/
 
 /*
  resource "cohesivenet_routes" "route" {
@@ -118,14 +118,18 @@ resource "cohesivenet_ipsec_ebpg" "peer" {
   ebgp_peer {
     ipaddress = "169.254.164.177"
     asn = 64512
-    local_asn_alias = 65007
-    access_list = "in permit any"
-    bgp_password = "password"
+    local_asn_alias = 65000
+    access_list = "in permit 10.10.10.0/24"
+    bgp_password = "waahooo"
     add_network_distance = true
     add_network_distance_direction = "in"
     add_network_distance_hops = 10
   }
+      depends_on = [
+        cohesivenet_ipsec_endpoints.endpoint_vf
+    ]
 }
+/*
 resource "cohesivenet_ipsec_ebpg" "peer2" {
   endpoint_id = 2
   ebgp_peer {
@@ -138,4 +142,8 @@ resource "cohesivenet_ipsec_ebpg" "peer2" {
     add_network_distance_direction = "in"
     add_network_distance_hops = 10
   }
+    depends_on = [
+        cohesivenet_ipsec_endpoints.endpoint_vf2
+    ]
 }
+*/

@@ -2,16 +2,15 @@ package cohesivenet
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
-	"fmt"
 
 	cn "github.com/cohesive/cohesivenet-client-go/cohesivenet"
 	macros "github.com/cohesive/cohesivenet-client-go/cohesivenet/macros"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
-
 
 func resourceVns3Config() *schema.Resource {
 	return &schema.Resource{
@@ -31,9 +30,9 @@ func resourceVns3Config() *schema.Resource {
 				ForceNew: true,
 			},
 			"password": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Sensitive:   true,
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
 			},
 			"apitoken": &schema.Schema{
 				Type:     schema.TypeString,
@@ -57,11 +56,11 @@ func resourceVns3Config() *schema.Resource {
 				MaxItems: 1,
 				Optional: true,
 				ForceNew: true,
-				Elem:     &schema.Resource{
+				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"default": &schema.Schema{
-							Type:    schema.TypeBool,
-							Default: true,
+							Type:     schema.TypeBool,
+							Default:  true,
 							Optional: true,
 						},
 					},
@@ -72,7 +71,7 @@ func resourceVns3Config() *schema.Resource {
 				Required: true,
 				MaxItems: 1,
 				ForceNew: true,
-				Elem:     &schema.Resource{
+				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"token": &schema.Schema{
 							Type:     schema.TypeString,
@@ -95,7 +94,7 @@ func resourceVns3Config() *schema.Resource {
 				Computed: true,
 			},
 			"licensed": &schema.Schema{
-				Type:    schema.TypeBool,
+				Type:     schema.TypeBool,
 				Computed: true,
 			},
 		},
@@ -127,7 +126,7 @@ func getVns3Client(ctx context.Context, d *schema.ResourceData, m interface{}) (
 
 		vns3 = cn.NewVNS3Client(cfg, cn.ClientParams{
 			Timeout: 3,
-			TLS: false,
+			TLS:     false,
 		})
 		Logger := NewLogger(ctx)
 		vns3.Log = Logger
@@ -153,7 +152,7 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	if hasParams {
 		licenseParams := licenseParamsSet.List()[0]
-		vns3.Log.Info(fmt.Sprintf("License params passed %+v", licenseParams))		
+		vns3.Log.Info(fmt.Sprintf("License params passed %+v", licenseParams))
 	}
 
 	// Keyset params are required so will eist.
@@ -164,7 +163,7 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	keysetParamsRequest := cn.SetKeysetParamsRequest{
 		Token: keysetParams["token"].(string),
 	}
-	
+
 	vns3.Log.Debug(fmt.Sprintf("keysetparams config %+v", keysetParams))
 
 	topologyName := d.Get("topology_name").(string)
@@ -173,29 +172,30 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		controllerName = "ctrl"
 	}
 
-    setupReq := macros.SetupRequest{
-        TopologyName: topologyName,
-        ControllerName: controllerName,
-        LicenseParams: licenseParamsRequest,
-        LicenseFile: "/Users/benplatta/code/cohesive/vns3-functional-testing/test-assets/license.txt",
-        PeerId: 1,
-        KeysetParams: keysetParamsRequest,
-        WaitTimeout: 60*5,
-        KeysetTimeout: 60*5,
-    }
+	setupReq := macros.SetupRequest{
+		TopologyName:   topologyName,
+		ControllerName: controllerName,
+		LicenseParams:  licenseParamsRequest,
+		//LicenseFile: "/Users/benplatta/code/cohesive/vns3-functional-testing/test-assets/license.txt",
+		LicenseFile:   "/Users/scott/vfuc-test-sme-license.txt",
+		PeerId:        1,
+		KeysetParams:  keysetParamsRequest,
+		WaitTimeout:   60 * 5,
+		KeysetTimeout: 60 * 5,
+	}
 
 	// wait for a while if still coming up
-	_, err :=  vns3.ConfigurationApi.WaitForApi(&ctx, 60*10, 3, 5)
-    configDetail, setupErr := macros.SetupController(vns3, setupReq)
+	_, err := vns3.ConfigurationApi.WaitForApi(&ctx, 60*10, 3, 5)
+	configDetail, setupErr := macros.SetupController(vns3, setupReq)
 
-    if setupErr != nil {
+	if setupErr != nil {
 		vns3.Log.Error(fmt.Sprintf("VNS3 Setup error: %+v", setupErr))
 		return diag.FromErr(fmt.Errorf("VNS3 Setup error: %+v", setupErr))
-    } else {
-        c := *configDetail
-        d, _ := c.MarshalJSON()
+	} else {
+		c := *configDetail
+		d, _ := c.MarshalJSON()
 		vns3.Log.Info(fmt.Sprintf("VNS3 Setup success %+v", string(d)))
-    }
+	}
 
 	configData := configDetail.GetResponse()
 	topologyChecksum := configData.GetTopologyChecksum()
@@ -258,14 +258,12 @@ func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface
 	return diags
 }
 
-
 func resourceConfigUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	// TODO: we could allow topology name and controller name to be reset and only fail 
+	// TODO: we could allow topology name and controller name to be reset and only fail
 	// when license params or keyset params change
 	notsupportederror := fmt.Errorf("VNS3 config resource cannot be updated. Please redeploy a new server or reset defaults and edit terraform state")
 	return diag.FromErr(notsupportederror)
 }
-
 
 func resourceConfigDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	// Warning or errors can be collected in a slice type
