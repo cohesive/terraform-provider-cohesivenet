@@ -14,7 +14,7 @@ func dataSourceFirewall() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceFirewallRead,
 		Schema: map[string]*schema.Schema{
-			"rules": &schema.Schema{
+			"rule": &schema.Schema{
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
@@ -23,7 +23,7 @@ func dataSourceFirewall() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"rule": &schema.Schema{
+						"script": &schema.Schema{
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -45,7 +45,7 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 
-	if err := d.Set("rules", flattenRules(firewallResponse)); err != nil {
+	if err := d.Set("rule", flattenRules(firewallResponse)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -60,7 +60,7 @@ func flattenRules(firewallResponse cn.FirewallResponse) interface{} {
 	for _, rt := range firewallResponse.FirewallRules {
 		row := make(map[string]interface{})
 		row["id"] = rt.ID
-		row["rule"] = rt.Rule
+		row["script"] = rt.Rule
 		rules[i] = row
 		i++
 	}

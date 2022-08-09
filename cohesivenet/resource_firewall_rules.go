@@ -20,7 +20,7 @@ func resourceRules() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-			"rules": &schema.Schema{
+			"rule": &schema.Schema{
 				Type:     schema.TypeList,
 				ForceNew: true,
 				Optional: true,
@@ -33,7 +33,7 @@ func resourceRules() *schema.Resource {
 							Optional: true,
 							Computed: true,
 						},
-						"rule": &schema.Schema{
+						"script": &schema.Schema{
 							Type:     schema.TypeString,
 							ForceNew: true,
 							Optional: true,
@@ -51,11 +51,11 @@ func resourceRulesCreate(ctx context.Context, d *schema.ResourceData, m interfac
 
 	var diags diag.Diagnostics
 
-	rle := d.Get("rules").([]interface{})[0]
+	rle := d.Get("rule").([]interface{})[0]
 	rule := rle.(map[string]interface{})
 
 	rl := cn.FirewallRule{
-		Rule: rule["rule"].(string),
+		Rule: rule["script"].(string),
 	}
 
 	newRule, err := c.CreateFirewallRules(&rl)
@@ -106,7 +106,7 @@ func flattenRulesData(ruleResponse cn.FirewallResponse) []interface{} {
 		row := make(map[string]interface{})
 
 		row["id"] = rt.ID
-		row["rule"] = rt.Rule
+		row["script"] = rt.Rule
 
 		routes[i] = row
 		i++
