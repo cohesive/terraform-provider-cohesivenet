@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+	"strings"
 
 	cn "github.com/cohesive/cohesivenet-client-go/cohesivenet"
 	macros "github.com/cohesive/cohesivenet-client-go/cohesivenet/macros"
@@ -24,19 +25,14 @@ func resourceVns3Config() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-			"host": &schema.Schema{
-				Type:     schema.TypeString,
+			"vns3": &schema.Schema{
+				Type:     schema.TypeSet,
+				MaxItems: 1,
 				Optional: true,
 				ForceNew: true,
-			},
-			"password": &schema.Schema{
-				Type:      schema.TypeString,
-				Optional:  true,
-				Sensitive: true,
-			},
-			"apitoken": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				Elem:     &schema.Resource{
+					Schema: getVns3AuthSchema(),
+				},
 			},
 			"license_file": &schema.Schema{
 				Type:     schema.TypeString,
@@ -58,6 +54,35 @@ func resourceVns3Config() *schema.Resource {
 				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"subnet": &schema.Schema{
+							Type:    schema.TypeString,
+							Optional: true,
+						},
+						"controllers": &schema.Schema{
+							Type:    schema.TypeList,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						"asns": &schema.Schema{
+							Type:    schema.TypeList,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeInt,
+							},
+						},
+						"controller_vip": &schema.Schema{
+							Type:    schema.TypeString,
+							Optional: true,
+						},
+						"clients": &schema.Schema{
+							Type:    schema.TypeList,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
 						"default": &schema.Schema{
 							Type:     schema.TypeBool,
 							Default:  true,
@@ -76,6 +101,10 @@ func resourceVns3Config() *schema.Resource {
 						"token": &schema.Schema{
 							Type:     schema.TypeString,
 							Required: true,
+						},
+						"source": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
 						},
 					},
 				},
@@ -101,42 +130,68 @@ func resourceVns3Config() *schema.Resource {
 	}
 }
 
-func getVns3Client(ctx context.Context, d *schema.ResourceData, m interface{}) (*cn.VNS3Client, error) {
-	host, _ := d.Get("host").(string)
-	password, _ := d.Get("password").(string)
-	token, _ := d.Get("token").(string)
+func buildLicenseParamsRequest(d *schema.ResourceData) (*cn.SetLicenseParametersRequest, error) {
+	licenseParamsSet, hasParams := d.Get("license_params").(*schema.Set)
 
-	var vns3 *cn.VNS3Client
-	// this is a lot of code to just determine vns3 client
-	if host != "" || password != "" || token != "" {
-		invalid := host == "" || (password == "" && token == "")
-		if invalid {
-			return nil, fmt.Errorf("host and auth is required if host, password or token are passed")
-		}
+	licenseParamsRequest := cn.NewSetLicenseParametersRequest(true)
+	if hasParams {
+		licenseParams := licenseParamsSet.List()[0].(map[string]any)
+		// "subnet,controllers,asns,controller_vip,clients,default"
 
-		var cfg *cn.Configuration
-		if token != "" {
-			cfg = cn.NewConfigurationWithAuth(host, cn.ContextAccessToken, token)
+		hasCustomParams := false
+		missingParams := []string{}
+
+		if subnetL, hasSubnet := licenseParams["subnet"]; hasSubnet {
+			licenseParamsRequest.SetSubnet(subnetL.(string))
+			hasCustomParams = true
 		} else {
-			cfg = cn.NewConfigurationWithAuth(host, cn.ContextBasicAuth, cn.BasicAuth{
-				UserName: "api",
-				Password: password,
-			})
+			missingParams = append(missingParams, "subnet")
 		}
 
-		vns3 = cn.NewVNS3Client(cfg, cn.ClientParams{
-			Timeout: 3,
-			TLS:     false,
-		})
-		Logger := NewLogger(ctx)
-		vns3.Log = Logger
 
-	} else {
-		vns3_ := m.(map[string]interface{})["vns3"].(cn.VNS3Client)
-		vns3 = &vns3_
+		if controllersL, hasControllers := licenseParams["controllers"]; hasControllers {
+			licenseParamsRequest.SetManagers(
+				strings.Join(controllersL.([]string), " "),
+			)
+			hasCustomParams = true
+		} else {
+			missingParams = append(missingParams, "controllers")
+		}
+
+		if asnsL, hasAsns := licenseParams["asns"]; hasAsns {
+			licenseParamsRequest.SetAsns(
+				strings.Join(asnsL.([]string), " "),
+			)
+			hasCustomParams = true
+		} else {
+			missingParams = append(missingParams, "asns")
+		}
+
+		if controllerVip, hasVip := licenseParams["controller_vip"]; hasVip {
+			licenseParamsRequest.SetMyManagerVip(controllerVip.(string))
+			hasCustomParams = true
+		} else {
+			missingParams = append(missingParams, "controller_vip")
+		}
+		
+		if clientsL, hasClients := licenseParams["clients"]; hasClients {
+			licenseParamsRequest.SetClients(strings.Join(clientsL.([]string), ","))
+			hasCustomParams = true
+		} else {
+			missingParams = append(missingParams, "clients")
+		}
+
+
+		if hasCustomParams {
+			if len(missingParams) != 0 {
+				return nil, fmt.Errorf("subnet, controllers, asns, controller_vip and clients required if default is false")
+			} else {
+				licenseParamsRequest.SetDefault(false)
+			}
+		}
 	}
 
-	return vns3, nil
+	return licenseParamsRequest, nil
 }
 
 func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -148,20 +203,22 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(clienterror)
 	}
 
-	licenseParamsSet, hasParams := d.Get("license_params").(*schema.Set)
-
-	if hasParams {
-		licenseParams := licenseParamsSet.List()[0]
-		vns3.Log.Info(fmt.Sprintf("License params passed %+v", licenseParams))
+	licenseParamsRequest, licenseParamsError := buildLicenseParamsRequest(d)
+	if licenseParamsError != nil {
+		return diag.FromErr(licenseParamsError)
 	}
 
 	// Keyset params are required so will eist.
 	keysetParams := d.Get("keyset_params").(*schema.Set).List()[0].(map[string]interface{})
 
-	licenseParamsRequest := cn.NewSetLicenseParametersRequest(true)
 	// TODO, set other keyset params if there
 	keysetParamsRequest := cn.SetKeysetParamsRequest{
 		Token: keysetParams["token"].(string),
+	}
+
+	keysetSource, hasSource := keysetParams["source"]
+	if hasSource {
+		keysetParamsRequest.SetSource(keysetSource.(string))
 	}
 
 	vns3.Log.Debug(fmt.Sprintf("keysetparams config %+v", keysetParams))
@@ -172,17 +229,20 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		controllerName = "ctrl"
 	}
 
-	setupReq := macros.SetupRequest{
-		TopologyName:   topologyName,
-		ControllerName: controllerName,
-		LicenseParams:  licenseParamsRequest,
-		//LicenseFile: "/Users/benplatta/code/cohesive/vns3-functional-testing/test-assets/license.txt",
-		LicenseFile:   "/Users/scott/vfuc-test-sme-license.txt",
-		PeerId:        1,
-		KeysetParams:  keysetParamsRequest,
-		WaitTimeout:   60 * 5,
-		KeysetTimeout: 60 * 5,
-	}
+
+	peerId := d.Get("peer_id").(int32)
+	licenseFile := d.Get("license_file").(string)
+
+    setupReq := macros.SetupRequest{
+        TopologyName: topologyName,
+        ControllerName: controllerName,
+        LicenseParams: licenseParamsRequest,
+        LicenseFile: licenseFile,
+        PeerId: peerId,
+        KeysetParams: keysetParamsRequest,
+        WaitTimeout: 60*10,
+        KeysetTimeout: 60*5,
+    }
 
 	// wait for a while if still coming up
 	_, err := vns3.ConfigurationApi.WaitForApi(&ctx, 60*10, 3, 5)

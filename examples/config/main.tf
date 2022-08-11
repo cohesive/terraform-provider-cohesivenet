@@ -82,6 +82,7 @@ resource "aws_eip" "vns3_ip" {
 resource "cohesivenet_vns3_config" "vns3" {
     host = aws_eip.vns3_ip.public_ip
     password = aws_instance.vns3controller[0].id
+    new_password = var.vns3_master_password
     topology_name = var.topology_name
     controller_name = var.controller_name
     license_file = var.vns3_license_file
@@ -94,14 +95,58 @@ resource "cohesivenet_vns3_config" "vns3" {
     peer_id = 1
 }
 
+resource "cohesivenet_vns3_peers" "vns3_1_peers" {
+  vns3 {
+    host = cohesivenet_vns3_config.vns3_1.private_dns
+    token = cohesivenet_vns3_config.vns3_1.api_token
+  }
 
-#  resource "cohesivenet_routes" "route" {
-#   route {
-#     cidr = "192.168.54.0/24"
-#     description = "cohesive_to_watford_secondary"
-#     interface = "tun0"
-#     gateway = "192.168.54.1/32"
-#     advertise = true
-#     metric = 300
-#   }
-#  }
+  peer {
+    address = cohesivenet_vns3_config.vns3_2.private_dns
+    id = 2
+  }
+  peer {
+    address = cohesivenet_vns3_config.vns3_3.private_dns
+    id = 3
+  }
+  peer {
+    address = cohesivenet_vns3_config.vns3_4.private_dns
+    id = 4
+  }
+}
+
+resource "cohesivenet_vns3_peers" "vns3_1_peers" {
+  peer {
+    address = cohesivenet_vns3_config.vns3_2.private_dns
+    id = 2
+  }
+  peer {
+    address = cohesivenet_vns3_config.vns3_3.private_dns
+    id = 3
+  }
+  peer {
+    address = cohesivenet_vns3_config.vns3_4.private_dns
+    id = 4
+  }
+}
+
+
+
+ resource "cohesivenet_routes" "route" {
+  auth {
+    password = cohesivenet_vns3_config.vns3.password
+  }
+
+  route {
+    cidr = "192.168.54.0/24"
+    description = "cohesive_to_watford_secondary"
+    interface = "tun0"
+    gateway = "192.168.54.1/32"
+    advertise = true
+    metric = 300
+  }
+
+  depends_on = [
+    cohesivenet_vns3_config.vns3
+  ]
+ }
