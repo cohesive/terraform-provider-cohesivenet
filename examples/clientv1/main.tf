@@ -16,40 +16,40 @@ provider "cohesivenet" {
 }
 
 /*
-data "cohesivenet_endpoints" all {}
+data "cohesivenet_vns3_ipsec_endpoints" all {}
 
 output "all_endpoints" {
-   value = data.cohesivenet_endpoints.all
+   value = data.cohesivenet_vns3_ipsec_endpoints.all
 }
 
-data "cohesivenet_config" config {}
+data "cohesivenet_vns3_config" config {}
 
 output "all_config" {
-  value = data.cohesivenet_config.config
+  value = data.cohesivenet_vns3_config.config
 }
 
 data "cohesivenet_container_network" all {}
 
 output "all_container_networks" {
-  value = data.cohesivenet_container_network.all }
+  value = data.cohesivenet_vns3_container_network.all }
 
-data "cohesivenet_routes" route {}
+data "cohesivenet_vns3_routes" route {}
 
 output "all_routes" {
-   value = data.cohesivenet_routes.route 
+   value = data.cohesivenet_vns3_routes.route 
 
 }
-data "cohesivenet_firewall" rules {}
+data "cohesivenet_vns3_firewall" rules {}
 
 output "all_rules" {
    value = data.cohesivenet_firewall.rules
 }
 */
-
- resource "cohesivenet_ipsec_endpoints" "endpoint_vf" {
+/*
+ resource "cohesivenet_vns3_ipsec_endpoint" "endpoint_vf" {
   endpoint {
       name = "cohesive_to_watford_secondary"
-      description = "cohesive_to_watford_secondary"
+      description = "cohesive_to_watford_secondary245"
       ipaddress = "52.49.5.120"
       secret =  "OadQNYkfGB2R5UXpmv1mczlqgOTbpI8q"
       pfs = true
@@ -62,9 +62,9 @@ output "all_rules" {
       route_based_remote = "0.0.0.0/0"
     }
  }
-
+*/
 /*
-  resource "cohesivenet_ipsec_endpoints" "endpoint_vf2" {
+  resource "cohesivenet_vns3_ipsec_endpoint" "endpoint_vf2" {
   endpoint {
       name = "cohesive_to_workload_secondary"
       description = "cohesive_to_workload_secondary"
@@ -83,7 +83,7 @@ output "all_rules" {
 */
 
 /*
- resource "cohesivenet_routes" "route" {
+ resource "cohesivenet_route" "route" {
   route {
     cidr = "192.168.54.0/24"
     description = "cohesive_to_watford_secondary"
@@ -96,31 +96,31 @@ output "all_rules" {
 */
 /*
 resource "cohesivenet_firewall" "rule" {
-  rules {
+  rule {
     id = "0"
-    rule = "PREROUTING -d 10.18.0.65 -p udp --dport 162 -j DNAT --to 198.52.100.5:162"
+    script = "PREROUTING -d 10.18.0.65 -p udp --dport 162 -j DNAT --to 198.52.100.5:162"
   }
   
 }
 
 resource "cohesivenet_firewall" "rule1" {
-  rules {
+  rule {
     id = "1"
-    rule = "PREROUTING -d 10.18.0.66 -p udp --dport 162 -j DNAT --to 198.52.100.6:162"
+    script = "PREROUTING -d 10.18.0.66 -p udp --dport 162 -j DNAT --to 198.52.100.6:162"
   }
   
 }
 */
 
-
-resource "cohesivenet_ipsec_ebpg" "peer" {
+/*
+resource "cohesivenet_vns3_ipsec_ebpg_peer" "peer" {
   endpoint_id = 1
   ebgp_peer {
     ipaddress = "169.254.164.177"
     asn = 64512
     local_asn_alias = 65000
-    access_list = "in permit 10.10.10.0/24"
-    bgp_password = "waahooo"
+    access_list = "in permit any"
+    bgp_password = "password"
     add_network_distance = true
     add_network_distance_direction = "in"
     add_network_distance_hops = 10
@@ -129,8 +129,9 @@ resource "cohesivenet_ipsec_ebpg" "peer" {
         cohesivenet_ipsec_endpoints.endpoint_vf
     ]
 }
+*/
 /*
-resource "cohesivenet_ipsec_ebpg" "peer2" {
+resource "cohesivenet_vns3_ipsec_ebpg_peer" "peer2" {
   endpoint_id = 2
   ebgp_peer {
     ipaddress = "169.254.164.178"
@@ -147,3 +148,16 @@ resource "cohesivenet_ipsec_ebpg" "peer2" {
     ]
 }
 */
+
+resource "cohesivenet_vns3_plugin_image" "image" {
+  image {
+    name = "test-tf-plugin"
+    url  = "https://vns3-containers-read-all.s3.amazonaws.com/HA_Container/haplugin-pm.tar.gz"
+    //uildurl =
+    //localbuild =
+    //localimage =
+    //imagefile =
+    //buildfile =
+    description = "test-tf-ha-description"
+  }
+ }
