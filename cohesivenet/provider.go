@@ -39,12 +39,12 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"cohesivenet_vns3_ipsec_endpoint":  resourceEndpoints(),
-			"cohesivenet_vns3_route":           resourceRoutes(),
-			"cohesivenet_vns3_firewall_rule":   resourceRules(),
-			"cohesivenet_vns3_config":          resourceVns3Config(),
-			"cohesivenet_vns3_ipsec_ebpg_peer": resourceEbgp(),
-			"cohesivenet_vns3_plugin_image":    resourcePluginImage(),
+			"cohesivenet_vns3_ipsec_endpoints":  resourceEndpoints(),
+			"cohesivenet_vns3_routes":           resourceRoutes(),
+			"cohesivenet_vns3_firewall_rules":   resourceRules(),
+			"cohesivenet_vns3_config":           resourceVns3Config(),
+			"cohesivenet_vns3_ipsec_ebpg_peers": resourceEbgp(),
+			"cohesivenet_vns3_plugin_images":    resourcePluginImage(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"cohesivenet_vns3_ipsec_endpoints":   dataSourceEndpoints(),

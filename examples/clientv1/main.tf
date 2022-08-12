@@ -46,7 +46,7 @@ output "all_rules" {
 }
 */
 /*
- resource "cohesivenet_vns3_ipsec_endpoint" "endpoint_vf" {
+ resource "cohesivenet_vns3_ipsec_endpoints" "endpoint_vf" {
   endpoint {
       name = "cohesive_to_watford_secondary"
       description = "cohesive_to_watford_secondary245"
@@ -64,7 +64,7 @@ output "all_rules" {
  }
 */
 /*
-  resource "cohesivenet_vns3_ipsec_endpoint" "endpoint_vf2" {
+  resource "cohesivenet_vns3_ipsec_endpoints" "endpoint_vf2" {
   endpoint {
       name = "cohesive_to_workload_secondary"
       description = "cohesive_to_workload_secondary"
@@ -83,7 +83,7 @@ output "all_rules" {
 */
 
 /*
- resource "cohesivenet_route" "route" {
+ resource "cohesivenet_routes" "route" {
   route {
     cidr = "192.168.54.0/24"
     description = "cohesive_to_watford_secondary"
@@ -95,7 +95,7 @@ output "all_rules" {
  }
 */
 /*
-resource "cohesivenet_firewall" "rule" {
+resource "cohesivenet_firewalls" "rule" {
   rule {
     id = "0"
     script = "PREROUTING -d 10.18.0.65 -p udp --dport 162 -j DNAT --to 198.52.100.5:162"
@@ -103,7 +103,7 @@ resource "cohesivenet_firewall" "rule" {
   
 }
 
-resource "cohesivenet_firewall" "rule1" {
+resource "cohesivenet_firewalls" "rule1" {
   rule {
     id = "1"
     script = "PREROUTING -d 10.18.0.66 -p udp --dport 162 -j DNAT --to 198.52.100.6:162"
@@ -113,7 +113,7 @@ resource "cohesivenet_firewall" "rule1" {
 */
 
 /*
-resource "cohesivenet_vns3_ipsec_ebpg_peer" "peer" {
+resource "cohesivenet_vns3_ipsec_ebpg_peers" "peer" {
   endpoint_id = 1
   ebgp_peer {
     ipaddress = "169.254.164.177"
@@ -131,7 +131,7 @@ resource "cohesivenet_vns3_ipsec_ebpg_peer" "peer" {
 }
 */
 /*
-resource "cohesivenet_vns3_ipsec_ebpg_peer" "peer2" {
+resource "cohesivenet_vns3_ipsec_ebpg_peers" "peer2" {
   endpoint_id = 2
   ebgp_peer {
     ipaddress = "169.254.164.178"
@@ -149,7 +149,7 @@ resource "cohesivenet_vns3_ipsec_ebpg_peer" "peer2" {
 }
 */
 
-resource "cohesivenet_vns3_plugin_image" "image" {
+resource "cohesivenet_vns3_plugin_images" "image" {
   image {
     name = "test-tf-plugin"
     url  = "https://vns3-containers-read-all.s3.amazonaws.com/HA_Container/haplugin-pm.tar.gz"
