@@ -149,9 +149,10 @@ resource "cohesivenet_vns3_ipsec_ebpg_peers" "peer2" {
 }
 */
 
+
 resource "cohesivenet_vns3_plugin_images" "image" {
   image {
-    name = "test-tf-plugin"
+    name = "test-tf-st-plugin"
     url  = "https://vns3-containers-read-all.s3.amazonaws.com/HA_Container/haplugin-pm.tar.gz"
     //uildurl =
     //localbuild =

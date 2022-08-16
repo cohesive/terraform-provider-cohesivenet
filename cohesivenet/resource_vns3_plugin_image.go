@@ -2,9 +2,6 @@ package cohesivenet
 
 import (
 	"context"
-	"log"
-	"strconv"
-	"time"
 
 	cn "github.com/cohesive/cohesivenet-client-go/cohesivenet/v1"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -152,24 +149,9 @@ func resourcePluginImageCreate(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
-	//images := flattenRouteData(imageResponse)
-	/*
-		highest := 0
-		for _, r := range images {
-			values := r.(map[string]interface{})
-			value, _ := strconv.Atoi(values["id"].(string))
-			if value > highest {
-				highest = value
-			}
-		}
-	*/
+	uuid := imageResponse.ImageResponse.Import_uuid
 
-	//d.SetId(strconv.Itoa(highest))
-	uuid := imageResponse.Import_uuid
-	log.Println(uuid)
-
-	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
-	//d.SetId(uuid)
+	d.SetId(uuid)
 	//resourcePluginImageRead(ctx, d, m)
 
 	return diags
