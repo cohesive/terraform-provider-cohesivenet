@@ -3,7 +3,7 @@
 ## Installation
 
 ### Dependencies
-Currently we only support local installation. This requires having go installed 1.18 or later installed on your machine and `go` in path. The easiest way on a mac is to use brew with `brew install go`.
+Currently we only support local installation. This requires having go installed 1.18 or later installed on your machine and `go` in path. The easiest way on a mac is to use brew with `brew install go`. You will also need [terraform installed](https://learn.hashicorp.com/tutorials/terraform/install-cli), v1.1 or later.
 
 ### Compiling provider
 1. git clone this repository and cd into it
