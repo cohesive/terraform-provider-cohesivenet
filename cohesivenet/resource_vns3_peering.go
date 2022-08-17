@@ -5,10 +5,8 @@ import (
 	"strconv"
 	"time"
 	"fmt"
-	"strings"
 
 	cn "github.com/cohesive/cohesivenet-client-go/cohesivenet"
-	macros "github.com/cohesive/cohesivenet-client-go/cohesivenet/macros"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -30,7 +28,6 @@ func resourceVns3Peering() *schema.Resource {
 				Type:     schema.TypeSet,
 				MaxItems: 1,
 				Optional: true,
-				ForceNew: true,
 				Elem:     &schema.Resource{
 					Schema: getVns3AuthSchema(),
 				},
@@ -71,10 +68,54 @@ func getPeeringStatus(ctx context.Context, vns3 *cn.VNS3Client) (*cn.PeersDetail
 }
 
 func deleteAllPeers(ctx context.Context, vns3 *cn.VNS3Client) (*cn.PeersDetail, error) {
-	deleteRequest := vns3.PeeringApi.DeletePeerRequest(ctx, 1)
 	peerDetail, err := getPeeringStatus(ctx, vns3)
-	resp, _, err := vns3.PeeringApi.DeletePeer(deleteRequest)
+	if err != nil {
+		return nil, err
+	}
 
+	for _, peer := range peerDetail.GetManagers() {
+		if !peer.GetSelf() {
+			deleteRequest := vns3.PeeringApi.DeletePeerRequest(ctx, peer.GetId())
+			vns3.PeeringApi.DeletePeer(deleteRequest)
+		}
+	}
+
+	return getPeeringStatus(ctx, vns3)
+}
+
+
+func createAllPeers(ctx context.Context, d *schema.ResourceData, vns3 *cn.VNS3Client) []string {
+	peersSet, _ := d.Get("peer").(*schema.Set)
+	failures := []string{}
+	for _, _peer := range peersSet.List() {
+		peer := _peer.(map[string]any)
+		peerName := peer["address"].(string)
+		peerId := int32(peer["peer_id"].(int))
+		peerRequest := cn.NewCreatePeerRequest(peerId, peerName)
+		peerMtu := peer["overlay_mtu"].(int)
+
+		if peerMtu != 0 {
+			vns3.Log.Info(fmt.Sprintf("Overlay MTU: %v", peerMtu))
+			peerRequest.SetOverlayMtu(peerMtu)
+		}
+
+		apiRequest := vns3.PeeringApi.PostCreatePeerRequest(ctx).CreatePeerRequest(*peerRequest)
+		_, _, err := vns3.PeeringApi.PostCreatePeer(apiRequest)
+		if err != nil {
+			apiError, isApiError := err.(*cn.GenericAPIError)
+			// apiError := cn.ParseApiError(err)
+			var errorString string
+			if isApiError {
+				errorMessage := apiError.GetErrorMessage()
+				errorString = fmt.Sprintf("Create peer %v @ %v failed: %v", peerId, peerName, errorMessage)
+			} else {
+				errorString = fmt.Sprintf("Create peer %v @ %v failed: %v", peerId, peerName, err.Error())
+			}
+			failures = append(failures, errorString)
+		}
+	}
+
+	return failures
 }
 
 func resourcePeeringCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -86,31 +127,15 @@ func resourcePeeringCreate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(clienterror)
 	}
 
-	peersSet, _ := d.Get("peer").(*schema.Set)
-	for _, _peer := range peersSet.List() {
-		peer := _peer.(map[string]any)
-		peerName := peer["address"].(string)
-		peerId := peer["peer_id"].(int32)
-		peerRequest := cn.NewCreatePeerRequest(peerId, peerName)
-
-		if peerMtu, hasMtu := peer["overlay_mtu"]; hasMtu {
-			peerRequest.SetOverlayMtu(peerMtu.(string))
-		}
-
-		apiRequest := vns3.PeeringApi.PostCreatePeerRequest(ctx)
-		apiRequest = apiRequest.CreatePeerRequest(*peerRequest)
-
-		resp, _, err := vns3.PeeringApi.PostCreatePeer(apiRequest)
-		if err != nil {
-
-		}
+	failures := createAllPeers(ctx, d, vns3)
+	if len(failures) > 0 {
+		errMessage := fmt.Sprintf("Failed to create all peers: %v.", failures)
+		return diag.FromErr(fmt.Errorf(errMessage))
 	}
 
 	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
 
 	resourcePeeringRead(ctx, d, m)
-	return diags
-
 	return diags
 }
 
@@ -132,46 +157,52 @@ func resourcePeeringRead(ctx context.Context, d *schema.ResourceData, m interfac
 		return diag.FromErr(clienterror)
 	}
 
-
-	peerDetail, err := getPeering(ctx, vns3)
-
-	configDetail, _, err := vns3.PeeringApi.GetConfig(vns3.ConfigurationApi.GetConfigRequest(ctx))
+	peerDetail, err := getPeeringStatus(ctx, vns3)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("VNS3 Config check error: %+v", err))
+		return diag.FromErr(err)
 	}
 
-	configData := configDetail.GetResponse()
-	topologyChecksum := configData.GetTopologyChecksum()
-	d.Set("topology_checksum", topologyChecksum)
-	d.Set("licensed", configData.GetLicensed())
-
-	keysetDetail, _, err := vns3.ConfigurationApi.GetKeyset(vns3.ConfigurationApi.GetKeysetRequest(ctx))
-
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("VNS3 Keyset check error: %+v", err))
+	for _, peer := range peerDetail.GetManagers() {
+		if !peer.GetSelf() {
+			vns3.Log.Info(fmt.Sprintf("Read peer id=%v name=%v mtu=%v", peer.GetId(), peer.GetAddress(), peer.GetMtu()))	
+		}
 	}
-
-	keysetData := keysetDetail.GetResponse()
-	keysetChecksum := keysetData.GetChecksum()
-	d.Set("keyset_checksum", keysetChecksum)
 
 	return diags
 }
 
 
 func resourcePeeringUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	// TODO: we could allow topology name and controller name to be reset and only fail 
-	// when license params or keyset params change
-	notsupportederror := fmt.Errorf("VNS3 config resource cannot be updated. Please redeploy a new server or reset defaults and edit terraform state")
-	return diag.FromErr(notsupportederror)
+	var diags diag.Diagnostics
+
+	vns3, clienterror := getVns3Client(ctx, d, m)
+	if clienterror != nil {
+		return diag.FromErr(clienterror)
+	}
+
+	if d.HasChange("peer") {
+		deleteAllPeers(ctx, vns3)
+		failures := createAllPeers(ctx, d, vns3)
+		if len(failures) != 0 {
+			errMessage := fmt.Sprintf("Failed to create all peers: %v.", failures)
+			return diag.FromErr(fmt.Errorf(errMessage))
+		}
+	}
+
+	return diags
 }
 
 
 func resourcePeeringDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
-	// Basically we just lie and say it was deleted.
-	d.SetId("")
+
+	vns3, clienterror := getVns3Client(ctx, d, m)
+	if clienterror != nil {
+		return diag.FromErr(clienterror)
+	}
+
+	deleteAllPeers(ctx, vns3)
 
 	return diags
 }

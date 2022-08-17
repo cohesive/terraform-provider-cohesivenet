@@ -90,6 +90,14 @@ github.com/cohesive/cohesivenet-client-go v0.0.0-20220808160012-be5ebf6b4ff8 h1:
 github.com/cohesive/cohesivenet-client-go v0.0.0-20220808160012-be5ebf6b4ff8/go.mod h1:I88xrjKHNTkHnn6/idGOD9oPedfSy+AaQqjWSqLp2X8=
 github.com/cohesive/cohesivenet-client-go v0.0.0-20220811080039-e28f00b091a9 h1:7qv4xqNpeju8SDekjjpFBXYzmXQk3/IyzO0NspoWhkA=
 github.com/cohesive/cohesivenet-client-go v0.0.0-20220811080039-e28f00b091a9/go.mod h1:I88xrjKHNTkHnn6/idGOD9oPedfSy+AaQqjWSqLp2X8=
+github.com/cohesive/cohesivenet-client-go v0.0.0-20220816031509-ec3c644e306e h1:rQ2/0LNzzNcfIT9XuVI4W0q/riJVywbrCHtX5ksTXoo=
+github.com/cohesive/cohesivenet-client-go v0.0.0-20220816031509-ec3c644e306e/go.mod h1:I88xrjKHNTkHnn6/idGOD9oPedfSy+AaQqjWSqLp2X8=
+github.com/cohesive/cohesivenet-client-go v0.0.0-20220816190017-8c379c8a68c3 h1:eGATd/aFEl3OleCkzZLpG1eSoAQObW5yUyiSn6jldP4=
+github.com/cohesive/cohesivenet-client-go v0.0.0-20220816190017-8c379c8a68c3/go.mod h1:I88xrjKHNTkHnn6/idGOD9oPedfSy+AaQqjWSqLp2X8=
+github.com/cohesive/cohesivenet-client-go v0.0.0-20220816191133-c0fe73d297dc h1:mSUp0QkassLNuFZozExNl+UVDoobk5q/TqheBxhpUuI=
+github.com/cohesive/cohesivenet-client-go v0.0.0-20220816191133-c0fe73d297dc/go.mod h1:I88xrjKHNTkHnn6/idGOD9oPedfSy+AaQqjWSqLp2X8=
+github.com/cohesive/cohesivenet-client-go v0.0.0-20220816201039-a03f98f0bd5f h1:l5e5ULAIHQYyL6ub/W0B2BpJGhU7meyz7IBQLinfFio=
+github.com/cohesive/cohesivenet-client-go v0.0.0-20220816201039-a03f98f0bd5f/go.mod h1:I88xrjKHNTkHnn6/idGOD9oPedfSy+AaQqjWSqLp2X8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

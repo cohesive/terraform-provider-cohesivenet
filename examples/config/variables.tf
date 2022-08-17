@@ -1,8 +1,26 @@
+
+variable "vns3_master_password" {
+  sensitive = true
+  type = string
+}
+
+variable "vns3_api_token_lifetime" {
+  type = number
+  description = "time in seconds until generated VNS3 token expires. 0 means don't generate token"
+  default = 0
+}
+
+variable "vns3_api_token_refresh" {
+  type = bool
+  description = "token lifetime will refresh for each successful request"
+  default = false
+}
+
 variable "topology_name" {
     default = "bens-test-tf-launch"
 }
 variable "controller_name" {
-    default = "ctrl1"
+    default = "ctrl"
 }
 
 variable "vns3_account_owner" {
@@ -45,7 +63,8 @@ variable "common_tags" {
 variable "subnet_ids" {
     type = list
     default = [
-        "subnet-06b9fc6a85df6e3c7"
+        "subnet-06b9fc6a85df6e3c7",
+        "subnet-02cea8256e7515eca"
     ]
 }
 
