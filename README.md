@@ -41,9 +41,9 @@ Explanation:
 
 **Upgrading plugin for your terraform code**
 
-tldr: `rm .terraform.lock.hcl && terraform init` or `terraform init -upgrade`
+tldr: `rm .terraform.lock.hcl && terraform init -upgrade`
 
-When you re-run `make install` this will update the plugin installed locally but it will not automatically update the plugin used by your terraform code. For instance, when testing, you run `make install` and then cd into examples/config and here you will need to pull in your updated plugin code. When you ran #2 above `terraform init`, terraform downloaded the plugins defined in main.tf and then wrote a file called [.terraform.lock.hcl](https://learn.hashicorp.com/tutorials/terraform/provider-versioning#explore-terraform-lock-hcl) to the same directly. This lock file ensures other users of the same infra code use the correct provider revision. To upgrade we need you will need to run `terraform init -upgrade`. Or you can just remove the lock file and rerun terraform init.
+When you re-run `make install` this will update the plugin installed locally but it will not automatically update the plugin used by your terraform code. For instance, when testing, you run `make install` and then cd into examples/config and here you will need to pull in your updated plugin code. When you ran #2 above `terraform init`, terraform downloaded the plugins defined in main.tf and then wrote a file called [.terraform.lock.hcl](https://learn.hashicorp.com/tutorials/terraform/provider-versioning#explore-terraform-lock-hcl) to the same directly. This lock file ensures other users of the same infra code use the correct provider revision. To upgrade we need you will need to remove the lock file and run `terraform init -upgrade`.
 
 ## Contributing
 TODO
