@@ -250,6 +250,16 @@ func buildLicenseParamsRequest(d *schema.ResourceData) (*cn.SetLicenseParameters
 	return licenseParamsRequest, nil
 }
 
+func setVns3AuthIfCreated(vns3 *cn.VNS3Client, d *schema.ResourceData) *cn.VNS3Client {
+	_id := d.Id()
+	if _id != "" {
+		if newAPIPassword := d.Get("new_api_password").(string); newAPIPassword != "" {
+			setVns3ClientPassword(vns3, newAPIPassword)
+		}
+	}
+	return vns3
+}
+
 func updateVns3Auth(ctx context.Context, d *schema.ResourceData, vns3 *cn.VNS3Client) (string, error) {
 	newUIPassword := d.Get("new_ui_password").(string)
 	newUIUsername := d.Get("new_ui_username").(string)
@@ -477,6 +487,7 @@ func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(clienterror)
 	}
 
+	vns3 = setVns3AuthIfCreated(vns3, d)
 	configDetail, _, err := vns3.ConfigurationApi.GetConfig(vns3.ConfigurationApi.GetConfigRequest(ctx))
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("VNS3 Config check error: %+v", err))
