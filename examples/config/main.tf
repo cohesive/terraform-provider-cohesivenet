@@ -75,27 +75,101 @@ resource "aws_instance" "vns3controller" {
 
 resource "aws_eip" "vns3_ip" {
   vpc               = true
-  instance          = aws_instance.vns3controller[0].id
-  network_interface = aws_network_interface.vns3controller_eni_primary[0].id
+  count             = length(aws_instance.vns3controller)
+  instance          = element(aws_instance.vns3controller.*.id, count.index)
+  network_interface = element(aws_network_interface.vns3controller_eni_primary.*.id, count.index)
 }
 
-resource "cohesivenet_vns3_config" "vns3" {
-    host = aws_eip.vns3_ip.public_ip
+resource "cohesivenet_vns3_config" "vns3_1" {
+  vns3 {
+    host = aws_eip.vns3_ip[0].public_ip
     password = aws_instance.vns3controller[0].id
-    topology_name = var.topology_name
-    controller_name = var.controller_name
-    license_file = var.vns3_license_file
-    license_params {
-        default = true
-    }
-    keyset_params {
-        token = var.keyset_token
-    }
+  }
+
+  topology_name = var.topology_name
+  controller_name = "${var.controller_name} 1"
+  license_file = var.vns3_license_file
+  new_api_password = var.vns3_master_password
+  new_ui_password = var.vns3_master_password
+  generate_token = var.vns3_api_token_lifetime == 0 ? false : true
+  token_lifetime = var.vns3_api_token_lifetime
+  token_refresh = var.vns3_api_token_refresh
+
+  license_params {
+      default = true
+  }
+  keyset_params {
+      token = var.keyset_token
+  }
+  peer_id = 1
+}
+
+resource "cohesivenet_vns3_config" "vns3_2" {
+  vns3 {
+    host = aws_eip.vns3_ip[1].public_ip
+    password = aws_instance.vns3controller[1].id
+  }
+
+  topology_name = var.topology_name
+  controller_name = "${var.controller_name} 2"
+  new_api_password = var.vns3_master_password
+  new_ui_password = var.vns3_master_password
+  generate_token = var.vns3_api_token_lifetime == 0 ? false : true
+  token_lifetime = var.vns3_api_token_lifetime
+  token_refresh = var.vns3_api_token_refresh
+
+  keyset_params {
+      token = var.keyset_token
+      source = aws_eip.vns3_ip[0].private_dns
+  }
+
+  peer_id = 2
+
+  depends_on = [
+    cohesivenet_vns3_config.vns3_1
+  ]
+}
+
+
+resource "cohesivenet_vns3_peers" "vns3_1_peers" {
+  vns3 {
+    host = aws_eip.vns3_ip[0].public_ip
+    password = var.vns3_master_password
+  }
+
+  peer {
+    address = aws_eip.vns3_ip[1].private_dns
+    peer_id = 2
+  }
+
+  depends_on = [
+    cohesivenet_vns3_config.vns3_1
+  ]
+}
+
+resource "cohesivenet_vns3_peers" "vns3_2_peers" {
+  vns3 {
+    host = aws_eip.vns3_ip[1].public_ip
+    password = var.vns3_master_password
+  }
+
+  peer {
+    address = aws_eip.vns3_ip[0].private_dns
     peer_id = 1
+  }
+
+
+  depends_on = [
+    cohesivenet_vns3_config.vns3_2
+  ]
 }
 
 
 #  resource "cohesivenet_routes" "route" {
+#   auth {
+#     password = cohesivenet_vns3_config.vns3.password
+#   }
+
 #   route {
 #     cidr = "192.168.54.0/24"
 #     description = "cohesive_to_watford_secondary"
@@ -104,4 +178,8 @@ resource "cohesivenet_vns3_config" "vns3" {
 #     advertise = true
 #     metric = 300
 #   }
+
+#   depends_on = [
+#     cohesivenet_vns3_config.vns3
+#   ]
 #  }

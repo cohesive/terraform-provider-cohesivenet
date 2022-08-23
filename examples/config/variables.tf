@@ -1,8 +1,27 @@
+
+variable "vns3_master_password" {
+  sensitive = true
+  type = string
+}
+
+variable "vns3_api_token_lifetime" {
+  type = number
+  description = "time in seconds until generated VNS3 token expires. 0 means don't generate token"
+  default = 0
+}
+
+variable "vns3_api_token_refresh" {
+  type = bool
+  description = "token lifetime will refresh for each successful request"
+  default = false
+}
+
 variable "topology_name" {
+    # CHANGE TOPOLOGY NAME
     default = "bens-test-tf-launch"
 }
 variable "controller_name" {
-    default = "ctrl1"
+    default = "ctrl"
 }
 
 variable "vns3_account_owner" {
@@ -16,7 +35,8 @@ variable "vns3_version" {
 }
 
 variable "vns3_license_file" {
-    default = "/Users/benplatta/code/cohesive/vns3-functional-testing/test-assets/license.txt"
+    # ADD PATH TO YOUR LICENSE FILE
+  default = "/Users/benplatta/code/cohesive/vns3-functional-testing/test-assets/license.txt"
 }
 
 variable "keyset_token" {
@@ -43,12 +63,17 @@ variable "common_tags" {
 }
 
 variable "subnet_ids" {
+  # CHANGE subnet ids
     type = list
     default = [
-        "subnet-06b9fc6a85df6e3c7"
+        "subnet-06b9fc6a85df6e3c7",
+        "subnet-02cea8256e7515eca"
     ]
+    description = "The subnets to launch VNS3 controllers. 1 VNS3 controller for each subnet"
 }
 
 variable "security_group_id" {
-    default = "sg-011082922b0f4915f"
+  # CHANGE security group
+  default = "sg-011082922b0f4915f"
+  description = "The Security group to launch VNS3 controllers in"
 }
