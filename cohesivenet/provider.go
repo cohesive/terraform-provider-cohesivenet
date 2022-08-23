@@ -45,6 +45,7 @@ func Provider() *schema.Provider {
 			"cohesivenet_vns3_config":           resourceVns3Config(),
 			"cohesivenet_vns3_ipsec_ebpg_peers": resourceEbgp(),
 			"cohesivenet_vns3_plugin_images":    resourcePluginImage(),
+			"cohesivenet_vns3_plugin_instances": resourceVns3PluginInstances(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"cohesivenet_vns3_ipsec_endpoints":   dataSourceEndpoints(),

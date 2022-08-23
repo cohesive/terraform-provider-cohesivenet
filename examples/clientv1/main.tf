@@ -162,3 +162,26 @@ resource "cohesivenet_vns3_plugin_images" "image" {
     description = "test-tf-ha-description"
   }
  }
+/*
+ resource "cohesivenet_vns3_plugin_images" "image2" {
+  image {
+    name = "test-tf-st-plugin-2"
+    url  = "https://vns3-containers-read-all.s3.amazonaws.com/HA_Container/haplugin-pm.tar.gz"
+    //uildurl =
+    //localbuild =
+    //localimage =
+    //imagefile =
+    //buildfile =
+    description = "test-tf-ha-description"
+  }
+ }
+ */
+
+
+ resource  "cohesivenet_vns3_plugin_instances" instance {
+    name = "pluginfromapi"
+    plugin_id = "sha256:4b10c549cb9a4062af07b6730661b2ae490fabb964daea24468a1434a63a69b1"
+    ip_address =  "198.51.100.9"
+    description = "pluginfromapi"
+    command = "/usr/bin/supervisord"
+ }
