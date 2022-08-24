@@ -162,26 +162,17 @@ resource "cohesivenet_vns3_plugin_images" "image" {
     description = "test-tf-ha-description"
   }
  }
-/*
- resource "cohesivenet_vns3_plugin_images" "image2" {
-  image {
-    name = "test-tf-st-plugin-2"
-    url  = "https://vns3-containers-read-all.s3.amazonaws.com/HA_Container/haplugin-pm.tar.gz"
-    //uildurl =
-    //localbuild =
-    //localimage =
-    //imagefile =
-    //buildfile =
-    description = "test-tf-ha-description"
-  }
- }
- */
-
 
  resource  "cohesivenet_vns3_plugin_instances" instance {
-    name = "pluginfromapi"
-    plugin_id = "sha256:4b10c549cb9a4062af07b6730661b2ae490fabb964daea24468a1434a63a69b1"
-    ip_address =  "198.51.100.9"
-    description = "pluginfromapi"
+    name = "pluginname"
+    //plugin_id = "sha256:9fe7429af80c9d1a8d53aa4f16f72bde0c73e153783cbdf0c95b23917b428e83" // var of cohesivenet_vns3_plugin_images.image.id
+    plugin_id = cohesivenet_vns3_plugin_images.image.image[0].id
+    ip_address =  "198.51.100.11"
+    description = "plugindescription"
     command = "/usr/bin/supervisord"
+    
+    depends_on = [
+    cohesivenet_vns3_plugin_images.image
+    ]
  }
+
