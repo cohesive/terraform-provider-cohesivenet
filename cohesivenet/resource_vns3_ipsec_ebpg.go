@@ -238,7 +238,6 @@ func flattenEbgpData(newPeer cn.EbgpPeer) []interface{} {
 	row["access_list"] = newPeer.AccessList
 	row["add_network_distance_hops"] = newPeer.AddNetworkDistanceHops
 	row["bgp_password"] = newPeer.BgpPassword
-	//row["bgp_password"] = "testtesticle"
 	row["add_network_distance"] = newPeer.AddNetworkDistance
 	row["add_network_distance_direction"] = newPeer.AddNetworkDistanceDirection
 	epeer[0] = row

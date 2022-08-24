@@ -2,9 +2,6 @@ package cohesivenet
 
 import (
 	"context"
-	"log"
-	"strconv"
-	"time"
 
 	cn "github.com/cohesive/cohesivenet-client-go/cohesivenet/v1"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -25,20 +22,17 @@ func resourcePluginImage() *schema.Resource {
 			},
 			"image": &schema.Schema{
 				Type:     schema.TypeList,
-				ForceNew: true,
 				Optional: true,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": &schema.Schema{
 							Type:     schema.TypeString,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
 						"name": &schema.Schema{
 							Type:     schema.TypeString,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
@@ -49,19 +43,16 @@ func resourcePluginImage() *schema.Resource {
 						},
 						"buildurl": &schema.Schema{
 							Type:     schema.TypeString,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
 						"localbuild": &schema.Schema{
 							Type:     schema.TypeString,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
 						"localimage": &schema.Schema{
 							Type:     schema.TypeString,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
@@ -81,43 +72,41 @@ func resourcePluginImage() *schema.Resource {
 						},
 						"image_name": &schema.Schema{
 							Type:     schema.TypeString,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
 						"status": &schema.Schema{
 							Type:     schema.TypeString,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
 						"status_msg": &schema.Schema{
-							Type:     schema.TypeInt,
-							ForceNew: true,
+							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
 						},
 						"import_id": &schema.Schema{
 							Type:     schema.TypeString,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
 						"created": &schema.Schema{
 							Type:     schema.TypeString,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
 						"tag_name": &schema.Schema{
 							Type:     schema.TypeString,
-							ForceNew: true,
+							Optional: true,
+							Computed: true,
+						},
+						"comment": &schema.Schema{
+							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
 						},
 						"import_uuid": &schema.Schema{
 							Type:     schema.TypeString,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
@@ -152,75 +141,61 @@ func resourcePluginImageCreate(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
-	//images := flattenRouteData(imageResponse)
-	/*
-		highest := 0
-		for _, r := range images {
-			values := r.(map[string]interface{})
-			value, _ := strconv.Atoi(values["id"].(string))
-			if value > highest {
-				highest = value
-			}
-		}
-	*/
+	uuid := imageResponse.NewImage.Import_uuid
 
-	//d.SetId(strconv.Itoa(highest))
-	uuid := imageResponse.Import_uuid
-	log.Println(uuid)
+	d.SetId(uuid)
 
-	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
-	//d.SetId(uuid)
-	//resourcePluginImageRead(ctx, d, m)
-
-	return diags
-}
-
-func resourcePluginImageRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	// Warning or errors can be collected in a slice type
-	var diags diag.Diagnostics
+	resourcePluginImageRead(ctx, d, m)
 
 	return diags
 }
 
 /*
 func resourcePluginImageRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	// Warning or errors can be collected in a slice type
+	var diags diag.Diagnostics
+
+	return diags
+}
+*/
+
+func resourcePluginImageRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
 
 	var diags diag.Diagnostics
 
-	routeId := d.Id()
+	imageId := d.Id()
 
-	routeResponse, err := c.GetRoute(routeId)
+	imageResponse, err := c.GetImage(imageId)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.SetId(routeResponse.Routes[0].ID)
+
+	image := flattenPluginImageData(imageResponse)
+
+	if err := d.Set("image", image); err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId(imageId)
+
 	return diags
 }
-*/
 
 func resourcePluginImageUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	return resourcePluginImageRead(ctx, d, m)
 }
 
 func resourcePluginImageDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	// Warning or errors can be collected in a slice type
-	var diags diag.Diagnostics
-	// Basically we just lie and say it was deleted.
-	d.SetId("")
-
-	return diags
-}
-
-/*
-func resourcePluginImageDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
 
 	var diags diag.Diagnostics
 
-	routeId := d.Id()
+	image := d.Get("image").([]interface{})[0]
+	imageId := image.(map[string]interface{})
+	id := imageId["id"].(string)
 
-	err := c.DeleteRoute(routeId)
+	err := c.DeleteImage(id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -230,29 +205,27 @@ func resourcePluginImageDelete(ctx context.Context, d *schema.ResourceData, m in
 	return diags
 }
 
-func flattenPluginImageData(routeResponse cn.RouteResponse) []interface{} {
-	routes := make([]interface{}, len(routeResponse.Routes), len(routeResponse.Routes))
+func flattenPluginImageData(imageResponse cn.ImageResponse) interface{} {
+	image := make([]interface{}, len(imageResponse.Images), len(imageResponse.Images))
 
-	i := 0
-	for _, rt := range routeResponse.Routes {
+	for _, ir := range imageResponse.Images {
 		row := make(map[string]interface{})
 
-		row["cidr"] = rt.Cidr
-		row["id"] = rt.ID
-		row["description"] = rt.Description
-		row["advertise"] = rt.Advertise
-		row["metric"] = rt.Metric
-		row["enabled"] = rt.Enabled
-		row["netmask"] = rt.Netmask
-		row["editable"] = rt.Editable
-		row["table"] = rt.Table
-		row["interface"] = rt.Interface
+		row["id"] = ir.ID
+		row["image_name"] = ir.ImageName
+		row["tag_name"] = ir.TagName
+		row["status"] = ir.Status
+		row["status_msg"] = ir.StatusMsg
+		row["import_id"] = ir.ImportID
+		row["created"] = ir.Created
+		row["description"] = ir.Description
+		row["comment"] = ir.Comment
+		row["import_uuid"] = ir.ImportUUID
 
-		routes[i] = row
-		i++
+		image[0] = row
+
 	}
 
-	return routes
+	return image
 
 }
-*/
