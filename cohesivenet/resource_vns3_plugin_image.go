@@ -38,8 +38,7 @@ func resourcePluginImage() *schema.Resource {
 						},
 						"url": &schema.Schema{
 							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+							Required: true,
 						},
 						"buildurl": &schema.Schema{
 							Type:     schema.TypeString,
@@ -126,7 +125,7 @@ func resourcePluginImageCreate(ctx context.Context, d *schema.ResourceData, m in
 	image := img.(map[string]interface{})
 
 	im := cn.PluginImage{
-		Name:        image["name"].(string),
+		Name:        image["image_name"].(string),
 		URL:         image["url"].(string),
 		Buildurl:    image["buildurl"].(string),
 		Localbuild:  image["localbuild"].(string),
@@ -140,13 +139,10 @@ func resourcePluginImageCreate(ctx context.Context, d *schema.ResourceData, m in
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
-	uuid := imageResponse.NewImage.Import_uuid
-
-	d.SetId(uuid)
-
-	resourcePluginImageRead(ctx, d, m)
-
+	if len(imageResponse.Images) != 0 {
+		d.SetId(imageResponse.Images[0].ID)
+		resourcePluginImageRead(ctx, d, m)
+	}
 	return diags
 }
 
@@ -191,15 +187,11 @@ func resourcePluginImageDelete(ctx context.Context, d *schema.ResourceData, m in
 
 	var diags diag.Diagnostics
 
-	image := d.Get("image").([]interface{})[0]
-	imageId := image.(map[string]interface{})
-	id := imageId["id"].(string)
-
+	id := d.Id()
 	err := c.DeleteImage(id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
 	d.SetId("")
 
 	return diags
