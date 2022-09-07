@@ -11,8 +11,8 @@ terraform {
 provider "cohesivenet" {
   username = "vnscubed"
   password = "vnscontroller!"
-  token = "bf58bd0fd364a6b5aae25c735093aa55ac1fe1cdda5312fbcde9b280fdd9705e"
-  host = "https://16.171.43.29:8000/api"
+  token = "771c844ecf0a2e0a9dd2c2a3071cfa7c1a06d7eed1f8664ce0995ec1b0824bee"
+  host = "https://3.127.171.216:8000/api"
 }
 
 /*
@@ -164,11 +164,11 @@ resource "cohesivenet_vns3_plugin_images" "image" {
 
  resource  "cohesivenet_vns3_plugin_instances" instance {
     name = "pluginname"
-    //plugin_id = "sha256:9fe7429af80c9d1a8d53aa4f16f72bde0c73e153783cbdf0c95b23917b428e83" // var of cohesivenet_vns3_plugin_images.image.id
     plugin_id = cohesivenet_vns3_plugin_images.image.id
     ip_address =  "198.51.100.11"
     description = "plugindescription"
     command = "/usr/bin/supervisord"
+    environment = "HAENV_MODE=primary,HAENV_CLOUD=aws,HAENV_PEER_PUBLIC_IP=3.127.171.216,HAENV_SLEEP_TIME=15"
     
     //depends_on = [ cohesivenet_vns3_plugin_images.image ]
  }
