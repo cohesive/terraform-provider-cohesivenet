@@ -3,6 +3,7 @@ package cohesivenet
 import (
 	"context"
 	"strconv"
+	"time"
 
 	cn "github.com/cohesive/cohesivenet-client-go/cohesivenet/v1"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -106,41 +107,52 @@ func resourceRoutesCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
 
 	var diags diag.Diagnostics
+	var routeList []*cn.Route
 
-	rte := d.Get("route").([]interface{})[0]
-	route := rte.(map[string]interface{})
+	routes := d.Get("route").([]interface{})
+	for _, route := range routes {
+		rt := route.(map[string]interface{})
+		route := cn.Route{
+			Cidr:        rt["cidr"].(string),
+			Description: rt["description"].(string),
+			Interface:   rt["interface"].(string),
+			Gateway:     rt["gateway"].(string),
+			Tunnel:      rt["tunnel"].(int),
+			Advertise:   rt["advertise"].(bool),
+			Metric:      rt["metric"].(int),
+		}
 
-	rt := cn.Route{
-		Cidr:        route["cidr"].(string),
-		Description: route["description"].(string),
-		Interface:   route["interface"].(string),
-		Gateway:     route["gateway"].(string),
-		Tunnel:      route["tunnel"].(int),
-		Advertise:   route["advertise"].(bool),
-		Metric:      route["metric"].(int),
+		routeList = append(routeList, &route)
 	}
-
-	routeResponse, err := c.CreateRoute(&rt)
+	//routeResponse, err := c.CreateRoute(routeList)
+	_, err := c.CreateRoute(routeList)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	routes := flattenRouteData(routeResponse)
+	//flatRoutes := flattenRouteData(routeResponse)
 
-	highest := 0
-	for _, r := range routes {
-		values := r.(map[string]interface{})
-		value, _ := strconv.Atoi(values["id"].(string))
-		if value > highest {
-			highest = value
+	//if err := d.Set("route", flatRoutes); err != nil {
+	//	return diag.FromErr(err)
+	//}
+	/*
+		highest := 0
+		for _, r := range routes {
+			values := r.(map[string]interface{})
+			value, _ := strconv.Atoi(values["id"].(string))
+			if value > highest {
+				highest = value
+			}
 		}
-	}
-
-	d.SetId(strconv.Itoa(highest))
+	*/
+	//d.SetId(strconv.Itoa(highest))
+	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
+	//d.SetId(d.Id())
 
 	resourceRoutesRead(ctx, d, m)
 
 	return diags
+
 }
 
 func resourceRoutesRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -148,13 +160,30 @@ func resourceRoutesRead(ctx context.Context, d *schema.ResourceData, m interface
 
 	var diags diag.Diagnostics
 
-	routeId := d.Id()
+	//routeId := d.Id()
 
-	routeResponse, err := c.GetRoute(routeId)
+	routesResponse, err := c.GetRoutes()
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.SetId(routeResponse.Routes[0].ID)
+
+	flatRoutes := flattenRouteData(routesResponse)
+
+	d.Set("route", flatRoutes)
+	/*
+		d.Set("cidr", flatRoutes)
+		d.Set("id", flatRoutes)
+		d.Set("description", flatRoutes)
+		d.Set("advertise", flatRoutes)
+		d.Set("metric", flatRoutes)
+		d.Set("enabled", flatRoutes)
+		d.Set("netmask", flatRoutes)
+		d.Set("editable", flatRoutes)
+		d.Set("table", flatRoutes)
+		d.Set("interface", flatRoutes)
+	*/
+	//d.SetId(routeResponse.Routes[0].ID)
+	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
 	return diags
 }
 
@@ -167,9 +196,9 @@ func resourceRoutesDelete(ctx context.Context, d *schema.ResourceData, m interfa
 
 	var diags diag.Diagnostics
 
-	routeId := d.Id()
+	//routeId := d.Id()
 
-	err := c.DeleteRoute(routeId)
+	err := c.DeleteRoute()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -179,7 +208,7 @@ func resourceRoutesDelete(ctx context.Context, d *schema.ResourceData, m interfa
 	return diags
 }
 
-func flattenRouteData(routeResponse cn.RouteResponse) []interface{} {
+func flattenRouteData(routeResponse cn.RouteResponse) interface{} {
 	routes := make([]interface{}, len(routeResponse.Routes), len(routeResponse.Routes))
 
 	i := 0

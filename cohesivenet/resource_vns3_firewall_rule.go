@@ -2,6 +2,8 @@ package cohesivenet
 
 import (
 	"context"
+	"strconv"
+	"time"
 
 	cn "github.com/cohesive/cohesivenet-client-go/cohesivenet/v1"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -50,20 +52,29 @@ func resourceRulesCreate(ctx context.Context, d *schema.ResourceData, m interfac
 	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
 
 	var diags diag.Diagnostics
+	var ruleList []*cn.FirewallRule
 
-	rle := d.Get("rule").([]interface{})[0]
-	rule := rle.(map[string]interface{})
+	//rle := d.Get("rule").([]interface{})[0]
+	//rule := rle.(map[string]interface{})
+	rules := d.Get("rule").([]interface{})
 
-	rl := cn.FirewallRule{
-		Rule: rule["script"].(string),
+	for _, rule := range rules {
+		rle := rule.(map[string]interface{})
+		rule := cn.FirewallRule{
+			ID:   rle["id"].(string),
+			Rule: rle["script"].(string),
+		}
+
+		ruleList = append(ruleList, &rule)
 	}
-
-	newRule, err := c.CreateFirewallRules(&rl)
+	//newRule, err := c.CreateFirewallRules(&rl)
+	_, err := c.CreateFirewallRules(ruleList)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(newRule.FirewallRules[0].ID)
+	//d.SetId(newRule.FirewallRules[0].ID)
+	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
 
 	//resourceRoutesRead(ctx, d, m)
 
@@ -86,9 +97,9 @@ func resourceRulesDelete(ctx context.Context, d *schema.ResourceData, m interfac
 
 	var diags diag.Diagnostics
 
-	ruleId := d.Id()
+	//ruleId := d.Id()
 
-	err := c.DeleteRule(ruleId)
+	err := c.DeleteRule()
 	if err != nil {
 		return diag.FromErr(err)
 	}
