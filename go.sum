@@ -100,6 +100,7 @@ github.com/cohesive/cohesivenet-client-go v0.0.0-20220816201039-a03f98f0bd5f h1:
 github.com/cohesive/cohesivenet-client-go v0.0.0-20220816201039-a03f98f0bd5f/go.mod h1:I88xrjKHNTkHnn6/idGOD9oPedfSy+AaQqjWSqLp2X8=
 github.com/cohesive/cohesivenet-client-go v0.0.0-20220823085150-53486bf9e785 h1:Qzupd4C4Zs+JBd0hucnuCu5VKcN+N1x3yuGVjlA9/IM=
 github.com/cohesive/cohesivenet-client-go v0.0.0-20220823085150-53486bf9e785/go.mod h1:I88xrjKHNTkHnn6/idGOD9oPedfSy+AaQqjWSqLp2X8=
+github.com/cohesive/cohesivenet-client-go v0.0.0-20220824153025-a0f6915b08ed h1:rRw8EI2Wt3Oo1LbkQLNGTztkhZNBDnYakP5d/nmL09g=
 github.com/cohesive/cohesivenet-client-go v0.0.0-20220906085949-c758cb1ed80d h1:GBPI+drWq/hke4g3is9K1lo81hrBsYa6lMigDyvpDCc=
 github.com/cohesive/cohesivenet-client-go v0.0.0-20220906085949-c758cb1ed80d/go.mod h1:I88xrjKHNTkHnn6/idGOD9oPedfSy+AaQqjWSqLp2X8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

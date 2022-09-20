@@ -48,6 +48,11 @@ func resourceVns3PluginInstances() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"environment": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -62,6 +67,7 @@ func resourcePluginInstanceCreate(ctx context.Context, d *schema.ResourceData, m
 	description := d.Get("description").(string)
 	ip_address := d.Get("ip_address").(string)
 	command := d.Get("command").(string)
+	environment := d.Get("environment").(string)
 
 	in := cn.CreatePluginInstance{
 
@@ -76,6 +82,7 @@ func resourcePluginInstanceCreate(ctx context.Context, d *schema.ResourceData, m
 		Description: description,
 		Ipaddress:   ip_address,
 		Command:     command,
+		Environment: environment,
 	}
 
 	instanceResponse, err := c.CreateInstance(&in)

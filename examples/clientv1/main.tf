@@ -279,11 +279,11 @@ resource "cohesivenet_vns3_plugin_images" "image" {
 
  resource  "cohesivenet_vns3_plugin_instances" instance {
     name = "pluginname"
-    //plugin_id = "sha256:9fe7429af80c9d1a8d53aa4f16f72bde0c73e153783cbdf0c95b23917b428e83" // var of cohesivenet_vns3_plugin_images.image.id
     plugin_id = cohesivenet_vns3_plugin_images.image.id
     ip_address =  "198.51.100.11"
     description = "plugindescription"
     command = "/usr/bin/supervisord"
+    environment = "HAENV_MODE=primary,HAENV_CLOUD=aws,HAENV_PEER_PUBLIC_IP=3.127.171.216,HAENV_SLEEP_TIME=15"
     
     //depends_on = [ cohesivenet_vns3_plugin_images.image ]
  }
