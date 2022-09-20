@@ -95,6 +95,91 @@ output "all_rules" {
  }
 */
 /*
+variable "routes_map" {
+  description = "Map of routes"
+  type        = map(any)
+
+  default = {
+  "route": {
+    "cidr": "192.168.54.102/32",
+    "description": "cohesive_to_watford_secondary",
+    "interface": "tun0",
+    "gateway": "",
+    "advertise": true,
+    "metric": 100
+  },
+  "route2": {
+    "cidr": "192.168.54.112/32",
+    "description": "cohesive_to_watford_secondary",
+    "interface": "tun0",
+    "gateway": "",
+    "advertise": true,
+    "metric": 100
+  },
+  "route3": {
+    "cidr": "192.168.54.113/32",
+    "description": "cohesive_to_watford_secondary",
+    "interface": "tun0",
+    "gateway": "",
+    "advertise": true,
+    "metric": 100
+  }
+}
+}
+*/
+/*
+variable "routes_map" {
+  description = "Map of routes"
+  type        = map(any)
+
+  default = {
+  "route": {
+    "cidr": "192.168.54.10/32",
+    "description": "cohesive_to_watford_secondary",
+    "interface": "tun0",
+    "gateway": "",
+    "advertise": true,
+    "metric": 100
+  }
+}
+}
+*/
+/*
+resource "cohesivenet_vns3_routes" "route-map" {
+  dynamic route {
+    for_each = var.routes_map
+    content {
+      cidr        = lookup(route.value, "cidr", null)
+      description = lookup(route.value, "description", null)
+      gateway     = lookup(route.value, "gateway", null)
+      advertise   = lookup(route.value, "advertise", false)
+    }
+  }
+}
+*/
+/*
+routes_map = {
+  "route": {
+    "cidr": "192.168.54.10/32",
+    "description": "cohesive_to_watford_secondary",
+    "interface": "tun0",
+    "gateway": "",
+    "advertise": true,
+    "metric": 100
+  },
+  "route2": {
+    "cidr": "192.168.54.10/32",
+    "description": "cohesive_to_watford_secondary",
+    "interface": "tun0",
+    "gateway": "",
+    "advertise": true,
+    "metric": 100
+  }
+}
+*/
+
+
+/*
 resource "cohesivenet_firewalls" "rule" {
   rule {
     id = "0"
@@ -111,6 +196,36 @@ resource "cohesivenet_firewalls" "rule1" {
   
 }
 */
+
+variable "rules_map" {
+  description = "Map of rules"
+  type        = map(any)
+
+  default = {
+  rule: {
+    id = "0"
+    script = "PREROUTING -d 10.18.0.65 -p udp --dport 162 -j DNAT --to 198.52.100.5:162"
+  },
+  rule1: {
+    id = "1"
+    script = "PREROUTING -d 10.18.0.66 -p udp --dport 162 -j DNAT --to 198.52.100.6:162"
+  },
+  rule2: {
+    id = "2"
+    script = "PREROUTING -d 10.18.0.67 -p udp --dport 162 -j DNAT --to 198.52.100.7:162"
+  }
+}
+}
+
+resource "cohesivenet_vns3_firewall_rules" "rule-map" {
+  dynamic rule {
+    for_each = var.rules_map
+    content {
+      id        = lookup(rule.value, "id", null)
+      script = lookup(rule.value, "script", null)
+    }
+  }
+}
 
 /*
 resource "cohesivenet_vns3_ipsec_ebpg_peers" "peer" {
@@ -148,7 +263,7 @@ resource "cohesivenet_vns3_ipsec_ebpg_peers" "peer2" {
     ]
 }
 */
-
+/*
 resource "cohesivenet_vns3_plugin_images" "image" {
   image {
     image_name = "test-tf-st-plugin"
@@ -172,5 +287,5 @@ resource "cohesivenet_vns3_plugin_images" "image" {
     
     //depends_on = [ cohesivenet_vns3_plugin_images.image ]
  }
-
+*/
 
