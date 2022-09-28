@@ -124,30 +124,12 @@ func resourceRoutesCreate(ctx context.Context, d *schema.ResourceData, m interfa
 
 		routeList = append(routeList, &route)
 	}
-	//routeResponse, err := c.CreateRoute(routeList)
 	_, err := c.CreateRoute(routeList)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	//flatRoutes := flattenRouteData(routeResponse)
-
-	//if err := d.Set("route", flatRoutes); err != nil {
-	//	return diag.FromErr(err)
-	//}
-	/*
-		highest := 0
-		for _, r := range routes {
-			values := r.(map[string]interface{})
-			value, _ := strconv.Atoi(values["id"].(string))
-			if value > highest {
-				highest = value
-			}
-		}
-	*/
-	//d.SetId(strconv.Itoa(highest))
 	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
-	//d.SetId(d.Id())
 
 	resourceRoutesRead(ctx, d, m)
 
@@ -170,19 +152,6 @@ func resourceRoutesRead(ctx context.Context, d *schema.ResourceData, m interface
 	flatRoutes := flattenRouteData(routesResponse)
 
 	d.Set("route", flatRoutes)
-	/*
-		d.Set("cidr", flatRoutes)
-		d.Set("id", flatRoutes)
-		d.Set("description", flatRoutes)
-		d.Set("advertise", flatRoutes)
-		d.Set("metric", flatRoutes)
-		d.Set("enabled", flatRoutes)
-		d.Set("netmask", flatRoutes)
-		d.Set("editable", flatRoutes)
-		d.Set("table", flatRoutes)
-		d.Set("interface", flatRoutes)
-	*/
-	//d.SetId(routeResponse.Routes[0].ID)
 	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
 	return diags
 }
@@ -196,8 +165,6 @@ func resourceRoutesDelete(ctx context.Context, d *schema.ResourceData, m interfa
 
 	var diags diag.Diagnostics
 
-	//routeId := d.Id()
-
 	err := c.DeleteRoute()
 	if err != nil {
 		return diag.FromErr(err)
@@ -209,7 +176,7 @@ func resourceRoutesDelete(ctx context.Context, d *schema.ResourceData, m interfa
 }
 
 func flattenRouteData(routeResponse cn.RouteResponse) interface{} {
-	routes := make([]interface{}, len(routeResponse.Routes), len(routeResponse.Routes))
+	routes := make([]interface{}, len(routeResponse.Routes))
 
 	i := 0
 	for _, rt := range routeResponse.Routes {

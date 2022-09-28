@@ -3,9 +3,9 @@ module terraform-provider-cohesivenet
 go 1.18
 
 require (
-	github.com/cohesive/cohesivenet-client-go v0.0.0-20220906085949-c758cb1ed80d
+	github.com/cohesive/cohesivenet-client-go v0.0.0-20220920062929-8fb4f59c4ba6
 	github.com/hashicorp/terraform-plugin-log v0.7.0
-	github.com/hashicorp/terraform-plugin-sdk/v2 v2.21.0
+	github.com/hashicorp/terraform-plugin-sdk/v2 v2.23.0
 )
 
 require (
@@ -13,7 +13,7 @@ require (
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/google/go-cmp v0.5.8 // indirect
+	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320 // indirect
 	github.com/hashicorp/go-hclog v1.3.0 // indirect
@@ -39,13 +39,12 @@ require (
 	github.com/vmihailenco/msgpack/v4 v4.3.12 // indirect
 	github.com/vmihailenco/tagparser v0.1.2 // indirect
 	github.com/zclconf/go-cty v1.11.0 // indirect
-	golang.org/x/net v0.0.0-20220906165146-f3363e06e74c // indirect
-	golang.org/x/oauth2 v0.0.0-20220822191816-0ebed06d0094 // indirect
-	golang.org/x/sys v0.0.0-20220907062415-87db552b00fd // indirect
-
+	golang.org/x/net v0.0.0-20220919232410-f2f64ebce3c1 // indirect
+	golang.org/x/oauth2 v0.0.0-20220909003341-f21342109be1 // indirect
+	golang.org/x/sys v0.0.0-20220919091848-fb04ddd9f9c8 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20220902135211-223410557253 // indirect
+	google.golang.org/genproto v0.0.0-20220919141832-68c03719ef51 // indirect
 	google.golang.org/grpc v1.49.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 )

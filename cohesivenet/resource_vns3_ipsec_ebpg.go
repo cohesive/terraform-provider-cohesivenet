@@ -3,6 +3,7 @@ package cohesivenet
 import (
 	"context"
 	"strconv"
+	"strings"
 	"time"
 
 	cn "github.com/cohesive/cohesivenet-client-go/cohesivenet/v1"
@@ -98,7 +99,7 @@ func resourceEbgpCreate(ctx context.Context, d *schema.ResourceData, m interface
 		Ipaddress:                   bgp["ipaddress"].(string),
 		Asn:                         bgp["asn"].(int),
 		LocalAsnAlias:               bgp["local_asn_alias"].(int),
-		AccessList:                  bgp["access_list"].(string),
+		AccessList:                  strings.Replace(bgp["access_list"].(string), ",", "\n", -1),
 		AddNetworkDistanceHops:      bgp["add_network_distance_hops"].(int),
 		BgpPassword:                 bgp["bgp_password"].(string),
 		AddNetworkDistance:          bgp["add_network_distance"].(bool),
@@ -122,21 +123,11 @@ func resourceEbgpCreate(ctx context.Context, d *schema.ResourceData, m interface
 	return diags
 }
 
-/*
-func resourceEbgpRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	// Warning or errors can be collected in a slice type
-	var diags diag.Diagnostics
-
-	return diags
-}
-*/
-
 func resourceEbgpRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
 
 	var diags diag.Diagnostics
 
-	//endpointId := d.Id()
 	endId := d.Get("endpoint_id").(int)
 	endpointId := strconv.Itoa(endId)
 
@@ -158,15 +149,6 @@ func resourceEbgpRead(ctx context.Context, d *schema.ResourceData, m interface{}
 
 	return diags
 }
-
-/*
-func resourceEbgpUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	// Warning or errors can be collected in a slice type
-	var diags diag.Diagnostics
-
-	return diags
-}
-*/
 
 func resourceEbgpUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
@@ -190,25 +172,16 @@ func resourceEbgpUpdate(ctx context.Context, d *schema.ResourceData, m interface
 			AddNetworkDistance:          bgp["add_network_distance"].(bool),
 			AddNetworkDistanceDirection: bgp["add_network_distance_direction"].(string),
 		}
-		_, err := c.UpdateEbgpPeer(endpointId, ebgpPeerId, &ep)
+		newPeer, err := c.UpdateEbgpPeer(endpointId, ebgpPeerId, &ep)
 		if err != nil {
 			return diag.FromErr(err)
 		}
-
+		d.Set("id", newPeer.ID)
 		d.Set("last_updated", time.Now().Format(time.RFC850))
 	}
 
 	return resourceEbgpRead(ctx, d, m)
 }
-
-/*
-func resourceEbgpDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	// Warning or errors can be collected in a slice type
-	var diags diag.Diagnostics
-
-	return diags
-}
-*/
 
 func resourceEbgpDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
