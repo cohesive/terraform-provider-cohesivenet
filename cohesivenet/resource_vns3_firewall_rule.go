@@ -53,37 +53,53 @@ func resourceRulesCreate(ctx context.Context, d *schema.ResourceData, m interfac
 
 	var diags diag.Diagnostics
 	var ruleList []*cn.FirewallRule
-
-	//rle := d.Get("rule").([]interface{})[0]
-	//rule := rle.(map[string]interface{})
 	rules := d.Get("rule").([]interface{})
 
 	for _, rule := range rules {
 		rle := rule.(map[string]interface{})
 		rule := cn.FirewallRule{
-			ID:   rle["id"].(string),
 			Rule: rle["script"].(string),
 		}
 
 		ruleList = append(ruleList, &rule)
 	}
-	//newRule, err := c.CreateFirewallRules(&rl)
 	_, err := c.CreateFirewallRules(ruleList)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
 	//d.SetId(newRule.FirewallRules[0].ID)
 	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
 
-	//resourceRoutesRead(ctx, d, m)
+	resourceRulesRead(ctx, d, m)
 
 	return diags
 }
 
+/*
 func resourceRulesRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	var diags diag.Diagnostics
+
+	return diags
+}
+*/
+
+func resourceRulesRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
+
+	// Warning or errors can be collected in a slice type
+	var diags diag.Diagnostics
+
+	firewallResponse, err := c.GetFirewallRules()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	rules := flattenRulesData(firewallResponse)
+
+	d.Set("rule", rules)
+
+	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
 
 	return diags
 }
@@ -97,9 +113,20 @@ func resourceRulesDelete(ctx context.Context, d *schema.ResourceData, m interfac
 
 	var diags diag.Diagnostics
 
-	//ruleId := d.Id()
+	var ruleList []*cn.FirewallRule
+	rules := d.Get("rule").([]interface{})
 
-	err := c.DeleteRule()
+	for _, rule := range rules {
+		rle := rule.(map[string]interface{})
+		rule := cn.FirewallRule{
+			ID:   rle["id"].(string),
+			Rule: rle["script"].(string),
+		}
+
+		ruleList = append(ruleList, &rule)
+	}
+
+	err := c.DeleteRules(ruleList)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -110,15 +137,14 @@ func resourceRulesDelete(ctx context.Context, d *schema.ResourceData, m interfac
 }
 
 func flattenRulesData(ruleResponse cn.FirewallResponse) []interface{} {
-	routes := make([]interface{}, len(ruleResponse.FirewallRules), len(ruleResponse.FirewallRules))
+	//routes := make([]interface{}, len(ruleResponse.FirewallRules), len(ruleResponse.FirewallRules))
+	routes := make([]interface{}, len(ruleResponse.FirewallRules))
 
 	i := 0
 	for _, rt := range ruleResponse.FirewallRules {
 		row := make(map[string]interface{})
-
 		row["id"] = rt.ID
 		row["script"] = rt.Rule
-
 		routes[i] = row
 		i++
 	}

@@ -45,7 +45,7 @@ output "all_rules" {
    value = data.cohesivenet_firewall.rules
 }
 */
-/*
+
  resource "cohesivenet_vns3_ipsec_endpoints" "endpoint_vf" {
   endpoint {
       name = "cohesive_to_watford_secondary"
@@ -61,9 +61,14 @@ output "all_rules" {
       route_based_local =  "10.18.0.64/26"
       route_based_remote = "0.0.0.0/0"
     }
+    
  }
-*/
+
+ output "endpoint_vf_id" {
+    value = cohesivenet_vns3_ipsec_endpoints.endpoint_vf.id
+}
 /*
+
   resource "cohesivenet_vns3_ipsec_endpoints" "endpoint_vf2" {
   endpoint {
       name = "cohesive_to_workload_secondary"
@@ -78,12 +83,53 @@ output "all_rules" {
       route_based_int_address = "169.254.32.186/30"
       route_based_local =  "0.0.0.0/0"
       route_based_remote = "0.0.0.0/0"
-    }
+      }
+        depends_on = [
+          cohesivenet_vns3_ipsec_endpoints.endpoint_vf
+    ]
  }
+ output "endpoint_vf2_id" {
+    value = cohesivenet_vns3_ipsec_endpoints.endpoint_vf2.id
+}
+
 */
+resource "cohesivenet_vns3_ipsec_ebpg_peers" "peer" {
+  endpoint_id = cohesivenet_vns3_ipsec_endpoints.endpoint_vf.id
+  ebgp_peer {
+    ipaddress = "169.254.164.200"
+    asn = 64512
+    local_asn_alias = 65000
+    access_list = "in permit 1.2.3.4/32,in permit 11.22.33.42/32,out permit 11.12.13.14/32"
+    bgp_password = "password"
+    add_network_distance = true
+    add_network_distance_direction = "in"
+    add_network_distance_hops = 10
+  }
+      depends_on = [
+        cohesivenet_vns3_ipsec_endpoints.endpoint_vf
+    ]
+}
 
 /*
- resource "cohesivenet_routes" "route" {
+resource "cohesivenet_vns3_ipsec_ebpg_peers" "peer2" {
+  endpoint_id = cohesivenet_vns3_ipsec_endpoints.endpoint_vf2.id
+  ebgp_peer {
+    ipaddress = "169.254.164.201"
+    asn = 64512
+    local_asn_alias = 65007
+    access_list = "in permit any"
+    bgp_password = "password"
+    add_network_distance = true
+    add_network_distance_direction = "in"
+    add_network_distance_hops = 10
+  }
+    depends_on = [
+        cohesivenet_vns3_ipsec_endpoints.endpoint_vf2
+    ]
+}
+*/
+/*
+ resource "cohesivenet_vns3_routes" "route" {
   route {
     cidr = "192.168.54.0/24"
     description = "cohesive_to_watford_secondary"
@@ -103,7 +149,7 @@ variable "routes_map" {
   "route": {
     "cidr": "192.168.54.102/32",
     "description": "cohesive_to_watford_secondary",
-    "interface": "tun0",
+    "interface": "",
     "gateway": "",
     "advertise": true,
     "metric": 100
@@ -111,7 +157,7 @@ variable "routes_map" {
   "route2": {
     "cidr": "192.168.54.112/32",
     "description": "cohesive_to_watford_secondary",
-    "interface": "tun0",
+    "interface": "",
     "gateway": "",
     "advertise": true,
     "metric": 100
@@ -119,7 +165,7 @@ variable "routes_map" {
   "route3": {
     "cidr": "192.168.54.113/32",
     "description": "cohesive_to_watford_secondary",
-    "interface": "tun0",
+    "interface": "",
     "gateway": "",
     "advertise": true,
     "metric": 100
@@ -196,23 +242,23 @@ resource "cohesivenet_firewalls" "rule1" {
   
 }
 */
-
+/*
 variable "rules_map" {
   description = "Map of rules"
   type        = map(any)
 
   default = {
   rule: {
-    id = "0"
-    script = "PREROUTING -d 10.18.0.65 -p udp --dport 162 -j DNAT --to 198.52.100.5:162"
+    id = "10"
+    script = "PREROUTING_CUST -d 10.18.0.65 -p udp --dport 162 -j DNAT --to 198.52.100.5:162"
   },
   rule1: {
-    id = "1"
-    script = "PREROUTING -d 10.18.0.66 -p udp --dport 162 -j DNAT --to 198.52.100.6:162"
+    id = "21"
+    script = "PREROUTING_CUST -d 10.18.0.66 -p udp --dport 162 -j DNAT --to 198.52.100.6:162"
   },
   rule2: {
-    id = "2"
-    script = "PREROUTING -d 10.18.0.67 -p udp --dport 162 -j DNAT --to 198.52.100.7:162"
+    id = "31"
+    script = "PREROUTING_CUST -d 10.18.0.67 -p udp --dport 162 -j DNAT --to 198.52.100.7:162"
   }
 }
 }
@@ -226,43 +272,36 @@ resource "cohesivenet_vns3_firewall_rules" "rule-map" {
     }
   }
 }
+*/
 
 /*
-resource "cohesivenet_vns3_ipsec_ebpg_peers" "peer" {
-  endpoint_id = 1
-  ebgp_peer {
-    ipaddress = "169.254.164.177"
-    asn = 64512
-    local_asn_alias = 65000
-    access_list = "in permit any"
-    bgp_password = "password"
-    add_network_distance = true
-    add_network_distance_direction = "in"
-    add_network_distance_hops = 10
+variable "rules_map" {
+  description = "Map of rules"
+  type        = map(any)
+
+  default = {
+  rule: {
+    script = "PREROUTING_CUST -d 10.18.0.65 -p udp --dport 162 -j DNAT --to 198.52.100.5:162"
+  },
+  rule1: {
+    script = "PREROUTING_CUST -d 10.18.0.66 -p udp --dport 162 -j DNAT --to 198.52.100.6:162"
+  },
+  rule2: {
+    script = "PREROUTING_CUST -d 10.18.0.67 -p udp --dport 162 -j DNAT --to 198.52.100.7:162"
   }
-      depends_on = [
-        cohesivenet_ipsec_endpoints.endpoint_vf
-    ]
+}
+}
+
+resource "cohesivenet_vns3_firewall_rules" "rule-map" {
+  dynamic rule {
+    for_each = var.rules_map
+    content {
+      script = lookup(rule.value, "script", null)
+    }
+  }
 }
 */
-/*
-resource "cohesivenet_vns3_ipsec_ebpg_peers" "peer2" {
-  endpoint_id = 2
-  ebgp_peer {
-    ipaddress = "169.254.164.178"
-    asn = 64512
-    local_asn_alias = 65007
-    access_list = "in permit any"
-    bgp_password = "password"
-    add_network_distance = true
-    add_network_distance_direction = "in"
-    add_network_distance_hops = 10
-  }
-    depends_on = [
-        cohesivenet_ipsec_endpoints.endpoint_vf2
-    ]
-}
-*/
+
 /*
 resource "cohesivenet_vns3_plugin_images" "image" {
   image {
