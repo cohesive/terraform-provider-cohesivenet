@@ -188,9 +188,9 @@ func resourceEbgpDelete(ctx context.Context, d *schema.ResourceData, m interface
 
 	var diags diag.Diagnostics
 
-	endpointId := d.Id()
+	endId := d.Get("endpoint_id").(int)
 	ebgpPeerId := d.Id()
-
+	endpointId := strconv.Itoa(endId)
 	err := c.DeleteEbgpPeer(endpointId, ebgpPeerId)
 	if err != nil {
 		return diag.FromErr(err)
