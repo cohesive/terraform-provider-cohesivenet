@@ -67,7 +67,6 @@ output "all_rules" {
  output "endpoint_vf_id" {
     value = cohesivenet_vns3_ipsec_endpoints.endpoint_vf.id
 }
-/*
 
   resource "cohesivenet_vns3_ipsec_endpoints" "endpoint_vf2" {
   endpoint {
@@ -92,11 +91,63 @@ output "all_rules" {
     value = cohesivenet_vns3_ipsec_endpoints.endpoint_vf2.id
 }
 
-*/
+ resource "cohesivenet_vns3_ipsec_endpoints" "endpoint_vf3" {
+  endpoint {
+      name = "cohesive_to_watford_primary"
+      description = "cohesive_to_watford_primary"
+      ipaddress = "62.49.5.120"
+      secret =  "OadQNYkfGB2R5UXpmv1mczlqgOTbpI8q"
+      pfs = true
+      ike_version = 2
+      nat_t_enabled = true
+      extra_config = "phase1=aes256-sha2_256-dh16"
+      vpn_type = "vti"
+      route_based_int_address = "169.254.164.178/30"
+      route_based_local =  "10.18.0.64/26"
+      route_based_remote = "0.0.0.0/0"
+    }
+         depends_on = [
+          cohesivenet_vns3_ipsec_endpoints.endpoint_vf,
+          cohesivenet_vns3_ipsec_endpoints.endpoint_vf2
+
+    ]
+    
+ }
+
+ output "endpoint_vf3_id" {
+    value = cohesivenet_vns3_ipsec_endpoints.endpoint_vf3.id
+}
+
+  resource "cohesivenet_vns3_ipsec_endpoints" "endpoint_vf4" {
+  endpoint {
+      name = "cohesive_to_workload_primary"
+      description = "cohesive_to_workload_primary"
+      ipaddress = "44.241.205.244"
+      secret =  "wakeYgPcjh6IJ70NmLxzrkSE0Wz9guMP"
+      pfs = true
+      ike_version = 2
+      nat_t_enabled = true
+      extra_config = "phase1=aes256-sha2_256-dh16"
+      vpn_type = "vti"
+      route_based_int_address = "169.254.32.186/30"
+      route_based_local =  "0.0.0.0/0"
+      route_based_remote = "0.0.0.0/0"
+      }
+        depends_on = [
+          cohesivenet_vns3_ipsec_endpoints.endpoint_vf2,
+          cohesivenet_vns3_ipsec_endpoints.endpoint_vf3
+
+    ]
+ }
+ output "endpoint_vf4_id" {
+    value = cohesivenet_vns3_ipsec_endpoints.endpoint_vf4.id
+}
+
+
 resource "cohesivenet_vns3_ipsec_ebpg_peers" "peer" {
   endpoint_id = cohesivenet_vns3_ipsec_endpoints.endpoint_vf.id
   ebgp_peer {
-    ipaddress = "169.254.164.200"
+    ipaddress = "169.254.164.204"
     asn = 64512
     local_asn_alias = 65000
     access_list = "in permit 1.2.3.4/32,in permit 11.22.33.42/32,out permit 11.12.13.14/32"
@@ -106,13 +157,57 @@ resource "cohesivenet_vns3_ipsec_ebpg_peers" "peer" {
     add_network_distance_hops = 10
   }
       depends_on = [
-        cohesivenet_vns3_ipsec_endpoints.endpoint_vf
+        cohesivenet_vns3_ipsec_endpoints.endpoint_vf,
+        cohesivenet_vns3_ipsec_endpoints.endpoint_vf2,
+        cohesivenet_vns3_ipsec_endpoints.endpoint_vf3,
+        cohesivenet_vns3_ipsec_endpoints.endpoint_vf4,
     ]
 }
 
-/*
+
 resource "cohesivenet_vns3_ipsec_ebpg_peers" "peer2" {
   endpoint_id = cohesivenet_vns3_ipsec_endpoints.endpoint_vf2.id
+  ebgp_peer {
+    ipaddress = "169.254.164.203"
+    asn = 64512
+    local_asn_alias = 65007
+    access_list = "in permit any"
+    bgp_password = "password"
+    add_network_distance = true
+    add_network_distance_direction = "in"
+    add_network_distance_hops = 10
+  }
+    depends_on = [
+        cohesivenet_vns3_ipsec_endpoints.endpoint_vf,
+        cohesivenet_vns3_ipsec_endpoints.endpoint_vf2,
+        cohesivenet_vns3_ipsec_endpoints.endpoint_vf3,
+        cohesivenet_vns3_ipsec_endpoints.endpoint_vf4,
+    ]
+}
+
+resource "cohesivenet_vns3_ipsec_ebpg_peers" "peer3" {
+  endpoint_id = cohesivenet_vns3_ipsec_endpoints.endpoint_vf3.id
+  ebgp_peer {
+    ipaddress = "169.254.164.202"
+    asn = 64512
+    local_asn_alias = 65000
+    access_list = "in permit 1.2.3.4/32,in permit 11.22.33.42/32,out permit 11.12.13.14/32"
+    bgp_password = "password"
+    add_network_distance = true
+    add_network_distance_direction = "in"
+    add_network_distance_hops = 10
+  }
+      depends_on = [
+        cohesivenet_vns3_ipsec_endpoints.endpoint_vf,
+        cohesivenet_vns3_ipsec_endpoints.endpoint_vf2,
+        cohesivenet_vns3_ipsec_endpoints.endpoint_vf3,
+        cohesivenet_vns3_ipsec_endpoints.endpoint_vf4,
+    ]
+}
+
+
+resource "cohesivenet_vns3_ipsec_ebpg_peers" "peer4" {
+  endpoint_id = cohesivenet_vns3_ipsec_endpoints.endpoint_vf4.id
   ebgp_peer {
     ipaddress = "169.254.164.201"
     asn = 64512
@@ -124,10 +219,16 @@ resource "cohesivenet_vns3_ipsec_ebpg_peers" "peer2" {
     add_network_distance_hops = 10
   }
     depends_on = [
-        cohesivenet_vns3_ipsec_endpoints.endpoint_vf2
+        cohesivenet_vns3_ipsec_endpoints.endpoint_vf,
+        cohesivenet_vns3_ipsec_endpoints.endpoint_vf2,
+        cohesivenet_vns3_ipsec_endpoints.endpoint_vf3,
+        cohesivenet_vns3_ipsec_endpoints.endpoint_vf4,
     ]
 }
-*/
+
+
+
+
 /*
  resource "cohesivenet_vns3_routes" "route" {
   route {
@@ -273,7 +374,6 @@ resource "cohesivenet_vns3_firewall_rules" "rule-map" {
   }
 }
 */
-
 /*
 variable "rules_map" {
   description = "Map of rules"
@@ -300,9 +400,8 @@ resource "cohesivenet_vns3_firewall_rules" "rule-map" {
     }
   }
 }
-*/
 
-/*
+
 resource "cohesivenet_vns3_plugin_images" "image" {
   image {
     image_name = "test-tf-st-plugin"
@@ -316,6 +415,19 @@ resource "cohesivenet_vns3_plugin_images" "image" {
   }
  }
 
+ resource "cohesivenet_vns3_plugin_images" "nlb" {
+  image {
+    image_name = "test-tf-st-lb-plugin"
+    url  = "https://st-temp-vf-share.s3.eu-central-1.amazonaws.com/nginx_lb_release_1509.export.tar.gz"
+    //uildurl =
+    //localbuild =
+    //localimage =
+    //imagefile =
+    //buildfile =
+    description = "test-tf-lb-description"
+  }
+ }
+
  resource  "cohesivenet_vns3_plugin_instances" instance {
     name = "pluginname"
     plugin_id = cohesivenet_vns3_plugin_images.image.id
@@ -326,5 +438,15 @@ resource "cohesivenet_vns3_plugin_images" "image" {
     
     //depends_on = [ cohesivenet_vns3_plugin_images.image ]
  }
+ resource  "cohesivenet_vns3_plugin_instances" instance {
+    name = "pluginname"
+    plugin_id = cohesivenet_vns3_plugin_images.nlb.id
+    ip_address =  "198.51.100.10"
+    description = "plugindescription"
+    command = "/usr/bin/supervisord"
+    //environment = "server_list=[53,-,route-53-tcp],[53,udp,route-53-udp],[80,-,esm-workload-ingress]"
+    environment = "server_list=\"[53,-,route-53-tcp],[53,udp,route-53-udp],[80,-,esm-workload-ingress]\",upstream_list=\"[route-53-tcp,10.23.2.43:53,10.23.2.59:53],[route-53-udp,10.23.2.43:53,10.23.2.59:53],[esm-workload-ingress,10.199.90.197:80,10.199.80.72:80]\""
+    
+    //depends_on = [ cohesivenet_vns3_plugin_images.image ]
+ }
 */
-
