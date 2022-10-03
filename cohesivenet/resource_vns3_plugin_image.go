@@ -38,7 +38,8 @@ func resourcePluginImage() *schema.Resource {
 						},
 						"url": &schema.Schema{
 							Type:     schema.TypeString,
-							Required: true,
+							Optional: true,
+							Computed: true,
 						},
 						"buildurl": &schema.Schema{
 							Type:     schema.TypeString,
@@ -163,6 +164,7 @@ func resourcePluginImageRead(ctx context.Context, d *schema.ResourceData, m inte
 	imageId := d.Id()
 
 	imageResponse, err := c.GetImage(imageId)
+	//_, err := c.GetImage(imageId)
 	if err != nil {
 		return diag.FromErr(err)
 	}

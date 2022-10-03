@@ -156,8 +156,42 @@ func resourceRoutesRead(ctx context.Context, d *schema.ResourceData, m interface
 	return diags
 }
 
+/*
 func resourceRoutesUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	return resourceEndpointsRead(ctx, d, m)
+	return resourceRoutesRead(ctx, d, m)
+}
+*/
+func resourceRoutesUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
+
+	if d.HasChange("route") {
+		var routeList []*cn.Route
+		routes := d.Get("route").([]interface{})
+		for _, route := range routes {
+			rt := route.(map[string]interface{})
+			route := cn.Route{
+				Cidr:        rt["cidr"].(string),
+				Description: rt["description"].(string),
+				Interface:   rt["interface"].(string),
+				Gateway:     rt["gateway"].(string),
+				Tunnel:      rt["tunnel"].(int),
+				Advertise:   rt["advertise"].(bool),
+				Metric:      rt["metric"].(int),
+			}
+
+			routeList = append(routeList, &route)
+		}
+		_, err := c.UpdateRoute(routeList)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
+		d.Set("last_updated", time.Now().Format(time.RFC850))
+
+	}
+
+	return resourceRoutesRead(ctx, d, m)
 }
 
 func resourceRoutesDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {

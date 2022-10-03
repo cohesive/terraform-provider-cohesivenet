@@ -28,10 +28,12 @@ output "all_config" {
   value = data.cohesivenet_vns3_config.config
 }
 
-data "cohesivenet_container_network" all {}
+data "data_source_vns3_container_network" all {}
 
 output "all_container_networks" {
-  value = data.cohesivenet_vns3_container_network.all }
+  value = data.cohesivenet_vns3_container_network.all 
+  }
+
 
 data "cohesivenet_vns3_routes" route {}
 
@@ -45,7 +47,7 @@ output "all_rules" {
    value = data.cohesivenet_firewall.rules
 }
 */
-
+/*
  resource "cohesivenet_vns3_ipsec_endpoints" "endpoint_vf" {
   endpoint {
       name = "cohesive_to_watford_secondary"
@@ -67,7 +69,7 @@ output "all_rules" {
  output "endpoint_vf_id" {
     value = cohesivenet_vns3_ipsec_endpoints.endpoint_vf.id
 }
-
+/*
   resource "cohesivenet_vns3_ipsec_endpoints" "endpoint_vf2" {
   endpoint {
       name = "cohesive_to_workload_secondary"
@@ -142,28 +144,28 @@ output "all_rules" {
  output "endpoint_vf4_id" {
     value = cohesivenet_vns3_ipsec_endpoints.endpoint_vf4.id
 }
-
-
+*/
+/*
 resource "cohesivenet_vns3_ipsec_ebpg_peers" "peer" {
   endpoint_id = cohesivenet_vns3_ipsec_endpoints.endpoint_vf.id
   ebgp_peer {
     ipaddress = "169.254.164.204"
     asn = 64512
     local_asn_alias = 65000
-    access_list = "in permit 1.2.3.4/32,in permit 11.22.33.42/32,out permit 11.12.13.14/32"
+    //access_list = "in permit any"
+    //access_list = "in permit any, out permit any"
+    access_list = "in permit 1.2.3.4/32, in permit 11.22.33.42/32, out permit 11.12.13.14/32"
     bgp_password = "password"
     add_network_distance = true
     add_network_distance_direction = "in"
     add_network_distance_hops = 10
   }
       depends_on = [
-        cohesivenet_vns3_ipsec_endpoints.endpoint_vf,
-        cohesivenet_vns3_ipsec_endpoints.endpoint_vf2,
-        cohesivenet_vns3_ipsec_endpoints.endpoint_vf3,
-        cohesivenet_vns3_ipsec_endpoints.endpoint_vf4,
+        cohesivenet_vns3_ipsec_endpoints.endpoint_vf
     ]
 }
-
+*/
+/*
 
 resource "cohesivenet_vns3_ipsec_ebpg_peers" "peer2" {
   endpoint_id = cohesivenet_vns3_ipsec_endpoints.endpoint_vf2.id
@@ -225,7 +227,7 @@ resource "cohesivenet_vns3_ipsec_ebpg_peers" "peer4" {
         cohesivenet_vns3_ipsec_endpoints.endpoint_vf4,
     ]
 }
-
+*/
 
 
 
@@ -241,7 +243,7 @@ resource "cohesivenet_vns3_ipsec_ebpg_peers" "peer4" {
   }
  }
 */
-/*
+
 variable "routes_map" {
   description = "Map of routes"
   type        = map(any)
@@ -249,7 +251,7 @@ variable "routes_map" {
   default = {
   "route": {
     "cidr": "192.168.54.102/32",
-    "description": "cohesive_to_watford_secondary",
+    "description": "cohesive_to_watford_one",
     "interface": "",
     "gateway": "",
     "advertise": true,
@@ -257,7 +259,7 @@ variable "routes_map" {
   },
   "route2": {
     "cidr": "192.168.54.112/32",
-    "description": "cohesive_to_watford_secondary",
+    "description": "cohesive_to_watford_two",
     "interface": "",
     "gateway": "",
     "advertise": true,
@@ -265,7 +267,7 @@ variable "routes_map" {
   },
   "route3": {
     "cidr": "192.168.54.113/32",
-    "description": "cohesive_to_watford_secondary",
+    "description": "cohesive_to_watford_three",
     "interface": "",
     "gateway": "",
     "advertise": true,
@@ -273,7 +275,7 @@ variable "routes_map" {
   }
 }
 }
-*/
+
 /*
 variable "routes_map" {
   description = "Map of routes"
@@ -291,7 +293,7 @@ variable "routes_map" {
 }
 }
 */
-/*
+
 resource "cohesivenet_vns3_routes" "route-map" {
   dynamic route {
     for_each = var.routes_map
@@ -303,7 +305,7 @@ resource "cohesivenet_vns3_routes" "route-map" {
     }
   }
 }
-*/
+
 /*
 routes_map = {
   "route": {
@@ -414,7 +416,7 @@ resource "cohesivenet_vns3_plugin_images" "image" {
     description = "test-tf-ha-description"
   }
  }
-
+ 
  resource "cohesivenet_vns3_plugin_images" "nlb" {
   image {
     image_name = "test-tf-st-lb-plugin"
