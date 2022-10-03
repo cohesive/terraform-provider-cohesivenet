@@ -205,7 +205,7 @@ func buildLicenseParamsRequest(d *schema.ResourceData) (*cn.SetLicenseParameters
 		if hasAsns {
 			asns := []string{}
 			for _, asnAny := range asnsL {
-				asns = append(asns, asnAny.(string))
+				asns = append(asns, strconv.Itoa(asnAny.(int)))
 			}
 			licenseParamsRequest.SetAsns(
 				strings.Join(asns, " "),
