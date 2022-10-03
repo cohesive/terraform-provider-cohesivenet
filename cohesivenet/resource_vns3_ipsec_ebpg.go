@@ -166,7 +166,7 @@ func resourceEbgpUpdate(ctx context.Context, d *schema.ResourceData, m interface
 			Ipaddress:                   bgp["ipaddress"].(string),
 			Asn:                         bgp["asn"].(int),
 			LocalAsnAlias:               bgp["local_asn_alias"].(int),
-			AccessList:                  bgp["access_list"].(string),
+			AccessList:                  strings.Replace(bgp["access_list"].(string), ",", "\n", -1),
 			AddNetworkDistanceHops:      bgp["add_network_distance_hops"].(int),
 			BgpPassword:                 bgp["bgp_password"].(string),
 			AddNetworkDistance:          bgp["add_network_distance"].(bool),
