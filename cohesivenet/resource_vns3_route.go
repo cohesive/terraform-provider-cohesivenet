@@ -31,13 +31,11 @@ func resourceRoutes() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"cidr": &schema.Schema{
 							Type:     schema.TypeString,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
 						"id": &schema.Schema{
 							Type:     schema.TypeInt,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
@@ -48,19 +46,16 @@ func resourceRoutes() *schema.Resource {
 						},
 						"advertise": &schema.Schema{
 							Type:     schema.TypeBool,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
 						"metric": &schema.Schema{
 							Type:     schema.TypeInt,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
 						"enabled": &schema.Schema{
 							Type:     schema.TypeBool,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
@@ -80,19 +75,16 @@ func resourceRoutes() *schema.Resource {
 						},
 						"interface": &schema.Schema{
 							Type:     schema.TypeString,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
 						"gateway": &schema.Schema{
 							Type:     schema.TypeString,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
 						"tunnel": &schema.Schema{
 							Type:     schema.TypeInt,
-							ForceNew: true,
 							Optional: true,
 							Computed: true,
 						},
