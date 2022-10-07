@@ -60,7 +60,7 @@ func resourceHttpsCertsUpdate(ctx context.Context, d *schema.ResourceData, m int
 
 	return diags
 
-	//return resourceSslCertsRead(ctx, d, m)
+	//return resourceHttpsCertsRead(ctx, d, m)
 }
 
 func resourceHttpsCertsDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
