@@ -8,12 +8,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceSslCerts() *schema.Resource {
+func resourceHttpsCerts() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceSslCertsCreate,
-		ReadContext:   resourceSslCertsRead,
-		UpdateContext: resourceSslCertsUpdate,
-		DeleteContext: resourceSslCertsDelete,
+		CreateContext: resourceHttpsCertsCreate,
+		ReadContext:   resourceHttpsCertsRead,
+		UpdateContext: resourceHttpsCertsUpdate,
+		DeleteContext: resourceHttpsCertsDelete,
 		Schema: map[string]*schema.Schema{
 			"cert_file": &schema.Schema{
 				Type:     schema.TypeString,
@@ -30,7 +30,7 @@ func resourceSslCerts() *schema.Resource {
 	}
 }
 
-func resourceSslCertsCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceHttpsCertsCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
 
 	var diags diag.Diagnostics
@@ -38,7 +38,7 @@ func resourceSslCertsCreate(ctx context.Context, d *schema.ResourceData, m inter
 	cert_file := d.Get("cert_file").(string)
 	key_file := d.Get("key_file").(string)
 
-	response, err := c.UpdateSslCerts(cert_file, key_file)
+	response, err := c.UpdateHttpsCerts(cert_file, key_file)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -48,14 +48,14 @@ func resourceSslCertsCreate(ctx context.Context, d *schema.ResourceData, m inter
 
 }
 
-func resourceSslCertsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceHttpsCertsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	var diags diag.Diagnostics
 
 	return diags
 }
 
-func resourceSslCertsUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceHttpsCertsUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	return diags
@@ -63,7 +63,7 @@ func resourceSslCertsUpdate(ctx context.Context, d *schema.ResourceData, m inter
 	//return resourceSslCertsRead(ctx, d, m)
 }
 
-func resourceSslCertsDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceHttpsCertsDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	return diags

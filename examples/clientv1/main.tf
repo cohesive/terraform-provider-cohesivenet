@@ -463,7 +463,7 @@ variable "vns3_license_key_file" {
   default = "/Users/scott/vns_cert.key"
 }
 
-resource "cohesivenet_vns3_ssl_certs" "certs" {
+resource "cohesivenet_vns3_https_certs" "certs" {
   cert_file = var.vns3_license_cert_file
   key_file = var.vns3_license_key_file
 }
