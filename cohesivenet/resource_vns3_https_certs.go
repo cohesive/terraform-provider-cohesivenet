@@ -16,15 +16,13 @@ func resourceHttpsCerts() *schema.Resource {
 		DeleteContext: resourceHttpsCertsDelete,
 		Schema: map[string]*schema.Schema{
 			"cert_file": &schema.Schema{
-				Type:     schema.TypeString,
-				ForceNew: true,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				ForceNew:    true,
+				Description: "File path to certificate",
 			},
 			"key_file": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "File path to private key",
 			},
 		},
 	}

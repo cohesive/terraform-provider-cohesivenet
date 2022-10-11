@@ -11,8 +11,8 @@ terraform {
 provider "cohesivenet" {
   username = "vnscubed"
   password = "vnscontroller!"
-  token = "771c844ecf0a2e0a9dd2c2a3071cfa7c1a06d7eed1f8664ce0995ec1b0824bee"
-  host = "https://3.127.171.216:8000/api"
+  token    = "771c844ecf0a2e0a9dd2c2a3071cfa7c1a06d7eed1f8664ce0995ec1b0824bee"
+  host     = "https://3.127.171.216:8000/api"
 }
 
 /*
@@ -47,7 +47,7 @@ output "all_rules" {
    value = data.cohesivenet_firewall.rules
 }
 
-
+*/
  resource "cohesivenet_vns3_ipsec_endpoints" "endpoint_vf" {
   endpoint {
       name = "cohesive_to_watford_secondary"
@@ -57,7 +57,7 @@ output "all_rules" {
       pfs = true
       ike_version = 2
       nat_t_enabled = true
-      extra_config = "phase1=aes256-sha2_256-dh16"
+      extra_config = "phase1=aes256-sha2_256-dh16 phase2=aes256-sha2_256"
       vpn_type = "vti"
       route_based_int_address = "169.254.164.178/30"
       route_based_local =  "10.18.0.64/26"
@@ -65,7 +65,7 @@ output "all_rules" {
     }
     
  }
-
+/*
  output "endpoint_vf_id" {
     value = cohesivenet_vns3_ipsec_endpoints.endpoint_vf.id
 }
@@ -453,17 +453,18 @@ resource "cohesivenet_vns3_plugin_images" "image" {
  }
 */
 
-
+/*
 variable "vns3_license_cert_file" {
-    # ADD PATH TO YOUR CERT FILE
+  # ADD PATH TO YOUR CERT FILE
   default = "/Users/scott/vns_cert.pem"
 }
 variable "vns3_license_key_file" {
-    # ADD PATH TO YOUR KEY FILE
+  # ADD PATH TO YOUR KEY FILE
   default = "/Users/scott/vns_cert.key"
 }
 
 resource "cohesivenet_vns3_https_certs" "certs" {
   cert_file = var.vns3_license_cert_file
-  key_file = var.vns3_license_key_file
+  key_file  = var.vns3_license_key_file
 }
+*/
