@@ -3,12 +3,35 @@
 page_title: "cohesivenet_vns3_ipsec_endpoints Resource - terraform-provider-cohesivenet"
 subcategory: ""
 description: |-
-  
+  Creates IPsec endpoint.
 ---
 
 # cohesivenet_vns3_ipsec_endpoints (Resource)
 
+Creates IPsec endpoint.
 
+## Example Usage
+```terraform
+  resource "vns3_ipsec_endpoints" "endpoint" {
+  endpoint {
+      name = "endpoint_name"
+      description = "endpoint_description"
+      ipaddress = "123.123.123.123"
+      secret =  "psk"
+      pfs = true 
+      ike_version = 2
+      nat_t_enabled = true 
+      extra_config = "phase1=aes256-sha2_256-dh16, phase2=aes256-sha2_256-dh16"
+      vpn_type = "vti"
+      route_based_int_address = "169.254.32.186/30"
+      route_based_local =  "0.0.0.0/0"
+      route_based_remote = "0.0.0.0/0"
+      }
+        depends_on = [
+          cohesivenet_vns3_ipsec_endpoints.endpoint
+    ]
+ }
+```
 
 
 
@@ -21,8 +44,6 @@ description: |-
 
 ### Optional
 
-- `last_updated` (String)
-
 ### Read-Only
 
 - `id` (String) The ID of this resource.
@@ -32,20 +53,20 @@ description: |-
 
 Required:
 
-- `ipaddress` (String) IP address or remote device
-- `name` (String) Name for new endpoint
-- `secret` (String) Pre-shared key for IPSec connection
+- `ipaddress` (String) IP address or remote device.
+- `name` (String) Name for new endpoint.
+- `secret` (String) Pre-shared key for IPSec connection.
 
 Optional:
 
-- `description` (String) Description of new endpoint
-- `extra_config` (String) IPsec extra parameter settings for auth and encryption
-- `ike_version` (Number) IKE version
-- `nat_t_enabled` (Boolean) Perfect Forward Secrecy setting. Default: false
-- `pfs` (Boolean) Perfect Forward Secrecy setting. Default: false
-- `route_based_int_address` (String) If VTI or GRE a /30 address for the virtual interface
-- `route_based_local` (String) Local subnet of IPsec tunnel
-- `route_based_remote` (String) Remote subnet of IPsec tunnel
-- `vpn_type` (String) Type of VPN connection. VTI or GRE
+- `description` (String) Description of new endpoint.
+- `extra_config` (String) IPsec extra parameter settings for auth and encryption.
+- `ike_version` (Number) IKE version.
+- `nat_t_enabled` (Boolean) Perfect Forward Secrecy setting. Default: false.
+- `pfs` (Boolean) Perfect Forward Secrecy setting. Default: false.
+- `route_based_int_address` (String) If VTI or GRE a /30 address for the virtual interface.
+- `route_based_local` (String) Local subnet of IPsec tunnel.
+- `route_based_remote` (String) Remote subnet of IPsec tunnel.
+- `vpn_type` (String) Type of VPN connection. VTI or GRE.
 
 

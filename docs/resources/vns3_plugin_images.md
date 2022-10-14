@@ -3,12 +3,28 @@
 page_title: "cohesivenet_vns3_plugin_images Resource - terraform-provider-cohesivenet"
 subcategory: ""
 description: |-
-  
+  Imports a plugin image in the VNS3 controller.
 ---
 
 # cohesivenet_vns3_plugin_images (Resource)
 
+Imports a plugin image in the VNS3 controller.
 
+## Example Usage
+```terraform
+resource "vns3_plugin_images" "image" {
+  image {
+    image_name = "test-tf-plugin"
+    url  = ""
+    uildurl = ""
+    localbuild = ""
+    localimage = ""
+    imagefile = ""
+    buildfile = ""
+    description = "test-tf-plugin-description"
+  }
+ }
+```
 
 
 
@@ -21,8 +37,6 @@ description: |-
 
 ### Optional
 
-- `last_updated` (String)
-
 ### Read-Only
 
 - `id` (String) The ID of this resource.
@@ -32,28 +46,28 @@ description: |-
 
 Required:
 
-- `name` (String) Name of deployed image
+- `name` (String) Name of deployed image.
 
 Optional:
 
-- `buildfile` (String) Upload docker file or zipped docker context directory
-- `buildurl` (String) URL of a dockerfile that will be used to build the image
-- `comment` (String) Comment
-- `created` (String) State of imgae
-- `description` (String) Description of deployed image
-- `id` (String) Id of deployed image
-- `image_name` (String) Name applied to uploaded image
-- `imagefile` (String) Upload image file
-- `import_uuid` (String) Uuid of imported image
-- `localbuild` (String) Local build file to create new image
-- `localimage` (String) Local image to tag
-- `status` (String) Current status of upload
-- `status_msg` (String) Status response
-- `tag_name` (String) Image Tag
-- `url` (String) URL of the image file to be imported
+- `buildfile` (String) Upload docker file or zipped docker context directory.
+- `buildurl` (String) URL of a dockerfile that will be used to build the image.
+- `comment` (String) Comment.
+- `created` (String) State of image.
+- `description` (String) Description of deployed image.
+- `id` (String) Id of deployed image.
+- `image_name` (String) Name applied to uploaded image.
+- `imagefile` (String) Upload image file.
+- `import_uuid` (String) Uuid of imported image.
+- `localbuild` (String) Local build file to create new image.
+- `localimage` (String) Local image to tag.
+- `status` (String) Current status of upload.
+- `status_msg` (String) Status response.
+- `tag_name` (String) Image Tag.
+- `url` (String) URL of the image file to be imported.
 
 Read-Only:
 
-- `import_id` (String) Initial import Id
+- `import_id` (String) Initial import Id.
 
 

@@ -98,7 +98,7 @@ func resourcePluginImage() *schema.Resource {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Computed:    true,
-							Description: "State of imgae",
+							Description: "State of image",
 						},
 						"tag_name": &schema.Schema{
 							Type:        schema.TypeString,
