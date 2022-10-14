@@ -148,7 +148,6 @@ func resourceRoutesRead(ctx context.Context, d *schema.ResourceData, m interface
 	flatRoutes := flattenRouteData(routesResponse)
 
 	d.Set("route", flatRoutes)
-	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
 	return diags
 }
 
@@ -177,7 +176,6 @@ func resourceRoutesUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 			return diag.FromErr(err)
 		}
 
-		d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
 		d.Set("last_updated", time.Now().Format(time.RFC850))
 
 	}
