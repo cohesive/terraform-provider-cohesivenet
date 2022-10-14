@@ -243,7 +243,7 @@ resource "cohesivenet_vns3_ipsec_ebpg_peers" "peer4" {
   }
  }
 */
-/*
+
 variable "routes_map" {
   description = "Map of routes"
   type        = map(any)
@@ -275,7 +275,7 @@ variable "routes_map" {
   }
 }
 }
-*/
+
 /*
 variable "routes_map" {
   description = "Map of routes"
@@ -293,7 +293,7 @@ variable "routes_map" {
 }
 }
 */
-/*
+
 resource "cohesivenet_vns3_routes" "route-map" {
   dynamic route {
     for_each = var.routes_map
@@ -305,7 +305,7 @@ resource "cohesivenet_vns3_routes" "route-map" {
     }
   }
 }
-*/
+
 /*
 routes_map = {
   "route": {
@@ -453,7 +453,7 @@ resource "cohesivenet_vns3_plugin_images" "image" {
  }
 */
 
-
+/*
 variable "vns3_license_cert_file" {
     # ADD PATH TO YOUR CERT FILE
   default = "/Users/scott/vns_cert.pem"
@@ -467,3 +467,4 @@ resource "cohesivenet_vns3_https_certs" "certs" {
   cert_file = var.vns3_license_cert_file
   key_file = var.vns3_license_key_file
 }
+*/
