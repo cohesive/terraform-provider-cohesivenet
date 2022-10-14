@@ -26,10 +26,6 @@ data "cohesivenet_vns3_routes" route {}
 
 data "cohesivenet_vns3_firewall" rules {}
 
-output "all_rules" {
-   value = data.cohesivenet_firewall.rules
-}
-
  resource "cohesivenet_vns3_ipsec_endpoints" "endpoint_1" {
   endpoint {
       name = "cohesive_to_peer"
@@ -49,7 +45,7 @@ output "all_rules" {
  }
 
 resource "cohesivenet_vns3_ipsec_ebpg_peers" "peer" {
-  endpoint_id = cohesivenet_vns3_ipsec_endpoints.endpoint_vf.id
+  endpoint_id = cohesivenet_vns3_ipsec_endpoints.endpoint_1.id
   ebgp_peer {
     ipaddress = "169.254.164.204"
     asn = 64512
@@ -61,28 +57,7 @@ resource "cohesivenet_vns3_ipsec_ebpg_peers" "peer" {
     add_network_distance_hops = 10
   }
       depends_on = [
-        cohesivenet_vns3_ipsec_endpoints.endpoint_vf
-    ]
-}
-
-
-resource "cohesivenet_vns3_ipsec_ebpg_peers" "peer4" {
-  endpoint_id = cohesivenet_vns3_ipsec_endpoints.endpoint_vf4.id
-  ebgp_peer {
-    ipaddress = "169.254.164.201"
-    asn = 64512
-    local_asn_alias = 65007
-    access_list = "in permit any"
-    bgp_password = "password"
-    add_network_distance = true
-    add_network_distance_direction = "in"
-    add_network_distance_hops = 10
-  }
-    depends_on = [
-        cohesivenet_vns3_ipsec_endpoints.endpoint_vf,
-        cohesivenet_vns3_ipsec_endpoints.endpoint_vf2,
-        cohesivenet_vns3_ipsec_endpoints.endpoint_vf3,
-        cohesivenet_vns3_ipsec_endpoints.endpoint_vf4,
+        cohesivenet_vns3_ipsec_endpoints.endpoint_1
     ]
 }
 
