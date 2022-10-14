@@ -69,17 +69,18 @@ resource "cohesivenet_vns3_ipsec_ebpg_peers" "peer" {
 
 resource "cohesivenet_vns3_routes" "route" {
   route {
-    cidr = "192.168.54.34/24"
+    cidr = "192.168.54.0/24"
     description = "cohesive_to_peer"
-    interface = "tun0"
-    gateway = "192.168.54.1/32"
+    interface = ""
+    gateway = "192.168.54.0/24"
     advertise = true
     metric = 300
   }
  }
 
 
-/* Example of how to use a map of routes
+// Example of how to use a map of routes
+/*
 resource "cohesivenet_vns3_routes" "route-map" {
   dynamic route {
     for_each = var.routes_map
@@ -92,7 +93,6 @@ resource "cohesivenet_vns3_routes" "route-map" {
   }
 }
 */
-
 
 resource "cohesivenet_vns3_firewall_rules" "rule" {
   rule {
