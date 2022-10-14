@@ -34,7 +34,7 @@ func resourceRoutes() *schema.Resource {
 							Description: "CIDR of route",
 						},
 						"id": &schema.Schema{
-							Type:        schema.TypeInt,
+							Type:        schema.TypeString,
 							Optional:    true,
 							Computed:    true,
 							Description: "Id of created route",

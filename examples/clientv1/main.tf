@@ -12,7 +12,7 @@ provider "cohesivenet" {
   username = "vnscubed"
   password = ""
   token = ""
-  host = "https://hostname:8000/api"
+  host = "https://host:8000/api"
 }
 
 data "cohesivenet_vns3_route" all {}
@@ -39,7 +39,7 @@ resource "cohesivenet_vns3_ipsec_endpoints" "endpoint_1" {
       pfs = true
       ike_version = 2
       nat_t_enabled = true
-      extra_config = "phase1=aes256-sha2_256-dh16 phase2=aes256-sha2_256"
+      extra_config = "phase1=aes256-sha2_256-dh16, phase2=aes256-sha2_256"
       vpn_type = "vti"
       route_based_int_address = "169.254.164.178/30"
       route_based_local =  "0.0.0.0/0"
@@ -69,17 +69,18 @@ resource "cohesivenet_vns3_ipsec_ebpg_peers" "peer" {
 
 resource "cohesivenet_vns3_routes" "route" {
   route {
-    cidr = "192.168.54.34/24"
-    description = "cohesive_to_watford_secondary"
-    interface = "tun0"
-    gateway = "192.168.54.1/32"
+    cidr = "192.168.54.0/24"
+    description = "cohesive_to_peer"
+    interface = ""
+    gateway = "192.168.54.0/24"
     advertise = true
     metric = 300
   }
  }
 
 
-/* Example of how to use a map of routes
+// Example of how to use a map of routes
+/*
 resource "cohesivenet_vns3_routes" "route-map" {
   dynamic route {
     for_each = var.routes_map
@@ -92,7 +93,6 @@ resource "cohesivenet_vns3_routes" "route-map" {
   }
 }
 */
-
 
 resource "cohesivenet_vns3_firewall_rules" "rule" {
   rule {
@@ -115,8 +115,8 @@ resource "cohesivenet_vns3_firewall_rules" "rule-map" {
 
 resource "cohesivenet_vns3_plugin_images" "image" {
   image {
-    name = "test-tf-st-plugin"
-    url  = "https://vns3-containers-read-all.s3.amazonaws.com/HA_Container/haplugin-pm.tar.gz"
+    image_name = "test-tf-st-plugin"
+    url  = "https://cohesive-networks-plugins.s3.amazonaws.com/plugins/vns3-high-availability/vns3-high-availability.pm.v2.2.1.tgz"
     //uildurl =
     //localbuild =
     //localimage =
@@ -133,9 +133,9 @@ resource "cohesivenet_vns3_plugin_images" "image" {
     ip_address =  "198.51.100.11"
     description = "plugindescription"
     command = "/usr/bin/supervisord"
-    environment = "HAENV_MODE=primary,HAENV_CLOUD=aws,HAENV_PEER_PUBLIC_IP=3.127.171.216,HAENV_SLEEP_TIME=15"
+    environment = ""
     
-    //depends_on = [ cohesivenet_vns3_plugin_images.image ]
+    depends_on = [ cohesivenet_vns3_plugin_images.image ]
  }
 
 /*

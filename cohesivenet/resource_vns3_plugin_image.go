@@ -32,7 +32,7 @@ func resourcePluginImage() *schema.Resource {
 							Computed:    true,
 							Description: "Id of deployed image",
 						},
-						"name": &schema.Schema{
+						"image_name": &schema.Schema{
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Name of deployed image",
@@ -71,11 +71,6 @@ func resourcePluginImage() *schema.Resource {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Description: "Description of deployed image",
-						},
-						"image_name": &schema.Schema{
-							Type:        schema.TypeString,
-							Optional:    true,
-							Description: "Name applied to uploaded image",
 						},
 						"status": &schema.Schema{
 							Type:        schema.TypeString,
