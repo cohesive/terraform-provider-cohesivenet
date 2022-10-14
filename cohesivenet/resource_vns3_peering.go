@@ -2,15 +2,14 @@ package cohesivenet
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
-	"fmt"
 
 	cn "github.com/cohesive/cohesivenet-client-go/cohesivenet"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
-
 
 func resourceVns3Peering() *schema.Resource {
 	return &schema.Resource{
@@ -28,7 +27,7 @@ func resourceVns3Peering() *schema.Resource {
 				Type:     schema.TypeSet,
 				MaxItems: 1,
 				Optional: true,
-				Elem:     &schema.Resource{
+				Elem: &schema.Resource{
 					Schema: getVns3AuthSchema(),
 				},
 			},
@@ -36,19 +35,22 @@ func resourceVns3Peering() *schema.Resource {
 				Type:     schema.TypeSet,
 				MinItems: 1,
 				Optional: true,
-				Elem:     &schema.Resource{
+				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"address": &schema.Schema{
-							Type:    schema.TypeString,
-							Required: true,
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "IP address or DNS name of remote peer",
 						},
 						"peer_id": &schema.Schema{
-							Type:    schema.TypeInt,
-							Required: true,
+							Type:        schema.TypeInt,
+							Required:    true,
+							Description: "Peer id in topology",
 						},
 						"overlay_mtu": &schema.Schema{
-							Type:    schema.TypeInt,
-							Optional: true,
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "MTU overide for peering link",
 						},
 					},
 				},
@@ -82,7 +84,6 @@ func deleteAllPeers(ctx context.Context, vns3 *cn.VNS3Client) (*cn.PeersDetail, 
 
 	return getPeeringStatus(ctx, vns3)
 }
-
 
 func createAllPeers(ctx context.Context, d *schema.ResourceData, vns3 *cn.VNS3Client) []string {
 	peersSet, _ := d.Get("peer").(*schema.Set)
@@ -164,13 +165,12 @@ func resourcePeeringRead(ctx context.Context, d *schema.ResourceData, m interfac
 
 	for _, peer := range peerDetail.GetManagers() {
 		if !peer.GetSelf() {
-			vns3.Log.Info(fmt.Sprintf("Read peer id=%v name=%v mtu=%v", peer.GetId(), peer.GetAddress(), peer.GetMtu()))	
+			vns3.Log.Info(fmt.Sprintf("Read peer id=%v name=%v mtu=%v", peer.GetId(), peer.GetAddress(), peer.GetMtu()))
 		}
 	}
 
 	return diags
 }
-
 
 func resourcePeeringUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
@@ -191,7 +191,6 @@ func resourcePeeringUpdate(ctx context.Context, d *schema.ResourceData, m interf
 
 	return diags
 }
-
 
 func resourcePeeringDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	// Warning or errors can be collected in a slice type

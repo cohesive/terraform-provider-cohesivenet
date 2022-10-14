@@ -24,34 +24,34 @@ func resourceVns3PluginInstances() *schema.Resource {
 				Computed: true,
 			},
 			"name": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Name of instance",
 			},
 			"plugin_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Id of instance",
 			},
 			"description": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Description of instance",
 			},
 			"ip_address": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "IP address of deployed image",
 			},
 			"command": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Command used to start instance",
 			},
 			"environment": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Environment variables used when launching instance",
 			},
 		},
 	}
@@ -70,13 +70,6 @@ func resourcePluginInstanceCreate(ctx context.Context, d *schema.ResourceData, m
 	environment := d.Get("environment").(string)
 
 	in := cn.CreatePluginInstance{
-
-		//Name:        name,
-		//PluginID:    plugin_id,
-		//Description: description,
-		//IPAddress:   ip_address,
-		//Command:     command,
-
 		Name:        name,
 		ImageUUID:   plugin_id,
 		Description: description,
@@ -91,8 +84,6 @@ func resourcePluginInstanceCreate(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	id := instanceResponse.Instance.UUID
-	//fmt.Println(id)
-	//d.SetId(strconv.Itoa(id))
 	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
 	d.SetId(id)
 
@@ -100,15 +91,6 @@ func resourcePluginInstanceCreate(ctx context.Context, d *schema.ResourceData, m
 
 	return diags
 }
-
-/*
-func resourcePluginInstanceRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	// Warning or errors can be collected in a slice type
-	var diags diag.Diagnostics
-
-	return diags
-}
-*/
 
 func resourcePluginInstanceRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
@@ -126,14 +108,6 @@ func resourcePluginInstanceRead(ctx context.Context, d *schema.ResourceData, m i
 
 	fmt.Println(instance)
 
-	//d.Set("name", instance[0].([]interface{})["Hostname"].(string))
-	//d.Set("ip_address", instance[0].(map[string]interface{})["ipaddress"].(string))
-	//d.Set("command", instance[0].(map[string]interface{})["path"].(string))
-	//if err := d.Set("command", instance); err != nil {
-	//	return diag.FromErr(err)
-	//}
-	//d.SetId(routeResponse.Routes[0].ID)
-
 	d.SetId(instanceUuid)
 
 	return diags
@@ -143,15 +117,6 @@ func resourcePluginInstanceUpdate(ctx context.Context, d *schema.ResourceData, m
 	return resourcePluginImageRead(ctx, d, m)
 }
 
-/*
-func resourcePluginInstanceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	// Warning or errors can be collected in a slice type
-	var diags diag.Diagnostics
-	d.SetId("")
-
-	return diags
-}
-*/
 func resourcePluginInstanceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
 
@@ -169,28 +134,8 @@ func resourcePluginInstanceDelete(ctx context.Context, d *schema.ResourceData, m
 	return diags
 }
 
-/*
-func resourcePluginInstanceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
-
-	var diags diag.Diagnostics
-
-	image := d.Get("image").([]interface{})[0]
-	imageId := image.(map[string]interface{})
-	id := imageId["id"].(string)
-
-	err := c.DeleteImage(id)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	d.SetId("")
-
-	return diags
-}
-*/
 func flattenPluginInstanceData(instanceResponse cn.InstanceResponse) []interface{} {
-	instance := make([]interface{}, len(instanceResponse.Instances), len(instanceResponse.Instances))
+	instance := make([]interface{}, len(instanceResponse.Instances))
 
 	for _, ir := range instanceResponse.Instances {
 		row := make(map[string]interface{})

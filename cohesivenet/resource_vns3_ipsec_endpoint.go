@@ -24,70 +24,73 @@ func resourceEndpoints() *schema.Resource {
 				Computed: true,
 			},
 			"endpoint": &schema.Schema{
-				Type:     schema.TypeList,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeList,
+				Required:    true,
+				Description: "Nested block for endpoint attributes",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Name for new endpoint",
 						},
 						"description": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							Description: "Description of new endpoint",
 						},
 						"ipaddress": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "IP address or remote device",
 						},
 						"secret": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Pre-shared key for IPSec connection",
 						},
 						"pfs": &schema.Schema{
-							Type:     schema.TypeBool,
-							Optional: true,
-							Computed: true,
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							Description: "Perfect Forward Secrecy setting. Default: false",
 						},
 						"ike_version": &schema.Schema{
-							Type:     schema.TypeInt,
-							Optional: true,
-							Computed: true,
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "IKE version",
 						},
 						"nat_t_enabled": &schema.Schema{
-							Type:     schema.TypeBool,
-							Optional: true,
-							Computed: true,
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							Description: "Perfect Forward Secrecy setting. Default: false",
 						},
 						"extra_config": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "IPsec extra parameter settings for auth and encryption",
 						},
 						"vpn_type": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "Type of VPN connection. VTI or GRE",
 						},
 						"route_based_int_address": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "If VTI or GRE a /30 address for the virtual interface",
 						},
 						"route_based_local": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "Local subnet of IPsec tunnel",
 						},
 						"route_based_remote": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "Remote subnet of IPsec tunnel",
 						},
 					},
 				},
@@ -208,7 +211,7 @@ func resourceEndpointsDelete(ctx context.Context, d *schema.ResourceData, m inte
 }
 
 func flattenEndpointData(newEndpoint cn.NewEndpoint) []interface{} {
-	endpoint := make([]interface{}, 1, 1)
+	endpoint := make([]interface{}, 1)
 	row := make(map[string]interface{})
 
 	row["name"] = newEndpoint.Response.Name

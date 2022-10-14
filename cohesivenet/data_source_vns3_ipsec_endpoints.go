@@ -20,36 +20,44 @@ func dataSourceEndpoints() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"local_subnet": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Local subnet of tunnel",
 						},
 						"remote_subnet": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Remote subnet of tunnel",
 						},
 						"endpointid": &schema.Schema{
-							Type:     schema.TypeInt,
-							Computed: true,
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "IP of remote peer",
 						},
 						"endpoint_name": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Local name of endpoint",
 						},
 						"active": &schema.Schema{
-							Type:     schema.TypeBool,
-							Computed: true,
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Active flag",
 						},
 						"enabled": &schema.Schema{
-							Type:     schema.TypeBool,
-							Computed: true,
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Enabled flag",
 						},
 						"description": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Local description of endpoint",
 						},
 						"connected": &schema.Schema{
-							Type:     schema.TypeBool,
-							Computed: true,
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Connected flag",
 						},
 					},
 				},
@@ -61,7 +69,6 @@ func dataSourceEndpoints() *schema.Resource {
 func dataSourceEndpointsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
 
-	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
 	endpointResponse, err := c.GetEndpoints()
@@ -77,7 +84,6 @@ func dataSourceEndpointsRead(ctx context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(err)
 	}
 
-	// always run
 	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
 
 	return diags
@@ -85,7 +91,7 @@ func dataSourceEndpointsRead(ctx context.Context, d *schema.ResourceData, m inte
 
 func flattenEndpoints(endpointResponse map[string]interface{}) interface{} {
 	if endpointResponse != nil {
-		endpoints := make([]interface{}, len(endpointResponse), len(endpointResponse))
+		endpoints := make([]interface{}, len(endpointResponse))
 
 		i := 0
 		for _, rt := range endpointResponse {

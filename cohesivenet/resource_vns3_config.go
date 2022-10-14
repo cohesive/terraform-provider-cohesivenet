@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-	"time"
 	"strings"
+	"time"
 
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	cn "github.com/cohesive/cohesivenet-client-go/cohesivenet"
 	macros "github.com/cohesive/cohesivenet-client-go/cohesivenet/macros"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -30,81 +30,96 @@ func resourceVns3Config() *schema.Resource {
 				Type:     schema.TypeSet,
 				MaxItems: 1,
 				Optional: true,
-				Elem:     &schema.Resource{
+				Elem: &schema.Resource{
 					Schema: getVns3AuthSchema(),
 				},
 			},
 			"new_api_password": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Sensitive: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Sensitive:   true,
+				Description: "Sets user defined API password",
 			},
 			"new_ui_password": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Sensitive: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Sensitive:   true,
+				Description: "Sets user defined UI password",
 			},
 			"new_ui_username": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Sets user defined admin username",
 			},
 			"generate_token": &schema.Schema{
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Optionally creates API token",
 			},
 			"token_lifetime": &schema.Schema{
-				Type:     schema.TypeInt,
-				Optional: true,
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "Sets API token lifetime. A value > 0 will generate token",
 			},
 			"token_refresh": &schema.Schema{
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Sets API token refresh",
 			},
 			"license_file": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Path to VNS3 license file",
 			},
 			"topology_name": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Sets VNS3 topolgy name",
 			},
 			"controller_name": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Sets VNS3 controller name",
 			},
 			"license_params": &schema.Schema{
-				Type:     schema.TypeSet,
-				MaxItems: 1,
-				Optional: true,
-				ForceNew: true,
+				Type:        schema.TypeSet,
+				MaxItems:    1,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Nested block of configurable VNS3 license parameters",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"subnet": &schema.Schema{
-							Type:    schema.TypeString,
-							Optional: true,
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "Sets VNS3 overlay subnet",
 						},
 						"controllers": &schema.Schema{
-							Type:    schema.TypeList,
-							Optional: true,
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "Specifies number of controllers in topology",
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
 						},
 						"asns": &schema.Schema{
-							Type:    schema.TypeList,
-							Optional: true,
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "Sets VNS3 default ASNs",
 							Elem: &schema.Schema{
 								Type: schema.TypeInt,
 							},
 						},
 						"controller_vip": &schema.Schema{
-							Type:    schema.TypeString,
-							Optional: true,
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "Sets VNS3 VIP",
 						},
 						"clients": &schema.Schema{
-							Type:    schema.TypeList,
-							Optional: true,
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "Sets VNS3 overlay client addresses",
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -136,21 +151,25 @@ func resourceVns3Config() *schema.Resource {
 				},
 			},
 			"peer_id": &schema.Schema{
-				Type:     schema.TypeInt,
-				ForceNew: true,
-				Required: true,
+				Type:        schema.TypeInt,
+				ForceNew:    true,
+				Required:    true,
+				Description: "Sets VNS3 controllers peer id",
 			},
 			"topology_checksum": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Checksum",
 			},
 			"keyset_checksum": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Keyset checksum",
 			},
 			"token": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Token",
 			},
 			"new_auth_set": &schema.Schema{
 				Type:     schema.TypeBool,
@@ -226,7 +245,7 @@ func buildLicenseParamsRequest(d *schema.ResourceData) (*cn.SetLicenseParameters
 
 		clientsL := licenseParams["clients"].([]any)
 		hasClients := len(clientsL) > 0
-		
+
 		if hasClients {
 			clients := []string{}
 			for _, clientIpAny := range clientsL {
@@ -409,14 +428,14 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		}
 
 		setupReq := macros.SetupRequest{
-			TopologyName: topologyName,
+			TopologyName:   topologyName,
 			ControllerName: controllerName,
-			LicenseParams: licenseParamsRequest,
-			LicenseFile: licenseFile,
-			PeerId: peerId,
-			KeysetParams: keysetParamsRequest,
-			WaitTimeout: 60*10,
-			KeysetTimeout: 60*5,
+			LicenseParams:  licenseParamsRequest,
+			LicenseFile:    licenseFile,
+			PeerId:         peerId,
+			KeysetParams:   keysetParamsRequest,
+			WaitTimeout:    60 * 10,
+			KeysetTimeout:  60 * 5,
 		}
 
 		configDetail, setupErr := macros.SetupController(vns3, setupReq)

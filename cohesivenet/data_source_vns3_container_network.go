@@ -20,12 +20,14 @@ func dataSourceContainerNetwork() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"network": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "VNS3 plugin network subnet",
 						},
 						"running": &schema.Schema{
-							Type:     schema.TypeBool,
-							Computed: true,
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "VNS3 plugun network state",
 						},
 					},
 				},
@@ -37,7 +39,6 @@ func dataSourceContainerNetwork() *schema.Resource {
 func dataSourceContainerNetworkRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
 
-	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
 	containerResponse, err := c.GetContainerNetwork()
@@ -45,7 +46,7 @@ func dataSourceContainerNetworkRead(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	resp := make([]interface{}, 1, 1)
+	resp := make([]interface{}, 1)
 	row := make(map[string]interface{})
 
 	row["network"] = containerResponse.Response.Network
