@@ -211,7 +211,7 @@ func resourceEndpointsDelete(ctx context.Context, d *schema.ResourceData, m inte
 }
 
 func flattenEndpointData(newEndpoint cn.NewEndpoint) []interface{} {
-	endpoint := make([]interface{}, 1, 1)
+	endpoint := make([]interface{}, 1)
 	row := make(map[string]interface{})
 
 	row["name"] = newEndpoint.Response.Name

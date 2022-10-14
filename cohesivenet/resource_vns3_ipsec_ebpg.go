@@ -202,7 +202,7 @@ func resourceEbgpDelete(ctx context.Context, d *schema.ResourceData, m interface
 }
 
 func flattenEbgpData(newPeer cn.EbgpPeer) []interface{} {
-	epeer := make([]interface{}, 1, 1)
+	epeer := make([]interface{}, 1)
 	row := make(map[string]interface{})
 
 	row["ipaddress"] = newPeer.Ipaddress
