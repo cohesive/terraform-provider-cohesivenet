@@ -87,9 +87,10 @@ func resourceRoutes() *schema.Resource {
 							Description: "Specifies network gateway",
 						},
 						"tunnel": &schema.Schema{
-							Type:     schema.TypeInt,
-							Optional: true,
-							Computed: true,
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Computed:    true,
+							Description: "GRE endpoint id (if applicable)",
 						},
 					},
 				},
@@ -137,8 +138,6 @@ func resourceRoutesRead(ctx context.Context, d *schema.ResourceData, m interface
 
 	var diags diag.Diagnostics
 
-	//routeId := d.Id()
-
 	routesResponse, err := c.GetRoutes()
 	if err != nil {
 		return diag.FromErr(err)
@@ -151,11 +150,6 @@ func resourceRoutesRead(ctx context.Context, d *schema.ResourceData, m interface
 	return diags
 }
 
-/*
-func resourceRoutesUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	return resourceRoutesRead(ctx, d, m)
-}
-*/
 func resourceRoutesUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
 

@@ -35,38 +35,37 @@ func resourcePluginImage() *schema.Resource {
 						"name": &schema.Schema{
 							Type:        schema.TypeString,
 							Required:    true,
-							Computed:    true,
 							Description: "Name of deployed image",
 						},
 						"url": &schema.Schema{
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: "URL where image file is located",
+							Description: "URL of the image file to be imported",
 						},
 						"buildurl": &schema.Schema{
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: "URL where image file is located",
+							Description: "URL of a dockerfile that will be used to build the image",
 						},
 						"localbuild": &schema.Schema{
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: "URL where image file is located",
+							Description: "Local build file to create new image",
 						},
 						"localimage": &schema.Schema{
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: "URL where image file is located",
+							Description: "Local image to tag",
 						},
 						"imagefile": &schema.Schema{
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: "URL where image file is located",
+							Description: "Upload image file",
 						},
 						"buildfile": &schema.Schema{
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: "URL where image file is located",
+							Description: "Upload docker file or zipped docker context directory",
 						},
 						"description": &schema.Schema{
 							Type:        schema.TypeString,
@@ -76,48 +75,48 @@ func resourcePluginImage() *schema.Resource {
 						"image_name": &schema.Schema{
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: "URL where image file is located",
+							Description: "Name applied to uploaded image",
 						},
 						"status": &schema.Schema{
 							Type:        schema.TypeString,
 							Optional:    true,
 							Computed:    true,
-							Description: "URL where image file is located",
+							Description: "Current status of upload",
 						},
 						"status_msg": &schema.Schema{
 							Type:        schema.TypeString,
 							Optional:    true,
 							Computed:    true,
-							Description: "URL where image file is located",
+							Description: "Status response",
 						},
 						"import_id": &schema.Schema{
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "URL where image file is located",
+							Description: "Initial import Id",
 						},
 						"created": &schema.Schema{
 							Type:        schema.TypeString,
 							Optional:    true,
 							Computed:    true,
-							Description: "URL where image file is located",
+							Description: "State of imgae",
 						},
 						"tag_name": &schema.Schema{
 							Type:        schema.TypeString,
 							Optional:    true,
 							Computed:    true,
-							Description: "URL where image file is located",
+							Description: "Image Tag",
 						},
 						"comment": &schema.Schema{
 							Type:        schema.TypeString,
 							Optional:    true,
 							Computed:    true,
-							Description: "URL where image file is located",
+							Description: "Comment",
 						},
 						"import_uuid": &schema.Schema{
 							Type:        schema.TypeString,
 							Optional:    true,
 							Computed:    true,
-							Description: "URL where image file is located",
+							Description: "Uuid of imported image",
 						},
 					},
 				},
@@ -156,15 +155,6 @@ func resourcePluginImageCreate(ctx context.Context, d *schema.ResourceData, m in
 	return diags
 }
 
-/*
-func resourcePluginImageRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	// Warning or errors can be collected in a slice type
-	var diags diag.Diagnostics
-
-	return diags
-}
-*/
-
 func resourcePluginImageRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
 
@@ -173,7 +163,6 @@ func resourcePluginImageRead(ctx context.Context, d *schema.ResourceData, m inte
 	imageId := d.Id()
 
 	imageResponse, err := c.GetImage(imageId)
-	//_, err := c.GetImage(imageId)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -209,7 +198,7 @@ func resourcePluginImageDelete(ctx context.Context, d *schema.ResourceData, m in
 }
 
 func flattenPluginImageData(imageResponse cn.ImageResponse) interface{} {
-	image := make([]interface{}, len(imageResponse.Images), len(imageResponse.Images))
+	image := make([]interface{}, len(imageResponse.Images))
 
 	for _, ir := range imageResponse.Images {
 		row := make(map[string]interface{})

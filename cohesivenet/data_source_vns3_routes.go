@@ -20,44 +20,54 @@ func dataSourceRoutes() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"cidr": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "CIDR of route",
 						},
 						"id": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "Id of created route",
 						},
 						"description": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "Description of route",
 						},
 						"advertise": &schema.Schema{
-							Type:     schema.TypeBool,
-							Computed: true,
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Flag to advertise route to VNS3 Overlay Network",
 						},
 						"metric": &schema.Schema{
-							Type:     schema.TypeInt,
-							Computed: true,
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "Route metric",
 						},
 						"enabled": &schema.Schema{
-							Type:     schema.TypeBool,
-							Computed: true,
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Flag to enable route",
 						},
 						"netmask": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Netmask",
 						},
 						"editable": &schema.Schema{
-							Type:     schema.TypeBool,
-							Computed: true,
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Editable flag",
 						},
 						"table": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Table route is created in",
 						},
 						"interface": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Specifies interface route applies to",
 						},
 					},
 				},
@@ -88,7 +98,7 @@ func dataSourceRoutesRead(ctx context.Context, d *schema.ResourceData, m interfa
 }
 
 func flattenRoutes(routeResponse cn.RouteResponse) interface{} {
-	routes := make([]interface{}, len(routeResponse.Routes), len(routeResponse.Routes))
+	routes := make([]interface{}, len(routeResponse.Routes))
 
 	i := 0
 	for _, rt := range routeResponse.Routes {

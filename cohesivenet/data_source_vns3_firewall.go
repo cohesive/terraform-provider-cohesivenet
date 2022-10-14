@@ -20,12 +20,14 @@ func dataSourceFirewall() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Id of rule in firewall",
 						},
 						"script": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Firewall rule in VNS3 syntax",
 						},
 					},
 				},
@@ -37,7 +39,6 @@ func dataSourceFirewall() *schema.Resource {
 func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
 
-	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
 	firewallResponse, err := c.GetFirewallRules()
@@ -55,7 +56,7 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, m inter
 }
 
 func flattenRules(firewallResponse cn.FirewallResponse) interface{} {
-	rules := make([]interface{}, len(firewallResponse.FirewallRules), len(firewallResponse.FirewallRules))
+	rules := make([]interface{}, len(firewallResponse.FirewallRules))
 	i := 0
 	for _, rt := range firewallResponse.FirewallRules {
 		row := make(map[string]interface{})
