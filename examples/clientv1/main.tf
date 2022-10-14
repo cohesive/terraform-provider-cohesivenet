@@ -10,23 +10,27 @@ terraform {
 
 provider "cohesivenet" {
   username = "vnscubed"
-  password = "vnscontroller!"
-  token    = "771c844ecf0a2e0a9dd2c2a3071cfa7c1a06d7eed1f8664ce0995ec1b0824bee"
-  host     = "https://3.127.171.216:8000/api"
+  password = ""
+  token = ""
+  host = "https://hostname:8000/api"
 }
+
+data "cohesivenet_vns3_route" all {}
 
 
 data "cohesivenet_vns3_ipsec_endpoints" all {}
 
+
 data "cohesivenet_vns3_config" config {}
 
-data "data_source_vns3_container_network" all {}
 
-data "cohesivenet_vns3_routes" route {}
+data "cohesivenet_vns3_container_network" network {}
 
-data "cohesivenet_vns3_firewall" rules {}
 
- resource "cohesivenet_vns3_ipsec_endpoints" "endpoint_1" {
+data "cohesivenet_vns3_firewall" all {}
+
+
+resource "cohesivenet_vns3_ipsec_endpoints" "endpoint_1" {
   endpoint {
       name = "cohesive_to_peer"
       description = "cohesive_to_peer"
@@ -44,6 +48,7 @@ data "cohesivenet_vns3_firewall" rules {}
     
  }
 
+
 resource "cohesivenet_vns3_ipsec_ebpg_peers" "peer" {
   endpoint_id = cohesivenet_vns3_ipsec_endpoints.endpoint_1.id
   ebgp_peer {
@@ -56,12 +61,13 @@ resource "cohesivenet_vns3_ipsec_ebpg_peers" "peer" {
     add_network_distance_direction = "in"
     add_network_distance_hops = 10
   }
-      depends_on = [
-        cohesivenet_vns3_ipsec_endpoints.endpoint_1
-    ]
+  depends_on = [
+    cohesivenet_vns3_ipsec_endpoints.endpoint_1
+  ]
 }
 
- resource "cohesivenet_vns3_routes" "route" {
+
+resource "cohesivenet_vns3_routes" "route" {
   route {
     cidr = "192.168.54.34/24"
     description = "cohesive_to_watford_secondary"
@@ -71,7 +77,9 @@ resource "cohesivenet_vns3_ipsec_ebpg_peers" "peer" {
     metric = 300
   }
  }
-/*
+
+
+/* Example of how to use a map of routes
 resource "cohesivenet_vns3_routes" "route-map" {
   dynamic route {
     for_each = var.routes_map
@@ -86,15 +94,14 @@ resource "cohesivenet_vns3_routes" "route-map" {
 */
 
 
-resource "cohesivenet_firewalls" "rule" {
+resource "cohesivenet_vns3_firewall_rules" "rule" {
   rule {
     script = "PREROUTING -d 10.18.0.65 -p udp --dport 162 -j DNAT --to 198.52.100.5:162"
-  }
-  
+  } 
 }
 
 
-/*
+/*  Example of how to use a map of rules
 resource "cohesivenet_vns3_firewall_rules" "rule-map" {
   dynamic rule {
     for_each = var.rules_map
@@ -104,9 +111,11 @@ resource "cohesivenet_vns3_firewall_rules" "rule-map" {
   }
 }
 */
+
+
 resource "cohesivenet_vns3_plugin_images" "image" {
   image {
-    image_name = "test-tf-st-plugin"
+    name = "test-tf-st-plugin"
     url  = "https://vns3-containers-read-all.s3.amazonaws.com/HA_Container/haplugin-pm.tar.gz"
     //uildurl =
     //localbuild =
@@ -129,7 +138,9 @@ resource "cohesivenet_vns3_plugin_images" "image" {
     //depends_on = [ cohesivenet_vns3_plugin_images.image ]
  }
 
+/*
 resource "cohesivenet_vns3_https_certs" "certs" {
   cert_file = var.vns3_license_cert_file
   key_file  = var.vns3_license_key_file
 }
+*/

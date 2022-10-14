@@ -25,7 +25,7 @@ func resourceEbgp() *schema.Resource {
 			},
 			"endpoint_id": &schema.Schema{
 				Type:     schema.TypeInt,
-				Computed: true,
+				Optional: true,
 			},
 			"ebgp_peer": &schema.Schema{
 				Type:        schema.TypeList,

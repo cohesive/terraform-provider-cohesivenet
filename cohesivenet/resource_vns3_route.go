@@ -58,7 +58,7 @@ func resourceRoutes() *schema.Resource {
 						"enabled": &schema.Schema{
 							Type:        schema.TypeBool,
 							Optional:    true,
-							Default:     true,
+							Computed:    true,
 							Description: "Flag to enable route",
 						},
 						"netmask": &schema.Schema{
@@ -69,11 +69,13 @@ func resourceRoutes() *schema.Resource {
 						"editable": &schema.Schema{
 							Type:        schema.TypeBool,
 							Optional:    true,
+							Computed:    true,
 							Description: "Editable flag",
 						},
 						"table": &schema.Schema{
 							Type:        schema.TypeString,
 							Optional:    true,
+							Computed:    true,
 							Description: "Table route is created in",
 						},
 						"interface": &schema.Schema{

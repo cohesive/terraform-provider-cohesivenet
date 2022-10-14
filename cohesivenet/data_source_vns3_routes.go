@@ -25,7 +25,7 @@ func dataSourceRoutes() *schema.Resource {
 							Description: "CIDR of route",
 						},
 						"id": &schema.Schema{
-							Type:        schema.TypeInt,
+							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "Id of created route",
 						},
