@@ -120,7 +120,7 @@ func resourceRoutesCreate(ctx context.Context, d *schema.ResourceData, m interfa
 
 		routeList = append(routeList, &route)
 	}
-	_, err := c.CreateRoute(routeList)
+	err := c.CreateRoute(routeList)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -170,7 +170,7 @@ func resourceRoutesUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 
 			routeList = append(routeList, &route)
 		}
-		_, err := c.UpdateRoute(routeList)
+		err := c.UpdateRoute(routeList)
 		if err != nil {
 			return diag.FromErr(err)
 		}
