@@ -10,9 +10,9 @@ terraform {
 
 provider "cohesivenet" {
   username = "vnscubed"
-  password = "vnscontroller!"
-  token = "bf8808f5078d757b017ccdfefd406a3c29031be7adf895cb933f80506bc44948"
-  host = "https://3.127.171.216:8000/api"
+  password = ""
+  token = ""
+  host = "https://host:8000/api"
 }
 
 data "cohesivenet_vns3_route" all {}
