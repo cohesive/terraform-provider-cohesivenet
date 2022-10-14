@@ -25,12 +25,12 @@ func resourceVns3PluginInstances() *schema.Resource {
 			},
 			"name": &schema.Schema{
 				Type:        schema.TypeString,
-				Computed:    true,
+				Optional:    true,
 				Description: "Name of instance",
 			},
 			"plugin_id": &schema.Schema{
 				Type:        schema.TypeString,
-				Computed:    true,
+				Optional:    true,
 				Description: "Id of instance",
 			},
 			"description": &schema.Schema{

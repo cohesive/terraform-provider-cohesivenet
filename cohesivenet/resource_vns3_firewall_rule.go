@@ -65,7 +65,7 @@ func resourceRulesCreate(ctx context.Context, d *schema.ResourceData, m interfac
 
 		ruleList = append(ruleList, &rule)
 	}
-	_, err := c.CreateFirewallRules(ruleList)
+	err := c.CreateFirewallRules(ruleList)
 	if err != nil {
 		return diag.FromErr(err)
 	}
