@@ -46,6 +46,7 @@ func Provider() *schema.Provider {
 			"cohesivenet_vns3_plugin_images":    resourcePluginImage(),
 			"cohesivenet_vns3_config":           resourceVns3Config(),
 			"cohesivenet_vns3_peers":            resourceVns3Peering(),
+			"cohesivenet_vns3_link":             resourceLink(),
 			"cohesivenet_vns3_plugin_instances": resourceVns3PluginInstances(),
 			"cohesivenet_vns3_https_certs":      resourceHttpsCerts(),
 		},

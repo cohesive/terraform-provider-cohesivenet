@@ -2,8 +2,9 @@ package cohesivenet
 
 import (
 	"context"
-	"strconv"
 	"time"
+	"strings"
+	"fmt"
 
 	cn "github.com/cohesive/cohesivenet-client-go/cohesivenet"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -49,12 +50,23 @@ func resourceLink() *schema.Resource {
 			"conf": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 				Description: "Link conf (wireguard or openvpn)",
 			},
 			"policies": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Optional policies to place at end of conf file",
+			},
+			"clientpack_ip": &schema.Schema{
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Overlay IP address for link",
+			},
+			"type": &schema.Schema{
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Type of client connection",
 			},
 		},
 	}
@@ -73,15 +85,36 @@ func resourceLinkCreate(ctx context.Context, d *schema.ResourceData, m interface
 	linkId := int32(d.Get("id").(int))
 	linkName := d.Get("name").(string)
 	linkConf := d.Get("conf").(string)
-	linkDescription, hasDescription := d.Get("description").(string)
-	linkPolicies, hasPolicies := d.Get("policies").(string)
 
-	err := c.CreateRoute(routeList)
+    newLink := cn.NewCreateLinkRequest(linkId, linkName)
+    // confBytes, err := os.ReadFile("openvpn.conf")
+    // if err != nil {
+    //     // fmt.Print(err)
+    //     os.Exit(1)
+    // }
+
+    newLink.SetConf(linkConf)
+	linkDescription, hasDescription := d.Get("description").(string)
+	if hasDescription {
+		newLink.SetDescription(linkDescription)
+	}
+
+	linkPolicies, hasPolicies := d.Get("policies").(string)
+	if hasPolicies {
+		policiesList := strings.Split(linkPolicies, "\n")
+		newLink.SetPolicies(policiesList)
+	}
+
+	apiRequest := vns3.OverlayNetworkApi.CreateLinkRequest(ctx)
+	apiRequest = apiRequest.CreateLinkRequest(*newLink)
+	detail, _, err := vns3.OverlayNetworkApi.CreateLink(apiRequest)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
+	linkData := detail.GetResponse()
+
+	d.SetId(string(linkData.GetId()))
 
 	resourceLinkRead(ctx, d, m)
 
@@ -98,16 +131,22 @@ func resourceLinkRead(ctx context.Context, d *schema.ResourceData, m interface{}
 		return diag.FromErr(clienterror)
 	}
 
+	linkId := d.Id()
+	vns3.Log.Info(fmt.Sprintf("Reading linkId %v", string(linkId)))
+	// if linkId != "" {
 
-	routesResponse, err := c.GetRoutes()
+	// }
+
+	getLinkRequest := vns3.OverlayNetworkApi.GetLinkRequest(ctx, linkId)
+	detail, _, err := vns3.OverlayNetworkApi.GetLink(getLinkRequest)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(fmt.Errorf("VNS3 GET Link error: %+v", err))
 	}
 
-	flatRoutes := flattenRouteData(routesResponse)
-
-	d.Set("route", flatRoutes)
-	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
+	link := detail.GetResponse()
+	d.Set("clientpack_ip", link.GetClientpackIp())
+	d.Set("type", link.GetType())
+	d.SetId(string(link.GetId()))
 	return diags
 }
 
@@ -120,35 +159,42 @@ func resourceLinkUpdate(ctx context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(clienterror)
 	}
 
+	hasChange := false
+	updateBody := cn.NewUpdateLinkRequest()
 
-	if d.HasChange("route") {
-		var routeList []*cn.Route
-		routes := d.Get("route").([]interface{})
-		for _, route := range routes {
-			rt := route.(map[string]interface{})
-			route := cn.Route{
-				Cidr:        rt["cidr"].(string),
-				Description: rt["description"].(string),
-				Interface:   rt["interface"].(string),
-				Gateway:     rt["gateway"].(string),
-				Tunnel:      rt["tunnel"].(int),
-				Advertise:   rt["advertise"].(bool),
-				Metric:      rt["metric"].(int),
-			}
+	if d.HasChange("policies") {
+		hasChange = true
+		linkPolicies := d.Get("policies").(string)
+		policiesList := strings.Split(linkPolicies, "\n")
+		updateBody.SetPolicies(policiesList)
+	}
 
-			routeList = append(routeList, &route)
-		}
-		err := c.UpdateRoute(routeList)
+	if d.HasChange("name") {
+		hasChange = true
+		name := d.Get("name").(string)
+		updateBody.SetName(name)
+	}
+
+	if d.HasChange("description") {
+		hasChange = true
+		description := d.Get("description").(string)
+		updateBody.SetDescription(description)
+	}
+
+	if hasChange {
+		linkId := d.Id()
+		apiRequest := vns3.OverlayNetworkApi.PutUpdateLinkRequest(ctx, linkId)
+		apiRequest = apiRequest.UpdateLinkRequest(*updateBody)
+		_, _, err := vns3.OverlayNetworkApi.PutUpdateLink(apiRequest)
 		if err != nil {
 			return diag.FromErr(err)
 		}
 
-		d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
 		d.Set("last_updated", time.Now().Format(time.RFC850))
-
 	}
 
-	return resourceRoutesRead(ctx, d, m)
+	resourceLinkRead(ctx, d, m)
+	return diags
 }
 
 func resourceLinkDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -160,7 +206,10 @@ func resourceLinkDelete(ctx context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(clienterror)
 	}
 
-	err := c.DeleteRoute()
+	linkId := d.Id()
+	apiRequest := vns3.OverlayNetworkApi.DeleteLinkRequest(ctx, linkId)
+	_, _, err := vns3.OverlayNetworkApi.DeleteLink(apiRequest)
+
 	if err != nil {
 		return diag.FromErr(err)
 	}
