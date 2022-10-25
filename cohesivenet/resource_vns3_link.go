@@ -5,6 +5,7 @@ import (
 	"time"
 	"strings"
 	"fmt"
+	"strconv"
 
 	cn "github.com/cohesive/cohesivenet-client-go/cohesivenet"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -13,10 +14,10 @@ import (
 
 func resourceLink() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceRoutesCreate,
-		ReadContext:   resourceRoutesRead,
-		UpdateContext: resourceRoutesUpdate,
-		DeleteContext: resourceRoutesDelete,
+		CreateContext: resourceLinkCreate,
+		ReadContext:   resourceLinkRead,
+		UpdateContext: resourceLinkUpdate,
+		DeleteContext: resourceLinkDelete,
 		Schema: map[string]*schema.Schema{
 			"last_updated": &schema.Schema{
 				Type:     schema.TypeString,
@@ -31,11 +32,11 @@ func resourceLink() *schema.Resource {
 					Schema: getVns3AuthSchema(),
 				},
 			},
-			"id": &schema.Schema{
+			"link_id": &schema.Schema{
 				Type:        schema.TypeInt,
 				Required:    true,
 				ForceNew:    true,
-				Description: "Id for interface and link",
+				Description: "Number for interface and link Id",
 			},
 			"name": &schema.Schema{
 				Type:        schema.TypeString,
@@ -82,7 +83,7 @@ func resourceLinkCreate(ctx context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(clienterror)
 	}
 
-	linkId := int32(d.Get("id").(int))
+	linkId := int32(d.Get("link_id").(int))
 	linkName := d.Get("name").(string)
 	linkConf := d.Get("conf").(string)
 
@@ -100,10 +101,13 @@ func resourceLinkCreate(ctx context.Context, d *schema.ResourceData, m interface
 	}
 
 	linkPolicies, hasPolicies := d.Get("policies").(string)
-	if hasPolicies {
+	if hasPolicies && linkPolicies != "" {
 		policiesList := strings.Split(linkPolicies, "\n")
 		newLink.SetPolicies(policiesList)
 	}
+
+    reqJson, _ := newLink.MarshalJSON()
+    vns3.Log.Debug(fmt.Sprintf("Creating link with request: %+v", string(reqJson)))
 
 	apiRequest := vns3.OverlayNetworkApi.CreateLinkRequest(ctx)
 	apiRequest = apiRequest.CreateLinkRequest(*newLink)
@@ -114,7 +118,7 @@ func resourceLinkCreate(ctx context.Context, d *schema.ResourceData, m interface
 
 	linkData := detail.GetResponse()
 
-	d.SetId(string(linkData.GetId()))
+	d.SetId(strconv.Itoa(int(linkData.GetId())))
 
 	resourceLinkRead(ctx, d, m)
 
@@ -138,15 +142,20 @@ func resourceLinkRead(ctx context.Context, d *schema.ResourceData, m interface{}
 	// }
 
 	getLinkRequest := vns3.OverlayNetworkApi.GetLinkRequest(ctx, linkId)
-	detail, _, err := vns3.OverlayNetworkApi.GetLink(getLinkRequest)
+	detail, httpResponse, err := vns3.OverlayNetworkApi.GetLink(getLinkRequest)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("VNS3 GET Link error: %+v", err))
+		if httpResponse.StatusCode == 404 {
+			d.SetId("")
+			return diags
+		} else {
+			return diag.FromErr(fmt.Errorf("VNS3 GET Link error: %+v", err))
+		}
 	}
 
 	link := detail.GetResponse()
 	d.Set("clientpack_ip", link.GetClientpackIp())
 	d.Set("type", link.GetType())
-	d.SetId(string(link.GetId()))
+	d.SetId(strconv.Itoa(int(link.GetId())))
 	return diags
 }
 

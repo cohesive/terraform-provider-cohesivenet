@@ -111,7 +111,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		})
 	}
 	vns3 := cn.NewVNS3Client(cfg, cn.ClientParams{
-		Timeout: 3,
+		Timeout: 15,
 		TLS:     false,
 	})
 
