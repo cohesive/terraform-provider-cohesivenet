@@ -15,6 +15,7 @@ func resourceVns3PluginInstances() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourcePluginInstanceCreate,
 		ReadContext:   resourcePluginInstanceRead,
+		// Currently update is not supported due to complexity.
 		//UpdateContext: resourcePluginInstanceUpdate,
 		DeleteContext: resourcePluginInstanceDelete,
 		Schema: map[string]*schema.Schema{
@@ -119,11 +120,6 @@ func resourcePluginInstanceRead(ctx context.Context, d *schema.ResourceData, m i
 	return diags
 }
 
-/*
-func resourcePluginInstanceUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	return resourcePluginImageRead(ctx, d, m)
-}
-*/
 func resourcePluginInstanceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
 

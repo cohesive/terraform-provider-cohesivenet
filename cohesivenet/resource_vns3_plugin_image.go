@@ -13,6 +13,7 @@ func resourcePluginImage() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourcePluginImageCreate,
 		ReadContext:   resourcePluginImageRead,
+		// Currently update is not supported due to complexity.
 		//UpdateContext: resourcePluginImageUpdate,
 		DeleteContext: resourcePluginImageDelete,
 		Schema: map[string]*schema.Schema{
@@ -188,11 +189,6 @@ func resourcePluginImageRead(ctx context.Context, d *schema.ResourceData, m inte
 	return diags
 }
 
-/*
-func resourcePluginImageUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	return resourcePluginImageRead(ctx, d, m)
-}
-*/
 func resourcePluginImageDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
 
