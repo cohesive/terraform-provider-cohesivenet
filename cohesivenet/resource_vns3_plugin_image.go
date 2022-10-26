@@ -2,6 +2,7 @@ package cohesivenet
 
 import (
 	"context"
+	"log"
 
 	cn "github.com/cohesive/cohesivenet-client-go/cohesivenet/v1"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -12,7 +13,7 @@ func resourcePluginImage() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourcePluginImageCreate,
 		ReadContext:   resourcePluginImageRead,
-		UpdateContext: resourcePluginImageUpdate,
+		//UpdateContext: resourcePluginImageUpdate,
 		DeleteContext: resourcePluginImageDelete,
 		Schema: map[string]*schema.Schema{
 			"last_updated": &schema.Schema{
@@ -23,6 +24,7 @@ func resourcePluginImage() *schema.Resource {
 			"image": &schema.Schema{
 				Type:        schema.TypeList,
 				Required:    true,
+				ForceNew:    true,
 				Description: "Nested block for image attributes",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -35,41 +37,49 @@ func resourcePluginImage() *schema.Resource {
 						"image_name": &schema.Schema{
 							Type:        schema.TypeString,
 							Required:    true,
+							ForceNew:    true,
 							Description: "Name of deployed image",
 						},
 						"url": &schema.Schema{
 							Type:        schema.TypeString,
 							Optional:    true,
+							ForceNew:    true,
 							Description: "URL of the image file to be imported",
 						},
 						"buildurl": &schema.Schema{
 							Type:        schema.TypeString,
 							Optional:    true,
+							ForceNew:    true,
 							Description: "URL of a dockerfile that will be used to build the image",
 						},
 						"localbuild": &schema.Schema{
 							Type:        schema.TypeString,
 							Optional:    true,
+							ForceNew:    true,
 							Description: "Local build file to create new image",
 						},
 						"localimage": &schema.Schema{
 							Type:        schema.TypeString,
 							Optional:    true,
+							ForceNew:    true,
 							Description: "Local image to tag",
 						},
 						"imagefile": &schema.Schema{
 							Type:        schema.TypeString,
 							Optional:    true,
+							ForceNew:    true,
 							Description: "Upload image file",
 						},
 						"buildfile": &schema.Schema{
 							Type:        schema.TypeString,
 							Optional:    true,
+							ForceNew:    true,
 							Description: "Upload docker file or zipped docker context directory",
 						},
 						"description": &schema.Schema{
 							Type:        schema.TypeString,
 							Optional:    true,
+							ForceNew:    true,
 							Description: "Description of deployed image",
 						},
 						"status": &schema.Schema{
@@ -143,6 +153,7 @@ func resourcePluginImageCreate(ctx context.Context, d *schema.ResourceData, m in
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
 	if len(imageResponse.Images) != 0 {
 		d.SetId(imageResponse.Images[0].ID)
 		resourcePluginImageRead(ctx, d, m)
@@ -157,12 +168,16 @@ func resourcePluginImageRead(ctx context.Context, d *schema.ResourceData, m inte
 
 	imageId := d.Id()
 
+	img := d.Get("image").([]interface{})[0]
+	im := img.(map[string]interface{})
+	url := im["url"].(string)
+	log.Println("url: " + url)
 	imageResponse, err := c.GetImage(imageId)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	image := flattenPluginImageData(imageResponse)
+	image := flattenPluginImageData(imageResponse, url)
 
 	if err := d.Set("image", image); err != nil {
 		return diag.FromErr(err)
@@ -173,10 +188,11 @@ func resourcePluginImageRead(ctx context.Context, d *schema.ResourceData, m inte
 	return diags
 }
 
+/*
 func resourcePluginImageUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	return resourcePluginImageRead(ctx, d, m)
 }
-
+*/
 func resourcePluginImageDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
 
@@ -192,7 +208,7 @@ func resourcePluginImageDelete(ctx context.Context, d *schema.ResourceData, m in
 	return diags
 }
 
-func flattenPluginImageData(imageResponse cn.ImageResponse) interface{} {
+func flattenPluginImageData(imageResponse cn.ImageResponse, url string) interface{} {
 	image := make([]interface{}, len(imageResponse.Images))
 
 	for _, ir := range imageResponse.Images {
@@ -208,6 +224,7 @@ func flattenPluginImageData(imageResponse cn.ImageResponse) interface{} {
 		row["description"] = ir.Description
 		row["comment"] = ir.Comment
 		row["import_uuid"] = ir.ImportUUID
+		row["url"] = url
 
 		image[0] = row
 

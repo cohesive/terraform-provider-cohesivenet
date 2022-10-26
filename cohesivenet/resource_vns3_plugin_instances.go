@@ -15,7 +15,7 @@ func resourceVns3PluginInstances() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourcePluginInstanceCreate,
 		ReadContext:   resourcePluginInstanceRead,
-		UpdateContext: resourcePluginInstanceUpdate,
+		//UpdateContext: resourcePluginInstanceUpdate,
 		DeleteContext: resourcePluginInstanceDelete,
 		Schema: map[string]*schema.Schema{
 			"last_updated": &schema.Schema{
@@ -26,31 +26,37 @@ func resourceVns3PluginInstances() *schema.Resource {
 			"name": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
+				ForceNew:    true,
 				Description: "Name of instance",
 			},
 			"plugin_id": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
+				ForceNew:    true,
 				Description: "Id of instance",
 			},
 			"description": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
+				ForceNew:    true,
 				Description: "Description of instance",
 			},
 			"ip_address": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
+				ForceNew:    true,
 				Description: "IP address of deployed image",
 			},
 			"command": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
+				ForceNew:    true,
 				Description: "Command used to start instance",
 			},
 			"environment": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
+				ForceNew:    true,
 				Description: "Environment variables used when launching instance",
 			},
 		},
@@ -113,10 +119,11 @@ func resourcePluginInstanceRead(ctx context.Context, d *schema.ResourceData, m i
 	return diags
 }
 
+/*
 func resourcePluginInstanceUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	return resourcePluginImageRead(ctx, d, m)
 }
-
+*/
 func resourcePluginInstanceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
 
