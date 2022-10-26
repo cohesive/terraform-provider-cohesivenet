@@ -2,7 +2,6 @@ package cohesivenet
 
 import (
 	"context"
-	"log"
 
 	cn "github.com/cohesive/cohesivenet-client-go/cohesivenet/v1"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -172,7 +171,6 @@ func resourcePluginImageRead(ctx context.Context, d *schema.ResourceData, m inte
 	img := d.Get("image").([]interface{})[0]
 	im := img.(map[string]interface{})
 	url := im["url"].(string)
-	log.Println("url: " + url)
 	imageResponse, err := c.GetImage(imageId)
 	if err != nil {
 		return diag.FromErr(err)
