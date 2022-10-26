@@ -73,6 +73,18 @@ func resourceLink() *schema.Resource {
 	}
 }
 
+func parseLinkResponseId(link cn.Link) string {
+	var linkIdString string
+	linkIdAny := link.GetId()
+	if linkIdAny.String != nil {
+		linkIdString = *linkIdAny.String
+	} else {
+		linkIdString = strconv.Itoa(int(*linkIdAny.Int32))
+	}
+
+	return linkIdString
+}
+
 func resourceLinkCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
@@ -88,12 +100,6 @@ func resourceLinkCreate(ctx context.Context, d *schema.ResourceData, m interface
 	linkConf := d.Get("conf").(string)
 
     newLink := cn.NewCreateLinkRequest(linkId, linkName)
-    // confBytes, err := os.ReadFile("openvpn.conf")
-    // if err != nil {
-    //     // fmt.Print(err)
-    //     os.Exit(1)
-    // }
-
     newLink.SetConf(linkConf)
 	linkDescription, hasDescription := d.Get("description").(string)
 	if hasDescription {
@@ -117,8 +123,8 @@ func resourceLinkCreate(ctx context.Context, d *schema.ResourceData, m interface
 	}
 
 	linkData := detail.GetResponse()
-
-	d.SetId(strconv.Itoa(int(linkData.GetId())))
+	linkIdString := parseLinkResponseId(linkData)
+	d.SetId(linkIdString)
 
 	resourceLinkRead(ctx, d, m)
 
@@ -137,10 +143,6 @@ func resourceLinkRead(ctx context.Context, d *schema.ResourceData, m interface{}
 
 	linkId := d.Id()
 	vns3.Log.Info(fmt.Sprintf("Reading linkId %v", string(linkId)))
-	// if linkId != "" {
-
-	// }
-
 	getLinkRequest := vns3.OverlayNetworkApi.GetLinkRequest(ctx, linkId)
 	detail, httpResponse, err := vns3.OverlayNetworkApi.GetLink(getLinkRequest)
 	if err != nil {
@@ -155,7 +157,8 @@ func resourceLinkRead(ctx context.Context, d *schema.ResourceData, m interface{}
 	link := detail.GetResponse()
 	d.Set("clientpack_ip", link.GetClientpackIp())
 	d.Set("type", link.GetType())
-	d.SetId(strconv.Itoa(int(link.GetId())))
+	linkIdString := parseLinkResponseId(link)
+	d.SetId(linkIdString)
 	return diags
 }
 
