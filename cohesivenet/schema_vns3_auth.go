@@ -52,8 +52,13 @@ func getVns3Client(ctx context.Context, d *schema.ResourceData, m interface{}) (
 			cfg = cn.NewConfigurationWithAuth(host, cn.ContextAccessToken, apiToken)
 		}
 
+		timeout, hasTimeout := vns3Auth["timeout"].(int)
+		if !hasTimeout || timeout == 0 {
+			timeout = 10
+		}
+
 		vns3 = cn.NewVNS3Client(cfg, cn.ClientParams{
-			Timeout: 3,
+			Timeout: timeout,
 			TLS: false,
 		})
 	} else {
@@ -93,6 +98,10 @@ func getVns3AuthSchema() map[string]*schema.Schema {
 		},
 		"username": &schema.Schema{
 			Type:    schema.TypeString,
+			Optional: true,
+		},
+		"timeout": &schema.Schema{
+			Type:    schema.TypeInt,
 			Optional: true,
 		},
 	}
