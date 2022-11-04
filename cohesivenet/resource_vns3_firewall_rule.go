@@ -22,6 +22,14 @@ func resourceRules() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"vns3": &schema.Schema{
+				Type:     schema.TypeSet,
+				MaxItems: 1,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: getVns3AuthSchema(),
+				},
+			},
 			"rule": &schema.Schema{
 				Type:        schema.TypeList,
 				ForceNew:    true,
@@ -51,7 +59,10 @@ func resourceRules() *schema.Resource {
 }
 
 func resourceRulesCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
+	c, error := getV1Client(ctx, d, m)
+	if error != nil {
+		return diag.FromErr(error)
+	}
 
 	var diags diag.Diagnostics
 	var ruleList []*cn.FirewallRule
@@ -87,7 +98,10 @@ func resourceRulesRead(ctx context.Context, d *schema.ResourceData, m interface{
 */
 
 func resourceRulesRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
+	c, error := getV1Client(ctx, d, m)
+	if error != nil {
+		return diag.FromErr(error)
+	}
 
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
@@ -111,7 +125,10 @@ func resourceRulesUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 }
 
 func resourceRulesDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
+	c, error := getV1Client(ctx, d, m)
+	if error != nil {
+		return diag.FromErr(error)
+	}
 
 	var diags diag.Diagnostics
 
@@ -139,7 +156,6 @@ func resourceRulesDelete(ctx context.Context, d *schema.ResourceData, m interfac
 }
 
 func flattenRulesData(ruleResponse cn.FirewallResponse) []interface{} {
-	//routes := make([]interface{}, len(ruleResponse.FirewallRules), len(ruleResponse.FirewallRules))
 	routes := make([]interface{}, len(ruleResponse.FirewallRules))
 
 	i := 0

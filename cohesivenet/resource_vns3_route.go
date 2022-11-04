@@ -22,6 +22,14 @@ func resourceRoutes() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"vns3": &schema.Schema{
+				Type:     schema.TypeSet,
+				MaxItems: 1,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: getVns3AuthSchema(),
+				},
+			},
 			"route": &schema.Schema{
 				Type:        schema.TypeList,
 				Required:    true,
@@ -102,11 +110,13 @@ func resourceRoutes() *schema.Resource {
 }
 
 func resourceRoutesCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
-
 	var diags diag.Diagnostics
-	var routeList []*cn.Route
+	c, error := getV1Client(ctx, d, m)
+	if error != nil {
+		return diag.FromErr(error)
+	}
 
+	var routeList []*cn.Route
 	routes := d.Get("route").([]interface{})
 	for _, route := range routes {
 		rt := route.(map[string]interface{})
@@ -128,17 +138,17 @@ func resourceRoutesCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 
 	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
-
 	resourceRoutesRead(ctx, d, m)
-
 	return diags
 
 }
 
 func resourceRoutesRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
-
 	var diags diag.Diagnostics
+	c, error := getV1Client(ctx, d, m)
+	if error != nil {
+		return diag.FromErr(error)
+	}
 
 	routesResponse, err := c.GetRoutes()
 	if err != nil {
@@ -146,14 +156,16 @@ func resourceRoutesRead(ctx context.Context, d *schema.ResourceData, m interface
 	}
 
 	flatRoutes := flattenRouteData(routesResponse)
-
 	d.Set("route", flatRoutes)
 	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
 	return diags
 }
 
 func resourceRoutesUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
+	c, error := getV1Client(ctx, d, m)
+	if error != nil {
+		return diag.FromErr(error)
+	}
 
 	if d.HasChange("route") {
 		var routeList []*cn.Route
@@ -181,32 +193,29 @@ func resourceRoutesUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 		d.Set("last_updated", time.Now().Format(time.RFC850))
 
 	}
-
 	return resourceRoutesRead(ctx, d, m)
 }
 
 func resourceRoutesDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
-
 	var diags diag.Diagnostics
 
+	c, error := getV1Client(ctx, d, m)
+	if error != nil {
+		return diag.FromErr(error)
+	}
 	err := c.DeleteRoute()
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
 	d.SetId("")
-
 	return diags
 }
 
 func flattenRouteData(routeResponse cn.RouteResponse) interface{} {
 	routes := make([]interface{}, len(routeResponse.Routes))
-
 	i := 0
 	for _, rt := range routeResponse.Routes {
 		row := make(map[string]interface{})
-
 		row["cidr"] = rt.Cidr
 		row["id"] = rt.ID
 		row["description"] = rt.Description
@@ -217,11 +226,8 @@ func flattenRouteData(routeResponse cn.RouteResponse) interface{} {
 		row["editable"] = rt.Editable
 		row["table"] = rt.Table
 		row["interface"] = rt.Interface
-
 		routes[i] = row
 		i++
 	}
-
 	return routes
-
 }

@@ -3,72 +3,29 @@ package cohesivenet
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	cn "github.com/cohesive/cohesivenet-client-go/cohesivenet"
+	cnv1 "github.com/cohesive/cohesivenet-client-go/cohesivenet/v1"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-
 func getVns3Client(ctx context.Context, d *schema.ResourceData, m interface{}) (*cn.VNS3Client, error) {
-	vns3AuthSet, hasVns3Auth := d.Get("vns3").(*schema.Set)
-
-	var vns3 *cn.VNS3Client
-
 	Logger := NewLogger(ctx)
-	if hasVns3Auth {
+	vns3AuthSet, hasVns3Auth := d.Get("vns3").(*schema.Set)
+	if hasVns3Auth && vns3AuthSet.Len() != 0 {
 		vns3Auth := vns3AuthSet.List()[0].(map[string]any)
-		vns3Host := vns3Auth["host"].(string);
-		hasHost := vns3Host != ""
-		if !hasHost {
-			return nil, fmt.Errorf("vns3 block requires host param and an authentication method")
+		vns3Client, err := generateVNS3Client(vns3Auth, Logger)
+		if err != nil {
+			return nil, err
 		}
-
-		host := vns3Host
-		var cfg *cn.Configuration
-		password := vns3Auth["password"].(string)
-		hasPassword := password != ""
-		if hasPassword {
-			vns3Username := vns3Auth["username"].(string)
-			var username string
-			if vns3Username != "" {
-				username = vns3Username
-			} else {
-				username = "api"
-			}
-
-			Logger.Debug("Using Basic auth for VNS3")
-			cfg = cn.NewConfigurationWithAuth(host, cn.ContextBasicAuth, cn.BasicAuth{
-				UserName: username,
-				Password: password,
-			})
-		} else {
-			Logger.Debug("Using API Token auth for VNS3")
-			apiToken := vns3Auth["api_token"].(string)
-			hasToken := apiToken != ""
-			if !hasToken {
-				return nil, fmt.Errorf("vns3 block requires host param and an authentication method: either password or api_token")
-			}
-
-			cfg = cn.NewConfigurationWithAuth(host, cn.ContextAccessToken, apiToken)
-		}
-
-		timeout, hasTimeout := vns3Auth["timeout"].(int)
-		if !hasTimeout || timeout == 0 {
-			timeout = 10
-		}
-
-		vns3 = cn.NewVNS3Client(cfg, cn.ClientParams{
-			Timeout: timeout,
-			TLS: false,
-		})
-	} else {
-		vns3_ := m.(map[string]interface{})["vns3"].(cn.VNS3Client)
-		vns3 = &vns3_
+		return vns3Client, nil
 	}
-
-	vns3.Log = Logger
-
-	return vns3, nil
+	vns3Client, hasVns3Client := m.(map[string]interface{})["vns3"].(*cn.VNS3Client)
+	if !hasVns3Client {
+		return nil, fmt.Errorf("no vns3 configured in provider or in resource")
+	}
+	return vns3Client, nil
 }
 
 func setVns3ClientPassword(vns3 *cn.VNS3Client, newPassword string) *cn.VNS3Client {
@@ -79,30 +36,175 @@ func setVns3ClientPassword(vns3 *cn.VNS3Client, newPassword string) *cn.VNS3Clie
 	return vns3
 }
 
-
 func getVns3AuthSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"host": &schema.Schema{
-			Type:    schema.TypeString,
+			Type:     schema.TypeString,
 			Optional: true,
 		},
 		"password": &schema.Schema{
-			Type:    schema.TypeString,
-			Optional: true,
-			Sensitive:   true,
+			Type:      schema.TypeString,
+			Optional:  true,
+			Sensitive: true,
 		},
 		"api_token": &schema.Schema{
-			Type:    schema.TypeString,
-			Optional: true,
-			Sensitive:   true,
+			Type:      schema.TypeString,
+			Optional:  true,
+			Sensitive: true,
 		},
 		"username": &schema.Schema{
-			Type:    schema.TypeString,
+			Type:     schema.TypeString,
 			Optional: true,
 		},
 		"timeout": &schema.Schema{
-			Type:    schema.TypeInt,
+			Type:     schema.TypeInt,
 			Optional: true,
 		},
 	}
+}
+
+func getV1Client(ctx context.Context, d *schema.ResourceData, m interface{}) (*cnv1.Client, error) {
+	Logger := NewLogger(ctx)
+
+	//first check for vns3 override
+	vns3AuthSet, hasVns3Auth := d.Get("vns3").(*schema.Set)
+	if hasVns3Auth && vns3AuthSet.Len() != 0 {
+		vns3Auth := vns3AuthSet.List()[0].(map[string]any)
+		v1client, err := generateV1Client(vns3Auth, Logger)
+		if err != nil {
+			return nil, err
+		}
+		return v1client, nil
+	} else {
+		v1Client, hasV1Client := m.(map[string]interface{})["clientv1"].(*cnv1.Client)
+		if !hasV1Client {
+			return nil, fmt.Errorf("no vns3 configured in provider or in resource")
+		}
+		return v1Client, nil
+	}
+}
+
+//will be deprecated when all resources using Go client
+func generateV1Client(vns3Auth map[string]any, Logger Logger) (*cnv1.Client, error) {
+	//check VNS3 controller host is specified
+	host, hasHost := parseHost(vns3Auth)
+	if !hasHost {
+		return nil, fmt.Errorf("vns3 block requires host param")
+	}
+	//v1client uses url
+	host = hostToUrl(host)
+	//validate authentication
+	username, hasUsername := parseUsername(vns3Auth)
+	password, hasPassword := parsePassword(vns3Auth)
+	token, hasToken := parseToken(vns3Auth)
+	var v1Client *cnv1.Client
+	var err error
+	emptyString := ""
+	if hasToken {
+		Logger.Debug("using API Token auth for VNS3 v1 connection")
+		if hasPassword && hasUsername {
+			Logger.Warn("ignoring user and password in vns3 config")
+		}
+		v1Client, err = cnv1.NewClient(&emptyString, &emptyString, &token, &host)
+	} else if hasPassword && hasUsername {
+		Logger.Debug("using Basic auth for VNS3 v1 connection")
+		v1Client, err = cnv1.NewClient(&username, &password, &emptyString, &host)
+	} else {
+		return nil, fmt.Errorf("vns3 config requires either username & password or token specified")
+	}
+
+	//check if any occurs parsing authentication
+	if err != nil {
+		return nil, err
+	}
+	return v1Client, nil
+}
+
+func generateVNS3Client(vns3Auth map[string]any, Logger Logger) (*cn.VNS3Client, error) {
+
+	//check VNS3 controller host is specified
+	host, hasHost := parseHost(vns3Auth)
+	if !hasHost {
+		return nil, fmt.Errorf("vns3 block requires host param")
+	}
+
+	//validate authentication
+	username, hasUsername := parseUsername(vns3Auth)
+	password, hasPassword := parsePassword(vns3Auth)
+	apiToken, hasApiToken := parseToken(vns3Auth)
+
+	var cfg *cn.Configuration
+	if hasApiToken {
+		Logger.Debug("using token auth for VNS3 connection")
+		if hasPassword && hasUsername && hasApiToken {
+			Logger.Warn("ignoring user and password in vns3 config")
+		}
+		cfg = cn.NewConfigurationWithAuth(host, cn.ContextAccessToken, apiToken)
+	} else if hasPassword && hasUsername {
+		Logger.Debug("using Basic auth for VNS3 connection")
+		cfg = cn.NewConfigurationWithAuth(host, cn.ContextBasicAuth, cn.BasicAuth{
+			UserName: username,
+			Password: password,
+		})
+	} else {
+		return nil, fmt.Errorf("vns3 config requires either username & password or api_token specified")
+	}
+	timeout, hasTimeout := vns3Auth["timeout"].(int)
+	if !hasTimeout || timeout == 0 {
+		timeout = 10
+	}
+	vns3Client := cn.NewVNS3Client(cfg, cn.ClientParams{
+		Timeout: timeout,
+		TLS:     false,
+	})
+	vns3Client.Log = Logger
+	return vns3Client, nil
+}
+
+func hostToUrl(host string) string {
+	if !strings.HasPrefix(host, "https") {
+		return "https://" + host + ":8000/api"
+	}
+	return host
+}
+
+func parseHost(vns3Auth map[string]any) (string, bool) {
+	host, has_host := vns3Auth["host"].(string)
+	if !has_host || host == "" {
+		return "", false
+	} else {
+		return host, true
+	}
+}
+
+func parsePassword(vns3Auth map[string]any) (string, bool) {
+	password, has_password := vns3Auth["password"].(string)
+	if !has_password || password == "" {
+		return "", false
+	} else {
+		return password, true
+	}
+}
+
+func parseUsername(vns3Auth map[string]any) (string, bool) {
+	vns3Username, hasUsername := vns3Auth["username"].(string)
+	if !hasUsername {
+		return "", false
+	} else if vns3Username == "" {
+		return "api", true
+	} else {
+		return vns3Username, true
+	}
+}
+
+func parseToken(vns3Auth map[string]any) (string, bool) {
+	token, has_token := vns3Auth["token"].(string)
+	if has_token && token != "" {
+		return token, true
+	}
+	api_token, has_token := vns3Auth["api_token"].(string)
+	if has_token && api_token != "" {
+		return api_token, true
+	}
+	return "", false
 }

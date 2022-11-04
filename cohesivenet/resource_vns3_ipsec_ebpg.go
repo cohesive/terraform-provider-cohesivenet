@@ -27,6 +27,14 @@ func resourceEbgp() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
+			"vns3": &schema.Schema{
+				Type:     schema.TypeSet,
+				MaxItems: 1,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: getVns3AuthSchema(),
+				},
+			},
 			"ebgp_peer": &schema.Schema{
 				Type:        schema.TypeList,
 				Required:    true,
@@ -87,7 +95,10 @@ func resourceEbgp() *schema.Resource {
 }
 
 func resourceEbgpCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
+	c, error := getV1Client(ctx, d, m)
+	if error != nil {
+		return diag.FromErr(error)
+	}
 
 	var diags diag.Diagnostics
 
@@ -124,7 +135,10 @@ func resourceEbgpCreate(ctx context.Context, d *schema.ResourceData, m interface
 }
 
 func resourceEbgpRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
+	c, error := getV1Client(ctx, d, m)
+	if error != nil {
+		return diag.FromErr(error)
+	}
 
 	var diags diag.Diagnostics
 
@@ -151,7 +165,10 @@ func resourceEbgpRead(ctx context.Context, d *schema.ResourceData, m interface{}
 }
 
 func resourceEbgpUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
+	c, error := getV1Client(ctx, d, m)
+	if error != nil {
+		return diag.FromErr(error)
+	}
 
 	endId := d.Get("endpoint_id").(int)
 	endpointId := strconv.Itoa(endId)
@@ -184,8 +201,10 @@ func resourceEbgpUpdate(ctx context.Context, d *schema.ResourceData, m interface
 }
 
 func resourceEbgpDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
-
+	c, error := getV1Client(ctx, d, m)
+	if error != nil {
+		return diag.FromErr(error)
+	}
 	var diags diag.Diagnostics
 
 	endId := d.Get("endpoint_id").(int)

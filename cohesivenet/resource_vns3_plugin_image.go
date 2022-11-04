@@ -21,6 +21,15 @@ func resourcePluginImage() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"vns3": &schema.Schema{
+				Type:     schema.TypeSet,
+				MaxItems: 1,
+				Optional: true,
+				ForceNew: true,
+				Elem: &schema.Resource{
+					Schema: getVns3AuthSchema(),
+				},
+			},
 			"image": &schema.Schema{
 				Type:        schema.TypeList,
 				Required:    true,
@@ -131,7 +140,10 @@ func resourcePluginImage() *schema.Resource {
 }
 
 func resourcePluginImageCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
+	c, error := getV1Client(ctx, d, m)
+	if error != nil {
+		return diag.FromErr(error)
+	}
 
 	var diags diag.Diagnostics
 
@@ -162,7 +174,10 @@ func resourcePluginImageCreate(ctx context.Context, d *schema.ResourceData, m in
 }
 
 func resourcePluginImageRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
+	c, error := getV1Client(ctx, d, m)
+	if error != nil {
+		return diag.FromErr(error)
+	}
 
 	var diags diag.Diagnostics
 
@@ -188,7 +203,10 @@ func resourcePluginImageRead(ctx context.Context, d *schema.ResourceData, m inte
 }
 
 func resourcePluginImageDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
+	c, error := getV1Client(ctx, d, m)
+	if error != nil {
+		return diag.FromErr(error)
+	}
 
 	var diags diag.Diagnostics
 
