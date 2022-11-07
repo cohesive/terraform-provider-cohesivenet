@@ -23,6 +23,14 @@ func resourceEndpoints() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"vns3": &schema.Schema{
+				Type:     schema.TypeSet,
+				MaxItems: 1,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: getVns3AuthSchema(),
+				},
+			},
 			"endpoint": &schema.Schema{
 				Type:        schema.TypeList,
 				Required:    true,
@@ -100,7 +108,10 @@ func resourceEndpoints() *schema.Resource {
 }
 
 func resourceEndpointsCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
+	c, error := getV1Client(ctx, d, m)
+	if error != nil {
+		return diag.FromErr(error)
+	}
 
 	var diags diag.Diagnostics
 
@@ -135,7 +146,10 @@ func resourceEndpointsCreate(ctx context.Context, d *schema.ResourceData, m inte
 }
 
 func resourceEndpointsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
+	c, error := getV1Client(ctx, d, m)
+	if error != nil {
+		return diag.FromErr(error)
+	}
 
 	var diags diag.Diagnostics
 
@@ -158,7 +172,10 @@ func resourceEndpointsRead(ctx context.Context, d *schema.ResourceData, m interf
 }
 
 func resourceEndpointsUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
+	c, error := getV1Client(ctx, d, m)
+	if error != nil {
+		return diag.FromErr(error)
+	}
 
 	endpointId := d.Id()
 
@@ -194,7 +211,10 @@ func resourceEndpointsUpdate(ctx context.Context, d *schema.ResourceData, m inte
 }
 
 func resourceEndpointsDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
+	c, error := getV1Client(ctx, d, m)
+	if error != nil {
+		return diag.FromErr(error)
+	}
 
 	var diags diag.Diagnostics
 

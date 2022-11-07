@@ -37,7 +37,10 @@ func dataSourceFirewall() *schema.Resource {
 }
 
 func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(map[string]interface{})["clientv1"].(*cn.Client)
+	c, error := getV1Client(ctx, d, m)
+	if error != nil {
+		return diag.FromErr(error)
+	}
 
 	var diags diag.Diagnostics
 

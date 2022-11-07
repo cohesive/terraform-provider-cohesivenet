@@ -2,10 +2,7 @@ package cohesivenet
 
 import (
 	"context"
-	"fmt"
 
-	cn "github.com/cohesive/cohesivenet-client-go/cohesivenet"
-	cnv1 "github.com/cohesive/cohesivenet-client-go/cohesivenet/v1"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -37,6 +34,14 @@ func Provider() *schema.Provider {
 				Sensitive:   true,
 				DefaultFunc: schema.EnvDefaultFunc("CN_HOST", nil),
 			},
+			"vns3": &schema.Schema{
+				Type:     schema.TypeSet,
+				MaxItems: 1,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: getVns3AuthSchema(),
+				},
+			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"cohesivenet_vns3_ipsec_endpoints":  resourceEndpoints(),
@@ -61,72 +66,51 @@ func Provider() *schema.Provider {
 	}
 }
 
-// func commonAuthSchema() *schema.Schema {
-// 	return &schema.Schema{
-// 		Type:     schema.TypeSet,
-// 		MaxItems: 1,
-// 		Optional: true,
-// 		Elem:     &schema.Resource{
-// 			Schema: map[string]*schema.Schema{
-// 				"host": &schema.Schema{
-// 					Type:    schema.TypeString,
-// 					Optional: true,
-// 				},
-// 				"username": &schema.Schema{
-// 					Type:    schema.TypeString,
-// 					Optional: true,
-// 				},
-// 				"password": &schema.Schema{
-// 					Type:    schema.TypeString,
-// 					Optional: true,
-// 				},
-// 				"token": &schema.Schema{
-// 					Type:    schema.TypeString,
-// 					Optional: true,
-// 				},
-// 			},
-// 		},
-// 	}
-// }
-
+/* configure VNS3 provider */
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
-	username := d.Get("username").(string)
-	password := d.Get("password").(string)
-	token := d.Get("token").(string)
-	host := d.Get("host").(string)
 
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
-
-	fmt.Printf("%+v\n", username)
-	fmt.Printf("%+v\n", password)
-
-	var cfg *cn.Configuration
-	if token != "" {
-		cfg = cn.NewConfigurationWithAuth(host, cn.ContextAccessToken, token)
-	} else {
-		cfg = cn.NewConfigurationWithAuth(host, cn.ContextBasicAuth, cn.BasicAuth{
-			UserName: username,
-			Password: password,
-		})
-	}
-	vns3 := cn.NewVNS3Client(cfg, cn.ClientParams{
-		Timeout: 15,
-		TLS:     false,
-	})
-
 	Logger := NewLogger(ctx)
-	vns3.Log = Logger
-
 	meta := make(map[string]interface{})
 
-	clientv1, err := cnv1.NewClient(&username, &password, &token, &host)
-	if err != nil {
-		return nil, diag.FromErr(err)
+	//check if VNS3 config is defined in "vns3"
+	vns3AuthSet, hasVns3Auth := d.Get("vns3").(*schema.Set)
+
+	if hasVns3Auth && vns3AuthSet.Len() != 0 {
+		vns3Auth := vns3AuthSet.List()[0].(map[string]any)
+		//create v1 client
+		v1client, err := generateV1Client(vns3Auth, Logger)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+		meta["clientv1"] = v1client
+		//create vns3 client
+		vns3Client, err := generateVNS3Client(vns3Auth, Logger)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+		meta["vns3"] = vns3Client
+	} else {
+		vns3Auth := make(map[string]interface{})
+		vns3Auth["host"] = d.Get("host").(string)
+		vns3Auth["username"] = d.Get("username").(string)
+		vns3Auth["password"] = d.Get("password").(string)
+		vns3Auth["token"] = d.Get("token").(string)
+		if vns3Auth["host"] != "" {
+			//create v1 client
+			v1client, err := generateV1Client(vns3Auth, Logger)
+			if err != nil {
+				return nil, diag.FromErr(err)
+			}
+			meta["clientv1"] = v1client
+			//create vns3 client
+			vns3Client, err := generateVNS3Client(vns3Auth, Logger)
+			if err != nil {
+				return nil, diag.FromErr(err)
+			}
+			meta["vns3"] = vns3Client
+		}
 	}
-
-	meta["clientv1"] = clientv1
-	meta["vns3"] = vns3
-
 	return meta, diags
 }
