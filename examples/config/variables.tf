@@ -21,12 +21,11 @@ variable "topology_name" {
     default = "terraform-launch"
 }
 variable "controller_name" {
-    default = "terraform"
+    default = "ctrl"
 }
 
 variable "vns3_account_owner" {
   type = string
-  #default = "201138274120"
   default = "678344834199"
 }
 
@@ -67,14 +66,14 @@ variable "subnet_ids" {
   # CHANGE subnet ids
     type = list
     default = [
-        "subnet-07823348e19526c990",
-        "subnet-0de18940602c1d1343"
+        "subnet-06b9fc6a85df6e3c7",
+        "subnet-02cea8256e7515eca"
     ]
     description = "The subnets to launch VNS3 controllers. 1 VNS3 controller for each subnet"
 }
 
 variable "security_group_id" {
   # CHANGE security group
-  default = "sg-055a3082672c469825"
+  default = "sg-011082922b0f4915f"
   description = "The Security group to launch VNS3 controllers in"
 }
