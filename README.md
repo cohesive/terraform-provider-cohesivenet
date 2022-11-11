@@ -34,9 +34,11 @@ terraform {
 }
 
 provider "cohesivenet" {
-  username = "vnscubed"
-  password = "password"
-  host = "https://host:8000/api"
+  vns3 {
+    username = "vnscubed"
+    password = "password"
+    host = "host name or ip"
+  }
 }
 
 resource "cohesivenet_vns3_routes" "route" {
@@ -52,6 +54,8 @@ resource "cohesivenet_vns3_routes" "route" {
  1. Add the above snippet to a file called main.tf
  2. terraform init
  3. terraform apply
+
+ See examples directory for setting up a single controller (basic) and peered controllers (config).
 
 ## Building the Provider
 
