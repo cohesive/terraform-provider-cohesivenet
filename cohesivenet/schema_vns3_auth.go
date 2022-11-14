@@ -189,7 +189,7 @@ func parsePassword(vns3Auth map[string]any) (string, bool) {
 func parseUsername(vns3Auth map[string]any) (string, bool) {
 	vns3Username, hasUsername := vns3Auth["username"].(string)
 	if !hasUsername {
-		return "", false
+		return "api", true
 	} else if vns3Username == "" {
 		return "api", true
 	} else {

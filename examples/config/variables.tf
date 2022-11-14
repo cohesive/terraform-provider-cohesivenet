@@ -18,7 +18,7 @@ variable "vns3_api_token_refresh" {
 
 variable "topology_name" {
     # CHANGE TOPOLOGY NAME
-    default = "bens-test-tf-launch"
+    default = "terraform-launch"
 }
 variable "controller_name" {
     default = "ctrl"
@@ -26,21 +26,21 @@ variable "controller_name" {
 
 variable "vns3_account_owner" {
   type = string
-  default = "678554804139"
+  default = "678344834199"
 }
 
 variable "vns3_version" {
     type = string
-    default = "5.2.4-20220317"
+    default = "602-20221104"
 }
 
 variable "vns3_license_file" {
     # ADD PATH TO YOUR LICENSE FILE
-  default = "/Users/benplatta/code/cohesive/vns3-functional-testing/test-assets/license.txt"
+  default = "~/license.txt"
 }
 
 variable "keyset_token" {
-    default = "testtest"
+    default = "keysetpassword"
     sensitive =  true
 }
 
