@@ -10,19 +10,22 @@ import (
 func resourceHttpsCerts() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceHttpsCertsCreate,
-		ReadContext:   resourceHttpsCertsRead,
-		UpdateContext: resourceHttpsCertsUpdate,
+		//There is no concept of read / update in API
+		//ReadContext:   resourceHttpsCertsRead,
+		//UpdateContext: resourceHttpsCertsUpdate,
 		DeleteContext: resourceHttpsCertsDelete,
 		Schema: map[string]*schema.Schema{
 			"cert_file": &schema.Schema{
 				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "File path to certificate",
+				Required:    true,
+				Sensitive:   true,
+				Description: "Certificate file. Accepts string, file or absolute path",
 			},
 			"key_file": &schema.Schema{
 				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "File path to private key",
+				Required:    true,
+				Sensitive:   true,
+				Description: "Key file. Accepts string, file or absolute path ",
 			},
 			"vns3": &schema.Schema{
 				Type:     schema.TypeSet,
@@ -57,23 +60,11 @@ func resourceHttpsCertsCreate(ctx context.Context, d *schema.ResourceData, m int
 
 }
 
-func resourceHttpsCertsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-
-	var diags diag.Diagnostics
-
-	return diags
-}
-
-func resourceHttpsCertsUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
-
-	return diags
-
-	//return resourceHttpsCertsRead(ctx, d, m)
-}
-
 func resourceHttpsCertsDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
+
+	//delete in the context of tf state
+	d.SetId("")
 
 	return diags
 }
