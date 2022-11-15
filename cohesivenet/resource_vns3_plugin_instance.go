@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+//Plugin instance V2 API and go client
 func resourceVns3PluginInstanceNew() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourcePluginInstanceCreateNew,
