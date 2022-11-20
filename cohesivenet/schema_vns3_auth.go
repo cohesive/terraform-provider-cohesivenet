@@ -12,6 +12,7 @@ import (
 
 func getVns3Client(ctx context.Context, d *schema.ResourceData, m interface{}) (*cn.VNS3Client, error) {
 	Logger := NewLogger(ctx)
+	defaultVns3Client, hasDefaultVns3Client := m.(map[string]interface{})["vns3"].(*cn.VNS3Client)
 	vns3AuthSet, hasVns3Auth := d.Get("vns3").(*schema.Set)
 	if hasVns3Auth && vns3AuthSet.Len() != 0 {
 		vns3Auth := vns3AuthSet.List()[0].(map[string]any)
@@ -19,13 +20,15 @@ func getVns3Client(ctx context.Context, d *schema.ResourceData, m interface{}) (
 		if err != nil {
 			return nil, err
 		}
+		if hasDefaultVns3Client {
+			vns3Client.NetworkEdgePluginsApi = defaultVns3Client.NetworkEdgePluginsApi
+		}
 		return vns3Client, nil
 	}
-	vns3Client, hasVns3Client := m.(map[string]interface{})["vns3"].(*cn.VNS3Client)
-	if !hasVns3Client {
+	if !hasDefaultVns3Client {
 		return nil, fmt.Errorf("no vns3 configured in provider or in resource")
 	}
-	return vns3Client, nil
+	return defaultVns3Client, nil
 }
 
 func setVns3ClientPassword(vns3 *cn.VNS3Client, newPassword string) *cn.VNS3Client {
@@ -65,7 +68,7 @@ func getVns3AuthSchema() map[string]*schema.Schema {
 
 func getV1Client(ctx context.Context, d *schema.ResourceData, m interface{}) (*cnv1.Client, error) {
 	Logger := NewLogger(ctx)
-
+	defaultV1Client, hasDefaultV1Client := m.(map[string]interface{})["clientv1"].(*cnv1.Client)
 	//first check for vns3 override
 	vns3AuthSet, hasVns3Auth := d.Get("vns3").(*schema.Set)
 	if hasVns3Auth && vns3AuthSet.Len() != 0 {
@@ -74,13 +77,15 @@ func getV1Client(ctx context.Context, d *schema.ResourceData, m interface{}) (*c
 		if err != nil {
 			return nil, err
 		}
+		if hasDefaultV1Client {
+			v1client.ReqLock = defaultV1Client.ReqLock
+		}
 		return v1client, nil
 	} else {
-		v1Client, hasV1Client := m.(map[string]interface{})["clientv1"].(*cnv1.Client)
-		if !hasV1Client {
+		if !hasDefaultV1Client {
 			return nil, fmt.Errorf("no vns3 configured in provider or in resource")
 		}
-		return v1Client, nil
+		return defaultV1Client, nil
 	}
 }
 
