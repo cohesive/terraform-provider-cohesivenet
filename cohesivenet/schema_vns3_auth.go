@@ -21,7 +21,7 @@ func getVns3Client(ctx context.Context, d *schema.ResourceData, m interface{}) (
 			return nil, err
 		}
 		if hasDefaultVns3Client {
-			vns3Client.NetworkEdgePluginsApi = defaultVns3Client.NetworkEdgePluginsApi
+			vns3Client.ReqLock = defaultVns3Client.ReqLock
 		}
 		return vns3Client, nil
 	}

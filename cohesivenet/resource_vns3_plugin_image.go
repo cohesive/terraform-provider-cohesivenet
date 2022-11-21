@@ -99,6 +99,10 @@ func resourcePluginImageCreateNew(ctx context.Context, d *schema.ResourceData, m
 	var diags diag.Diagnostics
 
 	vns3, clienterror := getVns3Client(ctx, d, m)
+	// synchronize creating a plugin image
+	vns3.ReqLock.Lock()
+	defer vns3.ReqLock.Unlock()
+
 	if clienterror != nil {
 		return diag.FromErr(clienterror)
 	}
