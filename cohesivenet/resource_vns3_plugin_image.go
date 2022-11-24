@@ -188,6 +188,9 @@ func resourcePluginImageDeleteNew(ctx context.Context, d *schema.ResourceData, m
 	if clienterror != nil {
 		return diag.FromErr(clienterror)
 	}
+	// synchronize creating a plugin image
+	vns3.ReqLock.Lock()
+	defer vns3.ReqLock.Unlock()
 
 	Id := d.Id()
 	iId, _ := strconv.Atoi(Id)

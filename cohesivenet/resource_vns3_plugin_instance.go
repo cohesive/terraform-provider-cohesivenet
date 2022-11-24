@@ -87,6 +87,10 @@ func resourcePluginInstanceCreateNew(ctx context.Context, d *schema.ResourceData
 	if clienterror != nil {
 		return diag.FromErr(clienterror)
 	}
+	// synchronize creating a plugin image
+	vns3.ReqLock.Lock()
+	defer vns3.ReqLock.Unlock()
+
 	name := d.Get("name").(string)
 	plugin_id := int32(d.Get("plugin_id").(int))
 	description := d.Get("description").(string)
@@ -212,6 +216,9 @@ func resourcePluginInstanceDeleteNew(ctx context.Context, d *schema.ResourceData
 	if clienterror != nil {
 		return diag.FromErr(clienterror)
 	}
+	// synchronize creating a plugin image
+	vns3.ReqLock.Lock()
+	defer vns3.ReqLock.Unlock()
 
 	Id := d.Id()
 	iId, _ := strconv.Atoi(Id)
