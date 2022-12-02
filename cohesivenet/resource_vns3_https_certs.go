@@ -2,6 +2,7 @@ package cohesivenet
 
 import (
 	"context"
+	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -63,25 +64,31 @@ func resourceHttpsCertsCreate(ctx context.Context, d *schema.ResourceData, m int
 
 	var diags diag.Diagnostics
 
-	cert_file := d.Get("cert_file").(string)
-	key_file := d.Get("key_file").(string)
-	cert := d.Get("cert").(string)
-	key := d.Get("key").(string)
+	cert_file, hasCertFile := d.GetOk("cert_file")
+	certFile := cert_file.(string)
+	key_file, hasKeyFile := d.GetOk("key_file")
+	keyFile := key_file.(string)
+	cert, hasCert := d.GetOk("cert")
+	certVal := cert.(string)
+	key, hasKey := d.GetOk("key")
+	keyVal := key.(string)
 
-	if cert_file != "" {
-		response, err := c.UpdateHttpsCertsByFilepath(cert_file, key_file)
+	if hasCertFile && hasKeyFile {
+		response, err := c.UpdateHttpsCertsByFilepath(certFile, keyFile)
+		log.Println("Log Message Path" + certFile)
 		if err != nil {
 			return diag.FromErr(err)
 		}
 		d.SetId(response.Response.UUID)
-	} else {
-		response, err := c.UpdateHttpsCertByValue(cert, key)
+	} else if hasCert && hasKey {
+		response, err := c.UpdateHttpsCertByValue(certVal, keyVal)
+		log.Println("Log Message File" + certVal)
 		if err != nil {
 			return diag.FromErr(err)
 		}
 		d.SetId(response.Response.UUID)
-
 	}
+
 	return diags
 
 }
