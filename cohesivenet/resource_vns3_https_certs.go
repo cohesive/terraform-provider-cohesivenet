@@ -17,14 +17,27 @@ func resourceHttpsCerts() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"cert_file": &schema.Schema{
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Certificate file. Accepts absolute path",
+			},
+			"key_file": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+
+				ForceNew:    true,
+				Description: "Key file. Accepts Accepts absolute path",
+			},
+			"cert": &schema.Schema{
+				Type:        schema.TypeString,
+				Optional:    true,
 				Sensitive:   true,
 				ForceNew:    true,
 				Description: "Certificate file. Accepts file",
 			},
-			"key_file": &schema.Schema{
+			"key": &schema.Schema{
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Sensitive:   true,
 				ForceNew:    true,
 				Description: "Key file. Accepts file",
@@ -52,13 +65,23 @@ func resourceHttpsCertsCreate(ctx context.Context, d *schema.ResourceData, m int
 
 	cert_file := d.Get("cert_file").(string)
 	key_file := d.Get("key_file").(string)
+	cert := d.Get("cert").(string)
+	key := d.Get("key").(string)
 
-	response, err := c.UpdateHttpsCertByValue(cert_file, key_file)
-	if err != nil {
-		return diag.FromErr(err)
+	if cert_file != "" {
+		response, err := c.UpdateHttpsCertsByFilepath(cert_file, key_file)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.SetId(response.Response.UUID)
+	} else {
+		response, err := c.UpdateHttpsCertByValue(cert, key)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.SetId(response.Response.UUID)
+
 	}
-	d.SetId(response.Response.UUID)
-
 	return diags
 
 }
