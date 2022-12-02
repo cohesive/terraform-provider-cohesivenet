@@ -10,8 +10,8 @@ import (
 func resourceHttpsCerts() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceHttpsCertsCreate,
+		ReadContext:   resourceHttpsCertsRead,
 		//There is no concept of read / update in API
-		//ReadContext:   resourceHttpsCertsRead,
 		//UpdateContext: resourceHttpsCertsUpdate,
 		DeleteContext: resourceHttpsCertsDelete,
 		Schema: map[string]*schema.Schema{
@@ -19,18 +19,21 @@ func resourceHttpsCerts() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Sensitive:   true,
-				Description: "Certificate file. Accepts string, file or absolute path",
+				ForceNew:    true,
+				Description: "Certificate file. Accepts file",
 			},
 			"key_file": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
 				Sensitive:   true,
-				Description: "Key file. Accepts string, file or absolute path ",
+				ForceNew:    true,
+				Description: "Key file. Accepts file",
 			},
 			"vns3": &schema.Schema{
 				Type:     schema.TypeSet,
 				MaxItems: 1,
 				Optional: true,
+				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: getVns3AuthSchema(),
 				},
@@ -50,7 +53,7 @@ func resourceHttpsCertsCreate(ctx context.Context, d *schema.ResourceData, m int
 	cert_file := d.Get("cert_file").(string)
 	key_file := d.Get("key_file").(string)
 
-	response, err := c.UpdateHttpsCerts(cert_file, key_file)
+	response, err := c.UpdateHttpsCertByValue(cert_file, key_file)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -58,6 +61,13 @@ func resourceHttpsCertsCreate(ctx context.Context, d *schema.ResourceData, m int
 
 	return diags
 
+}
+
+func resourceHttpsCertsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+
+	var diags diag.Diagnostics
+
+	return diags
 }
 
 func resourceHttpsCertsDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
