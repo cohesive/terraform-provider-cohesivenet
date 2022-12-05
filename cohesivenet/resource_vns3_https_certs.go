@@ -65,22 +65,18 @@ func resourceHttpsCertsCreate(ctx context.Context, d *schema.ResourceData, m int
 	var diags diag.Diagnostics
 
 	cert_file, hasCertFile := d.GetOk("cert_file")
-	certFile := cert_file.(string)
 	key_file, hasKeyFile := d.GetOk("key_file")
-	keyFile := key_file.(string)
 	cert, hasCert := d.GetOk("cert")
-	certVal := cert.(string)
 	key, hasKey := d.GetOk("key")
-	keyVal := key.(string)
 
 	if hasCertFile && hasKeyFile {
-		response, err := c.UpdateHttpsCertsByFilepath(certFile, keyFile)
+		response, err := c.UpdateHttpsCertsByFilepath(cert_file.(string), key_file.(string))
 		if err != nil {
 			return diag.FromErr(err)
 		}
 		d.SetId(response.Response.UUID)
 	} else if hasCert && hasKey {
-		response, err := c.UpdateHttpsCertByValue(certVal, keyVal)
+		response, err := c.UpdateHttpsCertByValue(cert.(string), key.(string))
 		if err != nil {
 			return diag.FromErr(err)
 		}
