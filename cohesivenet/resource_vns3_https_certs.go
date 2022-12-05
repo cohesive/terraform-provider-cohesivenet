@@ -2,7 +2,7 @@ package cohesivenet
 
 import (
 	"context"
-	"log"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -75,18 +75,18 @@ func resourceHttpsCertsCreate(ctx context.Context, d *schema.ResourceData, m int
 
 	if hasCertFile && hasKeyFile {
 		response, err := c.UpdateHttpsCertsByFilepath(certFile, keyFile)
-		log.Println("Log Message Path" + certFile)
 		if err != nil {
 			return diag.FromErr(err)
 		}
 		d.SetId(response.Response.UUID)
 	} else if hasCert && hasKey {
 		response, err := c.UpdateHttpsCertByValue(certVal, keyVal)
-		log.Println("Log Message File" + certVal)
 		if err != nil {
 			return diag.FromErr(err)
 		}
 		d.SetId(response.Response.UUID)
+	} else {
+		return diag.FromErr(fmt.Errorf("key or cert value or file missing from imput"))
 	}
 
 	return diags
