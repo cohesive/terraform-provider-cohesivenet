@@ -82,7 +82,7 @@ func resourceHttpsCertsCreate(ctx context.Context, d *schema.ResourceData, m int
 		}
 		d.SetId(response.Response.UUID)
 	} else {
-		return diag.FromErr(fmt.Errorf("key or cert value or file missing from imput"))
+		return diag.FromErr(fmt.Errorf("one of cert/key or cert_file/key_file must be specified"))
 	}
 
 	return diags
