@@ -173,7 +173,11 @@ resource "cohesivenet_vns3_plugin_images" "image" {
 
 /*
 resource "cohesivenet_vns3_https_certs" "certs" {
+  //filepath
   cert_file = var.vns3_license_cert_file
   key_file  = var.vns3_license_key_file
+  //file
+  cert = file("${path.module}/vns_cert.pem")
+  key = file("${path.module}/vns_cert.key")
 }
 */
