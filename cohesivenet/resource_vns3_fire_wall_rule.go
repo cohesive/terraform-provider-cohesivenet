@@ -41,11 +41,6 @@ func resourceFirewallRules() *schema.Resource {
 				Computed:    true,
 				Description: "Position of firewall rule",
 			},
-			"id": &schema.Schema{
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "Unique id of the rule in VNS3",
-			},
 			"table": &schema.Schema{
 				Type:        schema.TypeString,
 				Computed:    true,
