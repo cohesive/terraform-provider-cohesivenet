@@ -38,7 +38,6 @@ func resourceFirewallRules() *schema.Resource {
 			"position": &schema.Schema{
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Computed:    true,
 				Description: "Position of firewall rule",
 			},
 			"table": &schema.Schema{
