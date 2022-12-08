@@ -30,7 +30,7 @@ Read-Only:
 - `description` (String)
 - `editable` (Boolean)
 - `enabled` (Boolean)
-- `id` (Number)
+- `id` (String)
 - `interface` (String)
 - `metric` (Number)
 - `netmask` (String)

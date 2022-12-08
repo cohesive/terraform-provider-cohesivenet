@@ -21,3 +21,15 @@ description: |-
 - `password` (String, Sensitive)
 - `token` (String, Sensitive)
 - `username` (String)
+- `vns3` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--vns3))
+
+<a id="nestedblock--vns3"></a>
+### Nested Schema for `vns3`
+
+Optional:
+
+- `api_token` (String, Sensitive)
+- `host` (String)
+- `password` (String, Sensitive)
+- `timeout` (Number)
+- `username` (String)
