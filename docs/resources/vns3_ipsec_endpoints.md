@@ -3,12 +3,12 @@
 page_title: "cohesivenet_vns3_ipsec_endpoints Resource - terraform-provider-cohesivenet"
 subcategory: ""
 description: |-
-  
+  Creates IPsec endpoint
 ---
 
 # cohesivenet_vns3_ipsec_endpoints (Resource)
 
-
+Creates IPsec endpoint
 
 ## Example Usage
 
@@ -44,7 +44,6 @@ resource "vns3_ipsec_endpoints" "endpoint" {
 ### Optional
 
 - `last_updated` (String)
-- `vns3` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--vns3))
 
 ### Read-Only
 
@@ -70,17 +69,5 @@ Optional:
 - `route_based_local` (String) Local subnet of IPsec tunnel
 - `route_based_remote` (String) Remote subnet of IPsec tunnel
 - `vpn_type` (String) Type of VPN connection. VTI or GRE
-
-
-<a id="nestedblock--vns3"></a>
-### Nested Schema for `vns3`
-
-Optional:
-
-- `api_token` (String, Sensitive)
-- `host` (String)
-- `password` (String, Sensitive)
-- `timeout` (Number)
-- `username` (String)
 
 

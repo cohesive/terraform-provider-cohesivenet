@@ -3,12 +3,12 @@
 page_title: "cohesivenet_vns3_ipsec_ebpg_peers Resource - terraform-provider-cohesivenet"
 subcategory: ""
 description: |-
-  
+  Creates eBGP peer in conjunction with vns3_ipsec_endpoints resource.
 ---
 
 # cohesivenet_vns3_ipsec_ebpg_peers (Resource)
 
-
+Creates eBGP peer in conjunction with vns3_ipsec_endpoints resource.
 
 ## Example Usage
 
@@ -42,7 +42,6 @@ resource "vns3_ipsec_ebpg_peers" "peer" {
 
 - `endpoint_id` (Number)
 - `last_updated` (String)
-- `vns3` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--vns3))
 
 ### Read-Only
 
@@ -69,16 +68,5 @@ Read-Only:
 
 - `id` (String) Id of the eBGP peer
 
-
-<a id="nestedblock--vns3"></a>
-### Nested Schema for `vns3`
-
-Optional:
-
-- `api_token` (String, Sensitive)
-- `host` (String)
-- `password` (String, Sensitive)
-- `timeout` (Number)
-- `username` (String)
 
 

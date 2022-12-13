@@ -26,7 +26,6 @@ description: |-
 - `description` (String) Description of transit link
 - `last_updated` (String)
 - `policies` (String) Optional policies to place at end of conf file
-- `vns3` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--vns3))
 
 ### Read-Only
 
@@ -34,15 +33,5 @@ description: |-
 - `id` (String) The ID of this resource.
 - `type` (String) Type of client connection
 
-<a id="nestedblock--vns3"></a>
-### Nested Schema for `vns3`
-
-Optional:
-
-- `api_token` (String, Sensitive)
-- `host` (String)
-- `password` (String, Sensitive)
-- `timeout` (Number)
-- `username` (String)
 
 

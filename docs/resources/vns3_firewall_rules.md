@@ -3,12 +3,12 @@
 page_title: "cohesivenet_vns3_firewall_rules Resource - terraform-provider-cohesivenet"
 subcategory: ""
 description: |-
-  
+  Creates firewall rules using the Cohesive simplified IP tables syntax.
 ---
 
 # cohesivenet_vns3_firewall_rules (Resource)
 
-
+Creates firewall rules using the Cohesive simplified IP tables syntax.
 
 ## Example Usage
 
@@ -25,7 +25,6 @@ resource "vns3_firewall_rules" "rule" {
 
 - `last_updated` (String)
 - `rule` (Block List) Nested Block for rules (see [below for nested schema](#nestedblock--rule))
-- `vns3` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--vns3))
 
 ### Read-Only
 
@@ -38,17 +37,5 @@ Optional:
 
 - `id` (String) Id given to rule after it has been applied
 - `script` (String) Firewall rule in VNS3 syntax
-
-
-<a id="nestedblock--vns3"></a>
-### Nested Schema for `vns3`
-
-Optional:
-
-- `api_token` (String, Sensitive)
-- `host` (String)
-- `password` (String, Sensitive)
-- `timeout` (Number)
-- `username` (String)
 
 

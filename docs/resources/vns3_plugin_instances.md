@@ -3,12 +3,12 @@
 page_title: "cohesivenet_vns3_plugin_instances Resource - terraform-provider-cohesivenet"
 subcategory: ""
 description: |-
-  
+  Launches a plugin instance from a plugin image already imported into the VNS3 controller.
 ---
 
 # cohesivenet_vns3_plugin_instances (Resource)
 
-
+Launches a plugin instance from a plugin image already imported into the VNS3 controller.
 
 ## Example Usage
 
@@ -19,8 +19,6 @@ resource  "vns3_plugin_instances" instance {
     ip_address =  "198.51.100.11"
     description = "plugindescription"
     command = "/usr/bin/supervisord"
-    environment = "HAENV_MODE=primary,HAENV_CLOUD=aws,HAENV_PEER_PUBLIC_IP=3.127.171.216,HAENV_SLEEP_TIME=15"
-
  }
 ```
 
@@ -36,21 +34,10 @@ resource  "vns3_plugin_instances" instance {
 - `last_updated` (String)
 - `name` (String) Name of instance
 - `plugin_id` (String) Id of instance
-- `vns3` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--vns3))
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
 
-<a id="nestedblock--vns3"></a>
-### Nested Schema for `vns3`
-
-Optional:
-
-- `api_token` (String, Sensitive)
-- `host` (String)
-- `password` (String, Sensitive)
-- `timeout` (Number)
-- `username` (String)
 
 

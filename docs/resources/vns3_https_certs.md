@@ -3,12 +3,12 @@
 page_title: "cohesivenet_vns3_https_certs Resource - terraform-provider-cohesivenet"
 subcategory: ""
 description: |-
-  
+  Uploads HTTPS certificates to the VNS3 controller UI
 ---
 
 # cohesivenet_vns3_https_certs (Resource)
 
-
+Uploads HTTPS certificates to the VNS3 controller UI
 
 ## Example Usage
 
@@ -28,21 +28,8 @@ resource "vns3_https_certs" "cert" {
 - `cert_file` (String) Certificate file. Accepts absolute path
 - `key` (String, Sensitive) Key file. Accepts file
 - `key_file` (String) Key file. Accepts Accepts absolute path
-- `vns3` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--vns3))
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-<a id="nestedblock--vns3"></a>
-### Nested Schema for `vns3`
-
-Optional:
-
-- `api_token` (String, Sensitive)
-- `host` (String)
-- `password` (String, Sensitive)
-- `timeout` (Number)
-- `username` (String)
-
 

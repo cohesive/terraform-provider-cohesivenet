@@ -3,12 +3,12 @@
 page_title: "cohesivenet_vns3_plugin_images Resource - terraform-provider-cohesivenet"
 subcategory: ""
 description: |-
-  
+   Imports a plugin image in the VNS3 controller.
 ---
 
 # cohesivenet_vns3_plugin_images (Resource)
 
-
+ Imports a plugin image in the VNS3 controller.
 
 ## Example Usage
 
@@ -37,7 +37,6 @@ resource "vns3_plugin_images" "image" {
 ### Optional
 
 - `last_updated` (String)
-- `vns3` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--vns3))
 
 ### Read-Only
 
@@ -70,17 +69,5 @@ Optional:
 Read-Only:
 
 - `import_id` (String) Initial import Id
-
-
-<a id="nestedblock--vns3"></a>
-### Nested Schema for `vns3`
-
-Optional:
-
-- `api_token` (String, Sensitive)
-- `host` (String)
-- `password` (String, Sensitive)
-- `timeout` (Number)
-- `username` (String)
 
 

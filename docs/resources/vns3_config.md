@@ -3,7 +3,7 @@
 page_title: "cohesivenet_vns3_config Resource - terraform-provider-cohesivenet"
 subcategory: ""
 description: |-
-  
+  Launches, licences and configures one or many VNS3 controllers in conjunction with the AWS Terraform provider.
 ---
 
 # cohesivenet_vns3_config (Resource)
@@ -16,7 +16,7 @@ description: |-
 terraform {
   required_providers {
     cohesivenet = {
-      version = "0.1.0"
+      version = "0.1.9"
       source  = "cohesive.net/vns3/cohesivenet"
     }
     aws = {
