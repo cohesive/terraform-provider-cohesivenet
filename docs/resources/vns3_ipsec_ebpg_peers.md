@@ -11,6 +11,7 @@ description: |-
 Creates eBGP peer in conjunction with vns3_ipsec_endpoints resource.
 
 ## Example Usage
+
 ```terraform
 resource "vns3_ipsec_ebpg_peers" "peer" {
   endpoint_id = vns3_ipsec_endpoints.endpoint.id
@@ -39,9 +40,11 @@ resource "vns3_ipsec_ebpg_peers" "peer" {
 
 ### Optional
 
+- `endpoint_id` (Number)
+- `last_updated` (String)
+
 ### Read-Only
 
-- `endpoint_id` (Number)
 - `id` (String) The ID of this resource.
 
 <a id="nestedblock--ebgp_peer"></a>
@@ -49,20 +52,21 @@ resource "vns3_ipsec_ebpg_peers" "peer" {
 
 Required:
 
-- `asn` (Number) Autonomous System Number of your network.
-- `ipaddress` (String) IP address or neighbor IP for BGP.
+- `asn` (Number) Autonomous System Number of your network
+- `ipaddress` (String) IP address or neighbor IP for BGP
 
 Optional:
 
-- `access_list` (String) Access Control List. 
-- `add_network_distance` (Boolean) Specifies if we are using network distance weighting, Default: false.
-- `add_network_distance_direction` (String) Specifies direction for distance weighting. (in / out).
-- `add_network_distance_hops` (Number) Specifies how many hops for network distance weighting.
-- `bgp_password` (String) Password for BGP, if required.
-- `local_asn_alias` (Number) ASN alias.
+- `access_list` (String) Access Control List. IN PERMIT xxxx / OUT PERMIT xxxx
+- `add_network_distance` (Boolean) Specifies if we are using network distance weighting, Default: false
+- `add_network_distance_direction` (String) Specifies direction for distance weighting. IN / OUT
+- `add_network_distance_hops` (Number) Specifies how many hops for network distance weighting
+- `bgp_password` (String) Password for BGP, if required
+- `local_asn_alias` (Number) ASN alias
 
 Read-Only:
 
-- `id` (String) Id of the eBGP peer.
+- `id` (String) Id of the eBGP peer
+
 
 

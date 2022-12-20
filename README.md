@@ -13,7 +13,7 @@ Beta version of Cohesive Networks Terraform provider for VNS3 cloud edge control
 terraform {
   required_providers {
     cohesivenet = {
-      version = "0.1.0"
+      version = "0.1.9"
       source  = "cohesive/cohesivenet"
     }
   }
@@ -28,7 +28,7 @@ terraform {
   required_providers {
     cohesivenet = {
       source = "cohesive/cohesivenet"
-      version = "0.1.0"
+      version = "0.1.9"
     }
   }
 }
