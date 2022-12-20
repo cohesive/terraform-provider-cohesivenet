@@ -78,6 +78,7 @@ func resourceRulesCreate(ctx context.Context, d *schema.ResourceData, m interfac
 	}
 	err := c.CreateFirewallRules(ruleList)
 	if err != nil {
+		resourceRulesDelete(ctx, d, m)
 		return diag.FromErr(err)
 	}
 	//d.SetId(newRule.FirewallRules[0].ID)
