@@ -31,23 +31,23 @@ func resourceRules() *schema.Resource {
 				},
 			},
 			"rule": &schema.Schema{
-				Type:        schema.TypeList,
-				ForceNew:    true,
+				Type: schema.TypeList,
+				//ForceNew:    true,
 				Optional:    true,
 				Computed:    true,
 				Description: "Nested Block for rules",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": &schema.Schema{
-							Type:        schema.TypeString,
-							ForceNew:    true,
+							Type: schema.TypeString,
+							//ForceNew:    true,
 							Optional:    true,
 							Computed:    true,
 							Description: "Id given to rule after it has been applied",
 						},
 						"script": &schema.Schema{
-							Type:        schema.TypeString,
-							ForceNew:    true,
+							Type: schema.TypeString,
+							//ForceNew:    true,
 							Optional:    true,
 							Description: "Firewall rule in VNS3 syntax",
 						},
@@ -121,8 +121,39 @@ func resourceRulesRead(ctx context.Context, d *schema.ResourceData, m interface{
 	return diags
 }
 
+/*
 func resourceRulesUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	return resourceEndpointsRead(ctx, d, m)
+	return resourceRulesRead(ctx, d, m)
+}
+*/
+func resourceRulesUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	c, error := getV1Client(ctx, d, m)
+	if error != nil {
+		return diag.FromErr(error)
+	}
+
+	if d.HasChange("rule") {
+		var ruleList []*cn.FirewallRule
+		rules := d.Get("rule").([]interface{})
+
+		for _, rule := range rules {
+			rle := rule.(map[string]interface{})
+			rule := cn.FirewallRule{
+				ID:   rle["id"].(string),
+				Rule: rle["script"].(string),
+			}
+
+			ruleList = append(ruleList, &rule)
+		}
+
+		err := c.UpdateRules(ruleList)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
+		d.Set("last_updated", time.Now().Format(time.RFC850))
+	}
+	return resourceRulesRead(ctx, d, m)
 }
 
 func resourceRulesDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
