@@ -104,7 +104,7 @@ func resourceRulesRead(ctx context.Context, d *schema.ResourceData, m interface{
 
 	d.Set("rule", rules)
 
-	//d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
+	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
 
 	return diags
 }
