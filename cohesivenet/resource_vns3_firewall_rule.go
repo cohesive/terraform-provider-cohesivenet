@@ -78,7 +78,7 @@ func resourceRulesCreate(ctx context.Context, d *schema.ResourceData, m interfac
 		resourceRulesDelete(ctx, d, m)
 		return diag.FromErr(err)
 	}
-	//d.SetId(newRule.FirewallRules[0].ID)
+
 	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
 
 	resourceRulesRead(ctx, d, m)
@@ -103,8 +103,6 @@ func resourceRulesRead(ctx context.Context, d *schema.ResourceData, m interface{
 	rules := flattenRulesData(firewallResponse)
 
 	d.Set("rule", rules)
-
-	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
 
 	return diags
 }
