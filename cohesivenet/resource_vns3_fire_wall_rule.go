@@ -94,9 +94,9 @@ func resourceFirewallRulesCreate(ctx context.Context, d *schema.ResourceData, m 
 	rule := d.Get("rule").(string)
 	newRule := cn.NewCreateFirewallRuleRequest(rule)
 
-	position, hasPosition := d.Get("position").(int32)
+	position, hasPosition := d.Get("position").(int)
 	if hasPosition {
-		newRule.Position = &position
+		*newRule.Position = int32(position)
 	}
 
 	comment, hasComment := d.Get("comment").(string)
