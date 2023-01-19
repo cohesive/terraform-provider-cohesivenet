@@ -390,10 +390,10 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 
 	// wait for a while if still coming up
-	_, err := vns3.ConfigurationApi.WaitForApi(&ctx, 60*8, 3, 5)
+	_, err := vns3.ConfigurationApi.WaitForApi(&ctx, 60*20, 3, 5)
 	if err != nil {
 		host, _ := vns3.GetConfig().ServerURL(0, map[string]string{})
-		return diag.FromErr(fmt.Errorf("VNS3 is not available [host=%v]", host))
+		return diag.FromErr(fmt.Errorf("VNS3 is not available [host=%v] %v", host, err))
 	}
 
 	if !hasAuthBeenSet {
@@ -434,8 +434,8 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 			LicenseFile:    licenseFile,
 			PeerId:         peerId,
 			KeysetParams:   keysetParamsRequest,
-			WaitTimeout:    60 * 10,
-			KeysetTimeout:  60 * 5,
+			WaitTimeout:    60 * 20,
+			KeysetTimeout:  60 * 20,
 		}
 
 		configDetail, setupErr := macros.SetupController(vns3, setupReq)
@@ -451,7 +451,7 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	} else {
 		source := keysetSource.(string)
-		_, err := macros.FetchKeysetFromSource(vns3, source, keysetToken, 60*10)
+		_, err := macros.FetchKeysetFromSource(vns3, source, keysetToken, 60*20)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("VNS3 Setup error [fetch keyset] %+v", err))
 		}

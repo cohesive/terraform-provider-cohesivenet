@@ -156,7 +156,7 @@ func generateVNS3Client(vns3Auth map[string]any, Logger Logger) (*cn.VNS3Client,
 	}
 	timeout, hasTimeout := vns3Auth["timeout"].(int)
 	if !hasTimeout || timeout == 0 {
-		timeout = 10
+		timeout = 60
 	}
 	vns3Client := cn.NewVNS3Client(cfg, cn.ClientParams{
 		Timeout: timeout,
