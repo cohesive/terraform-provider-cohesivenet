@@ -186,7 +186,7 @@ func resourceVns3Config() *schema.Resource {
 			},
 			"configuration_id": &schema.Schema{
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				Description: "Configuration id",
 			},
 		},
