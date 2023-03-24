@@ -179,6 +179,16 @@ func resourceVns3Config() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"private_ip": &schema.Schema{
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "ip of controller",
+			},
+			"configuration_id": &schema.Schema{
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Configuration id",
+			},
 		},
 	}
 }
@@ -511,11 +521,11 @@ func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("VNS3 Config check error: %+v", err))
 	}
-
 	configData := configDetail.GetResponse()
 	topologyChecksum := configData.GetTopologyChecksum()
 	d.Set("topology_checksum", topologyChecksum)
 	d.Set("licensed", configData.GetLicensed())
+	d.Set("private_ip", configData.GetPrivateIpaddress())
 
 	keysetDetail, _, err := vns3.ConfigurationApi.GetKeyset(vns3.ConfigurationApi.GetKeysetRequest(ctx))
 	if err != nil {
@@ -530,10 +540,35 @@ func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface
 }
 
 func resourceConfigUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	// TODO: we could allow topology name and controller name to be reset and only fail
-	// when license params or keyset params change
-	notsupportederror := fmt.Errorf("VNS3 config resource cannot be updated. Please redeploy a new server or reset defaults and edit terraform state")
-	return diag.FromErr(notsupportederror)
+
+	var diags diag.Diagnostics
+	vns3, clienterror := getVns3Client(ctx, d, m)
+	if clienterror != nil {
+		return diag.FromErr(clienterror)
+	}
+
+	if !d.HasChange("configuration_id") {
+		notsupportederror := fmt.Errorf("specified VNS3 config resource cannot be updated yet, coming soon")
+		return diag.FromErr(notsupportederror)
+	}
+
+	// wait for new controller instance to come up
+	_, wait_err := vns3.ConfigurationApi.WaitForApi(&ctx, 60*20, 3, 5)
+	if wait_err != nil {
+		host, _ := vns3.GetConfig().ServerURL(0, map[string]string{})
+		return diag.FromErr(fmt.Errorf("VNS3 is not available [host=%v] %v", host, wait_err))
+	}
+
+	// take snashop of current controller
+	source := d.Get("private_ip").(string)
+	vns3.Log.Info(fmt.Sprintf("Init controller from source: %+v", source))
+	_, err := macros.InitControllerFromSource(vns3, source, d.Get("new_api_password").(string), 60*20)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("VNS3 Setup error [fetch snapshot] %+v", err))
+	}
+
+	resourceConfigRead(ctx, d, m)
+	return diags
 }
 
 func resourceConfigDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
