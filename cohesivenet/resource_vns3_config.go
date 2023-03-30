@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
 	cn "github.com/cohesive/cohesivenet-client-go/cohesivenet"
 	macros "github.com/cohesive/cohesivenet-client-go/cohesivenet/macros"
@@ -417,16 +416,11 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	// Begin configuration
 	vns3.Log.Debug(fmt.Sprintf("keysetparams config %+v", keysetParams))
-
 	keysetSource, hasSource := keysetParams["source"]
 	hasSource = hasSource && keysetSource != ""
-	// if no source provided, we are configuring new VNS3 topology. license required
-	if !hasSource {
-		_licenseFile, hasLicense := d.GetOk("license_file")
-		if !hasLicense {
-			return diag.FromErr(fmt.Errorf("license_file or keyset.source is required to configure VNS3"))
-		}
-
+	_licenseFile, hasLicense := d.GetOk("license_file")
+	// if license is provided, we are configuring new VNS3 topology. license required
+	if hasLicense {
 		licenseFile := _licenseFile.(string)
 		licenseParamsRequest, licenseParamsError := buildLicenseParamsRequest(d)
 		if licenseParamsError != nil {
@@ -460,6 +454,9 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		}
 
 	} else {
+		if !hasSource {
+			return diag.FromErr(fmt.Errorf("license_file or keyset.source is required to configure VNS3"))
+		}
 		source := keysetSource.(string)
 		_, err := macros.FetchKeysetFromSource(vns3, source, keysetToken, 60*20)
 		if err != nil {
@@ -493,7 +490,7 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	keysetChecksum := keysetData.GetChecksum()
 	d.Set("keyset_checksum", keysetChecksum)
 
-	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
+	d.SetId(strconv.Itoa(int(configData.GetManagerId())))
 
 	return diags
 }
@@ -548,8 +545,10 @@ func resourceConfigUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 
 	if !d.HasChange("configuration_id") {
-		notsupportederror := fmt.Errorf("specified VNS3 config resource cannot be updated yet, coming soon")
-		return diag.FromErr(notsupportederror)
+		vns3.Log.Info(fmt.Sprintf("specified VNS3 config resource cannot be updated yet coming soon %v", d.Get("controller_name").(string)))
+		//notsupportederror := fmt.Errorf("specified VNS3 config resource cannot be updated yet, coming soon")
+		//return diag.FromErr(notsupportederror)
+		return diags
 	}
 
 	// wait for new controller instance to come up

@@ -15,8 +15,8 @@ func resourceVns3Peering() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourcePeeringCreate,
 		ReadContext:   resourcePeeringRead,
-		UpdateContext: resourceConfigUpdate,
-		DeleteContext: resourceConfigDelete,
+		UpdateContext: resourcePeeringUpdate,
+		DeleteContext: resourcePeeringDelete,
 		Schema: map[string]*schema.Schema{
 			"last_updated": &schema.Schema{
 				Type:     schema.TypeString,
