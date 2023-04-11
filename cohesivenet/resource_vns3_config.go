@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
 	cn "github.com/cohesive/cohesivenet-client-go/cohesivenet"
 	macros "github.com/cohesive/cohesivenet-client-go/cohesivenet/macros"
@@ -178,6 +177,16 @@ func resourceVns3Config() *schema.Resource {
 			"licensed": &schema.Schema{
 				Type:     schema.TypeBool,
 				Computed: true,
+			},
+			"private_ip": &schema.Schema{
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "ip of controller",
+			},
+			"configuration_id": &schema.Schema{
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Configuration id",
 			},
 		},
 	}
@@ -407,16 +416,11 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	// Begin configuration
 	vns3.Log.Debug(fmt.Sprintf("keysetparams config %+v", keysetParams))
-
 	keysetSource, hasSource := keysetParams["source"]
 	hasSource = hasSource && keysetSource != ""
-	// if no source provided, we are configuring new VNS3 topology. license required
-	if !hasSource {
-		_licenseFile, hasLicense := d.GetOk("license_file")
-		if !hasLicense {
-			return diag.FromErr(fmt.Errorf("license_file or keyset.source is required to configure VNS3"))
-		}
-
+	_licenseFile, hasLicense := d.GetOk("license_file")
+	// if license is provided, we are configuring new VNS3 topology. license required
+	if hasLicense {
 		licenseFile := _licenseFile.(string)
 		licenseParamsRequest, licenseParamsError := buildLicenseParamsRequest(d)
 		if licenseParamsError != nil {
@@ -450,6 +454,9 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		}
 
 	} else {
+		if !hasSource {
+			return diag.FromErr(fmt.Errorf("license_file or keyset.source is required to configure VNS3"))
+		}
 		source := keysetSource.(string)
 		_, err := macros.FetchKeysetFromSource(vns3, source, keysetToken, 60*20)
 		if err != nil {
@@ -483,7 +490,7 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	keysetChecksum := keysetData.GetChecksum()
 	d.Set("keyset_checksum", keysetChecksum)
 
-	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
+	d.SetId(strconv.Itoa(int(configData.GetManagerId())))
 
 	return diags
 }
@@ -511,11 +518,11 @@ func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("VNS3 Config check error: %+v", err))
 	}
-
 	configData := configDetail.GetResponse()
 	topologyChecksum := configData.GetTopologyChecksum()
 	d.Set("topology_checksum", topologyChecksum)
 	d.Set("licensed", configData.GetLicensed())
+	d.Set("private_ip", configData.GetPrivateIpaddress())
 
 	keysetDetail, _, err := vns3.ConfigurationApi.GetKeyset(vns3.ConfigurationApi.GetKeysetRequest(ctx))
 	if err != nil {
@@ -530,10 +537,37 @@ func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface
 }
 
 func resourceConfigUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	// TODO: we could allow topology name and controller name to be reset and only fail
-	// when license params or keyset params change
-	notsupportederror := fmt.Errorf("VNS3 config resource cannot be updated. Please redeploy a new server or reset defaults and edit terraform state")
-	return diag.FromErr(notsupportederror)
+
+	var diags diag.Diagnostics
+	vns3, clienterror := getVns3Client(ctx, d, m)
+	if clienterror != nil {
+		return diag.FromErr(clienterror)
+	}
+
+	if !d.HasChange("configuration_id") {
+		vns3.Log.Info(fmt.Sprintf("specified VNS3 config resource cannot be updated yet coming soon %v", d.Get("controller_name").(string)))
+		//notsupportederror := fmt.Errorf("specified VNS3 config resource cannot be updated yet, coming soon")
+		//return diag.FromErr(notsupportederror)
+		return diags
+	}
+
+	// wait for new controller instance to come up
+	_, wait_err := vns3.ConfigurationApi.WaitForApi(&ctx, 60*20, 3, 5)
+	if wait_err != nil {
+		host, _ := vns3.GetConfig().ServerURL(0, map[string]string{})
+		return diag.FromErr(fmt.Errorf("VNS3 is not available [host=%v] %v", host, wait_err))
+	}
+
+	// take snashop of current controller
+	source := d.Get("private_ip").(string)
+	vns3.Log.Info(fmt.Sprintf("Init controller from source: %+v", source))
+	_, err := macros.InitControllerFromSource(vns3, source, d.Get("new_api_password").(string), 60*20)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("VNS3 Setup error [fetch snapshot] %+v", err))
+	}
+
+	resourceConfigRead(ctx, d, m)
+	return diags
 }
 
 func resourceConfigDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
