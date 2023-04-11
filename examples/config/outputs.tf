@@ -1,9 +1,18 @@
-output "vns3_public_ips" {
-    value = aws_eip.vns3_ip.*.public_ip
+
+output "vns3_public_ips_1" {
+    value = aws_eip.vns3_ip_1.*.public_ip
 }
 
-output "vns3_private_dns" {
-    value = aws_eip.vns3_ip.*.private_dns
+output "vns3_public_ips_2" {
+    value = aws_eip.vns3_ip_2.*.public_ip
+}
+
+output "vns3_private_dns_1" {
+    value = aws_eip.vns3_ip_1.*.private_dns
+}
+
+output "vns3_private_dns_2" {
+    value = aws_eip.vns3_ip_2.*.private_dns
 }
 
 output "vns3_1_topology_checksum" {
