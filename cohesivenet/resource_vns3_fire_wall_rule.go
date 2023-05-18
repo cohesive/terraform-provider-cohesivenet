@@ -90,6 +90,9 @@ func resourceFirewallRulesCreate(ctx context.Context, d *schema.ResourceData, m 
 	if clienterror != nil {
 		return diag.FromErr(clienterror)
 	}
+	//db lock
+	vns3.ReqLock.Lock()
+	defer vns3.ReqLock.Unlock()
 
 	rule := d.Get("rule").(string)
 	newRule := cn.NewCreateFirewallRuleRequest(rule)
