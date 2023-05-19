@@ -90,6 +90,9 @@ func resourceFirewallRulesCreate(ctx context.Context, d *schema.ResourceData, m 
 	if clienterror != nil {
 		return diag.FromErr(clienterror)
 	}
+	// synchronize creating a firewall rule
+	vns3.ReqLock.Lock()
+	defer vns3.ReqLock.Unlock()
 
 	rule := d.Get("rule").(string)
 	newRule := cn.NewCreateFirewallRuleRequest(rule)
@@ -161,7 +164,6 @@ func resourceFirewallRulesRead(ctx context.Context, d *schema.ResourceData, m in
 	d.Set("groups", rule.Groups)
 	d.Set("last_resolved", rule.LastResolved)
 	d.Set("rule_resolved", rule.RuleResolved)
-
 	return diags
 }
 
@@ -173,6 +175,10 @@ func resourceFirewallRulesUpdate(ctx context.Context, d *schema.ResourceData, m 
 	if clienterror != nil {
 		return diag.FromErr(clienterror)
 	}
+
+	// // synchronize updating a firewall rule
+	vns3.ReqLock.Lock()
+	defer vns3.ReqLock.Unlock()
 
 	hasChange := false
 	updateRule := cn.NewUpdateFirewallRuleRequest()
@@ -224,6 +230,10 @@ func resourceFirewallRulesDelete(ctx context.Context, d *schema.ResourceData, m 
 	if clienterror != nil {
 		return diag.FromErr(clienterror)
 	}
+
+	// // synchronize deleting a firewall rule
+	vns3.ReqLock.Lock()
+	defer vns3.ReqLock.Unlock()
 
 	id := d.Id()
 	ruleRequest := vns3.FirewallApi.DeleteFirewallRuleRequest(ctx, id)

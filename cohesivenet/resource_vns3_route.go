@@ -116,6 +116,10 @@ func resourceRoutesCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(error)
 	}
 
+	// synchronize creating a route
+	c.ReqLock.Lock()
+	defer c.ReqLock.Unlock()
+
 	var routeList []*cn.Route
 	routes := d.Get("route").([]interface{})
 	for _, route := range routes {
@@ -166,6 +170,10 @@ func resourceRoutesUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(error)
 	}
 
+	// synchronize updating a route
+	c.ReqLock.Lock()
+	defer c.ReqLock.Unlock()
+
 	if d.HasChange("route") {
 		var routeList []*cn.Route
 		routes := d.Get("route").([]interface{})
@@ -201,6 +209,11 @@ func resourceRoutesDelete(ctx context.Context, d *schema.ResourceData, m interfa
 	if error != nil {
 		return diag.FromErr(error)
 	}
+
+	// synchronize deleting a route
+	c.ReqLock.Lock()
+	defer c.ReqLock.Unlock()
+
 	err := c.DeleteRoute()
 	if err != nil {
 		return diag.FromErr(err)
