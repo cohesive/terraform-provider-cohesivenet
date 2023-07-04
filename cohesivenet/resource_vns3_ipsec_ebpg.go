@@ -49,11 +49,13 @@ func resourceEbgp() *schema.Resource {
 						"ipaddress": &schema.Schema{
 							Type:        schema.TypeString,
 							Required:    true,
+							ForceNew:    true,
 							Description: "IP address or neighbor IP for BGP",
 						},
 						"asn": &schema.Schema{
 							Type:        schema.TypeInt,
 							Required:    true,
+							ForceNew:    true,
 							Description: "Autonomous System Number of your network",
 						},
 						"local_asn_alias": &schema.Schema{
