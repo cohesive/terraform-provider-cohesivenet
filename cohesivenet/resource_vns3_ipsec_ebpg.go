@@ -49,11 +49,13 @@ func resourceEbgp() *schema.Resource {
 						"ipaddress": &schema.Schema{
 							Type:        schema.TypeString,
 							Required:    true,
+							ForceNew:    true,
 							Description: "IP address or neighbor IP for BGP",
 						},
 						"asn": &schema.Schema{
 							Type:        schema.TypeInt,
 							Required:    true,
+							ForceNew:    true,
 							Description: "Autonomous System Number of your network",
 						},
 						"local_asn_alias": &schema.Schema{
@@ -196,7 +198,7 @@ func resourceEbgpUpdate(ctx context.Context, d *schema.ResourceData, m interface
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		d.Set("id", newPeer.ID)
+		d.SetId(strconv.Itoa(newPeer.ID))
 		d.Set("last_updated", time.Now().Format(time.RFC850))
 	}
 
