@@ -3,12 +3,14 @@
 page_title: "cohesivenet_vns3_config Resource - terraform-provider-cohesivenet"
 subcategory: ""
 description: |-
-  Launches, licences and configures one or many VNS3 controllers in conjunction with the AWS Terraform provider.
+  Sets Configuration Parameters on Initial Launch of one or many Controller Instances
 ---
 
 # cohesivenet_vns3_config (Resource)
 
+Sets Configuration Parameters on Initial Launch of one or many Controller Instances. 
 
+In conjunction with the AWS EC2 Provider. 
 
 ## Example Usage
 
@@ -16,7 +18,7 @@ description: |-
 terraform {
   required_providers {
     cohesivenet = {
-      version = "0.1.9"
+      version = "0.1.0"
       source  = "cohesive.net/vns3/cohesivenet"
     }
     aws = {
@@ -151,6 +153,7 @@ resource "cohesivenet_vns3_config" "vns3_2" {
 
 ### Required
 
+- `configuration_id` (String) Configuration id
 - `keyset_params` (Block Set, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--keyset_params))
 - `peer_id` (Number) Sets VNS3 controllers peer id
 - `topology_name` (String) Sets VNS3 topolgy name
@@ -175,6 +178,7 @@ resource "cohesivenet_vns3_config" "vns3_2" {
 - `keyset_checksum` (String) Keyset checksum
 - `licensed` (Boolean)
 - `new_auth_set` (Boolean)
+- `private_ip` (String) ip of controller
 - `token` (String) Token
 - `topology_checksum` (String) Checksum
 

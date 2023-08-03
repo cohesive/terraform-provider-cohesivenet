@@ -10,6 +10,8 @@ description: |-
 
 Creates firewall rules using the Cohesive simplified IP tables syntax.
 
+Deprecated in VNS3 Version 6 - Refer to cohesivenet_vns3_firewall_rule 
+
 ## Example Usage
 
 ```terraform
@@ -23,7 +25,6 @@ resource "vns3_firewall_rules" "rule" {
 
 ### Optional
 
-- `last_updated` (String)
 - `rule` (Block List) Nested Block for rules (see [below for nested schema](#nestedblock--rule))
 
 ### Read-Only
@@ -37,5 +38,6 @@ Optional:
 
 - `id` (String) Id given to rule after it has been applied
 - `script` (String) Firewall rule in VNS3 syntax
+
 
 
