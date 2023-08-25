@@ -58,11 +58,13 @@ func resourceVns3Config() *schema.Resource {
 			"token_lifetime": &schema.Schema{
 				Type:        schema.TypeInt,
 				Optional:    true,
+				Default:     31536000, // 1 year
 				Description: "Sets API token lifetime. A value > 0 will generate token",
 			},
 			"token_refresh": &schema.Schema{
 				Type:        schema.TypeBool,
 				Optional:    true,
+				Default:     true,
 				Description: "Sets API token refresh",
 			},
 			"license_file": &schema.Schema{
@@ -279,6 +281,7 @@ func buildLicenseParamsRequest(d *schema.ResourceData) (*cn.SetLicenseParameters
 }
 
 func setVns3AuthIfCreated(vns3 *cn.VNS3Client, d *schema.ResourceData) *cn.VNS3Client {
+
 	_id := d.Id()
 	if _id != "" {
 		if newAPIPassword := d.Get("new_api_password").(string); newAPIPassword != "" {
@@ -365,6 +368,7 @@ func updateVns3Auth(ctx context.Context, d *schema.ResourceData, vns3 *cn.VNS3Cl
 		accessTokenData := tokenResponse.GetResponse()
 
 		d.Set("token", accessTokenData.Token)
+		d.Set("generate_token", false)
 	}
 
 	// set a flag for handling auth setting
@@ -543,6 +547,53 @@ func resourceConfigUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	if clienterror != nil {
 		return diag.FromErr(clienterror)
 	}
+
+	if d.HasChange("new_ui_password") {
+		oldPassword, _ := d.GetChange("new_ui_password")
+		setVns3ClientPassword(vns3, oldPassword.(string))
+		step, authErr := updateVns3Auth(ctx, d, vns3)
+		if authErr != nil {
+			errMessage := fmt.Sprintf("Error updating %v authentication: %v", step, authErr.Error())
+			vns3.Log.Error(errMessage)
+			return diag.FromErr(fmt.Errorf(errMessage))
+		}
+	}
+
+	if d.HasChange("generate_token") && d.Get("generate_token") == true {
+		tokenLifetime := d.Get("token_lifetime").(int)
+		tokenRefresh := d.Get("token_refresh").(bool)
+		vns3.Log.Debug("Generating new API token")
+		hasLifetime := tokenLifetime != 0
+		hasRefresh := tokenRefresh
+		var tokenRequest *cn.CreateAPITokenRequest
+		if hasLifetime || hasRefresh {
+			tokenRequest = cn.NewCreateAPITokenRequest()
+			if hasLifetime {
+				tokenRequest.SetExpires(int32(tokenLifetime))
+			}
+			if hasRefresh {
+				tokenRequest.SetRefreshes(tokenRefresh)
+			}
+		}
+		vns3 = setVns3AuthIfCreated(vns3, d)
+		apiRequest := vns3.AccessApi.CreateApiTokenRequest(ctx)
+		if tokenRequest != nil {
+			apiRequest = apiRequest.CreateAPITokenRequest(*tokenRequest)
+		}
+
+		tokenResponse, _, err := vns3.AccessApi.CreateApiToken(apiRequest)
+		if err != nil {
+			d.Set("generate_token", false)
+			token_error := fmt.Errorf("could not create new token %v", err)
+			return diag.FromErr(token_error)
+		}
+		accessTokenData := tokenResponse.GetResponse()
+
+		d.Set("token", accessTokenData.Token)
+		d.Set("generate_token", false)
+	}
+
+	d.Set("generate_token", false) //for backwards compatibility
 
 	if !d.HasChange("configuration_id") {
 		vns3.Log.Info(fmt.Sprintf("specified VNS3 config resource cannot be updated yet coming soon %v", d.Get("controller_name").(string)))
