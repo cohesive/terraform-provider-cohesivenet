@@ -34,22 +34,22 @@ func resourceTunnel() *schema.Resource {
 			"endpoint_id": &schema.Schema{
 				Type:        schema.TypeInt,
 				Required:    true,
-				Description: "Remote Subnet CIDR",
+				Description: "Endpoint ID to associate Tunnel",
 			},
 			"remote_subnet": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Remote Subnet CIDR",
+				Description: "Remote Subnet CIDR of Tunnel",
 			},
 			"local_subnet": &schema.Schema{
 				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Local Subnet CIDR",
+				Optional:    true,
+				Description: "Local Subnet CIDR of Tunnel",
 			},
 			"ping_ipaddress": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "ping_ipaddress",
+				Description: "IP Address to Send Keep Alive Pings",
 			},
 			"description": &schema.Schema{
 				Type:        schema.TypeString,
@@ -59,25 +59,25 @@ func resourceTunnel() *schema.Resource {
 			"enabled": &schema.Schema{
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "Enabled",
+				Description: "Enabled / Diable Tunnel",
 			},
 			"ping_interval": &schema.Schema{
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Computed:    true,
-				Description: "ping_interval",
+				Description: "Interval between Keep Alive Pings",
 			},
 			"ping_interface": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: "ping_interface",
+				Description: "Keep Alive Ping Interface (eth0/tun0)",
 			},
 			"tunnel_id": &schema.Schema{
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Computed:    true,
-				Description: "ping_interface",
+				Description: "ID of IPsec Tunnel",
 			},
 		},
 	}

@@ -33,50 +33,50 @@ func resourceTrafficPair() *schema.Resource {
 			"endpoint_id": &schema.Schema{
 				Type:        schema.TypeInt,
 				Required:    true,
-				Description: "Remote Subnet CIDR",
+				Description: "Endpoint ID to associate Trrafic Pair",
 			},
 			"remote_subnet": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Remote Subnet CIDR",
+				Description: "Remote Subnet CIDR of Traffic Pair",
 			},
 			"local_subnet": &schema.Schema{
 				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Local Subnet CIDR",
+				Optional:    true,
+				Computed:    true,
+				Description: "Local Subnet CIDR of Traffic Pair",
 			},
 			"ping_ipaddress": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "ping_ipaddress",
+				Description: "IP Address to Send Keep Alive Pings",
 			},
 			"description": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Tunnel Description",
+				Description: "Traffic Pair Description",
 			},
 			"enabled": &schema.Schema{
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "Enabled",
+				Description: "Enable / Disable Traffic Pair ",
 			},
 			"ping_interval": &schema.Schema{
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Computed:    true,
-				Description: "ping_interval",
+				Description: "Interval between Keep Alive Pings",
 			},
 			"ping_interface": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: "ping_interface",
+				Description: "Keep Alive Ping Interface (eth0/tun0)",
 			},
 			"ipsec_endpoint_id": &schema.Schema{
 				Type:        schema.TypeInt,
-				Optional:    true,
 				Computed:    true,
-				Description: "ping_interface",
+				Description: "ID of IPsec Endpoint",
 			},
 		},
 	}
@@ -181,7 +181,6 @@ func resourceTrafficPairUpdate(ctx context.Context, d *schema.ResourceData, m in
 		d.HasChange("ping_ipaddress") ||
 		d.HasChange("ping_interval") ||
 		d.HasChange("ping_interface") ||
-		d.HasChange("enabled") ||
 		d.HasChange("description") {
 
 		remote_subnet := d.Get("remote_subnet").(string)
@@ -203,6 +202,19 @@ func resourceTrafficPairUpdate(ctx context.Context, d *schema.ResourceData, m in
 		}
 
 		_, err := c.UpdateTrafficPair(endpointId, trafficPairId, &tp)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		d.Set("last_updated", time.Now().Format(time.RFC850))
+
+	}
+
+	if d.HasChange("enabled") {
+
+		enabled := d.Get("enabled").(bool)
+
+		err := c.EnableDisableTrafficPair(endpointId, trafficPairId, enabled)
 		if err != nil {
 			return diag.FromErr(err)
 		}
