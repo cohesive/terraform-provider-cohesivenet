@@ -59,7 +59,7 @@ func resourceTunnel() *schema.Resource {
 			"enabled": &schema.Schema{
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "Enabled / Diable Tunnel",
+				Description: "Enabled / Disable Tunnel",
 			},
 			"ping_interval": &schema.Schema{
 				Type:        schema.TypeInt,
