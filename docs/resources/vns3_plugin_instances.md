@@ -10,6 +10,8 @@ description: |-
 
 Launches a plugin instance from a plugin image already imported into the VNS3 controller.
 
+Deprecated in VNS3 Version 6 - refer to resource cohesivenet_vns3_plugin_instance.
+
 ## Example Usage
 
 ```terraform

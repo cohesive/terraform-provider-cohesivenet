@@ -37,11 +37,7 @@ resource "vns3_ipsec_ebpg_peers" "peer" {
 ### Required
 
 - `ebgp_peer` (Block List, Min: 1) Nested block for eBGP peer attributes (see [below for nested schema](#nestedblock--ebgp_peer))
-
-### Optional
-
 - `endpoint_id` (Number)
-- `last_updated` (String)
 
 ### Read-Only
 
@@ -67,6 +63,5 @@ Optional:
 Read-Only:
 
 - `id` (String) Id of the eBGP peer
-
 
 

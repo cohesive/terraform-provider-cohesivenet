@@ -10,6 +10,8 @@ description: |-
 
  Imports a plugin image in the VNS3 controller.
 
+ Deprecated in VNS3 Version 6 - refer to resource cohesivenet_vns3_plugin_image.
+
 ## Example Usage
 
 ```terraform
@@ -71,3 +73,4 @@ Read-Only:
 - `import_id` (String) Initial import Id
 
 
+   
