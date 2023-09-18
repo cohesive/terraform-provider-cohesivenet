@@ -190,6 +190,11 @@ func resourceVns3Config() *schema.Resource {
 				Required:    true,
 				Description: "Configuration id",
 			},
+			"instance_id": &schema.Schema{
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "instance id (used for upgrade)",
+			},
 		},
 	}
 }
@@ -563,6 +568,13 @@ func resourceConfigUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 		return diags
 	}
 
+	// cache the password for later after new controller i sup
+	config := vns3.GetConfig()
+	password := (*config.Auth).(cn.BasicAuth).Password
+
+	// set the instance id as password for new controller instance
+	setVns3ClientPassword(vns3, d.Get("instance_id").(string))
+
 	// wait for new controller instance to come up
 	_, wait_err := vns3.ConfigurationApi.WaitForApi(&ctx, 60*20, 3, 5)
 	if wait_err != nil {
@@ -573,11 +585,15 @@ func resourceConfigUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	// take snashop of current controller
 	source := d.Get("private_ip").(string)
 	vns3.Log.Info(fmt.Sprintf("Init controller from source: %+v", source))
-	_, err := macros.InitControllerFromSource(vns3, source, d.Get("new_api_password").(string), 60*20)
+
+	// password is used to connect to "other" controller
+	_, err := macros.InitControllerFromSource(vns3, source, password, 60*20)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("VNS3 Setup error [fetch snapshot] %+v", err))
 	}
 
+	// set the password back (from instance id) into vns3 client
+	setVns3ClientPassword(vns3, password)
 	resourceConfigRead(ctx, d, m)
 	return diags
 }
