@@ -190,6 +190,11 @@ func resourceVns3Config() *schema.Resource {
 				Required:    true,
 				Description: "Configuration id",
 			},
+			"instance_id": &schema.Schema{
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "instance id (used for upgrade)",
+			},
 		},
 	}
 }
@@ -280,18 +285,26 @@ func buildLicenseParamsRequest(d *schema.ResourceData) (*cn.SetLicenseParameters
 	return licenseParamsRequest, nil
 }
 
-func setVns3AuthIfCreated(vns3 *cn.VNS3Client, d *schema.ResourceData) *cn.VNS3Client {
-
-	_id := d.Id()
-	if _id != "" {
-		if newAPIPassword := d.Get("new_api_password").(string); newAPIPassword != "" {
-			setVns3ClientPassword(vns3, newAPIPassword)
-		}
+func setVns3AuthIfCreated(vns3 *cn.VNS3Client, ctx context.Context, d *schema.ResourceData, m interface{}) *cn.VNS3Client {
+	if newAPIPassword := d.Get("new_api_password").(string); newAPIPassword != "" {
+		setVns3ClientPassword(vns3, newAPIPassword)
+		// change v1 client
+		client_v1, _ := getV1Client(ctx, d, m)
+		client_v1.Password = newAPIPassword
+		vns3.Log.Debug("Updated auth password")
 	}
 	return vns3
 }
 
-func updateVns3Auth(ctx context.Context, d *schema.ResourceData, vns3 *cn.VNS3Client) (string, error) {
+func createVns3Auth(ctx context.Context, d *schema.ResourceData, m interface{}, vns3 *cn.VNS3Client) (string, error) {
+	return setVns3AuthProps(ctx, d, m, vns3, "create")
+}
+
+func updateVns3Auth(ctx context.Context, d *schema.ResourceData, m interface{}, vns3 *cn.VNS3Client) (string, error) {
+	return setVns3AuthProps(ctx, d, m, vns3, "update")
+}
+
+func setVns3AuthProps(ctx context.Context, d *schema.ResourceData, m interface{}, vns3 *cn.VNS3Client, action string) (string, error) {
 	newUIPassword := d.Get("new_ui_password").(string)
 	newUIUsername := d.Get("new_ui_username").(string)
 	newAPIPassword := d.Get("new_api_password").(string)
@@ -301,16 +314,19 @@ func updateVns3Auth(ctx context.Context, d *schema.ResourceData, vns3 *cn.VNS3Cl
 
 	adminUiRequest := cn.NewUpdateAdminUISettingsRequest()
 	shouldUpdateUi := false
-	if newUIPassword != "" {
+	vns3.Log.Debug(fmt.Sprintf("should change ui pass: %+v", d.HasChange("new_ui_password")))
+	if (d.HasChange("new_ui_password") && newUIPassword != "") || (action == "create" && newUIPassword != "") {
 		adminUiRequest.SetAdminPassword(newUIPassword)
 		shouldUpdateUi = true
 	}
 
-	if newUIUsername != "" {
+	vns3.Log.Debug(fmt.Sprintf("should change ui username: %+v", d.HasChange("new_ui_username")))
+	if d.HasChange("new_ui_username") && newUIUsername != "" || (action == "create" && newUIUsername != "") {
 		adminUiRequest.SetAdminUsername(newUIUsername)
 		shouldUpdateUi = true
 	}
 
+	vns3.Log.Debug(fmt.Sprintf("should update ui : %+v", shouldUpdateUi))
 	if shouldUpdateUi {
 		vns3.Log.Debug("Setting new UI authentication")
 		uiApiRequest := vns3.ConfigurationApi.PutUpdateAdminUiRequest(ctx)
@@ -321,30 +337,36 @@ func updateVns3Auth(ctx context.Context, d *schema.ResourceData, vns3 *cn.VNS3Cl
 		}
 	}
 
-	if newAPIPassword != "" {
+	vns3.Log.Debug(fmt.Sprintf("should update new_api_password : %+v", d.HasChange("new_api_password")))
+	if d.HasChange("new_api_password") && newAPIPassword != "" || (action == "create" && newAPIPassword != "") {
 		vns3.Log.Debug("Setting new API authentication")
 		updatePassword := cn.NewUpdatePasswordRequest()
 		updatePassword.SetPassword(newAPIPassword)
 		apiPsSetRequest := vns3.ConfigurationApi.PutUpdateApiPasswordRequest(ctx)
 		apiPsSetRequest = apiPsSetRequest.UpdatePasswordRequest(*updatePassword)
+		vns3.Log.Debug("before Setting new API authentication")
 		_, _, err := vns3.ConfigurationApi.PutUpdateApiPassword(apiPsSetRequest)
+		vns3.Log.Debug("after Setting new API authentication")
 		if err != nil {
+			vns3.Log.Debug(fmt.Sprintf("err Setting new API authentication", err))
 			return "API", err
 		}
+		setVns3AuthIfCreated(vns3, ctx, d, m)
 
 		// if the current client is using basic auth with root api password then we need
 		// to update the client
 		currentClientConfig := vns3.GetConfig()
 		currentAuthType := *(currentClientConfig.AuthType)
 		if currentAuthType == cn.ContextBasicAuth {
-			setVns3ClientPassword(vns3, newAPIPassword)
+			setVns3AuthIfCreated(vns3, ctx, d, m)
 		}
 	}
 
-	if createToken {
+	vns3.Log.Debug(fmt.Sprintf("should update generate_token : %+v", d.HasChange("generate_token")))
+	if d.HasChange("generate_token") && createToken || (action == "create" && createToken) {
 		vns3.Log.Debug("Generating new API token")
 		hasLifetime := tokenLifetime != 0
-		hasRefresh := tokenRefresh != false
+		hasRefresh := tokenRefresh
 		var tokenRequest *cn.CreateAPITokenRequest
 		if hasLifetime || hasRefresh {
 			tokenRequest = cn.NewCreateAPITokenRequest()
@@ -371,9 +393,6 @@ func updateVns3Auth(ctx context.Context, d *schema.ResourceData, vns3 *cn.VNS3Cl
 		d.Set("generate_token", false)
 	}
 
-	// set a flag for handling auth setting
-	vns3.Log.Debug("New VNS3 auth setting run. Setting flag")
-	d.Set("new_auth_set", true)
 	return "", nil
 }
 
@@ -392,11 +411,6 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	peerId := int32(d.Get("peer_id").(int))
 	keysetToken := keysetParams["token"].(string)
 	controllerName, ctrlNameExists := d.Get("controller_name").(string)
-	hasAuthBeenSet := d.Get("new_auth_set").(bool)
-	newAPIPassword := d.Get("new_api_password").(string)
-	if hasAuthBeenSet && newAPIPassword != "" {
-		setVns3ClientPassword(vns3, newAPIPassword)
-	}
 
 	if !ctrlNameExists {
 		controllerName = "ctrl"
@@ -407,15 +421,6 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	if err != nil {
 		host, _ := vns3.GetConfig().ServerURL(0, map[string]string{})
 		return diag.FromErr(fmt.Errorf("VNS3 is not available [host=%v] %v", host, err))
-	}
-
-	if !hasAuthBeenSet {
-		step, authErr := updateVns3Auth(ctx, d, vns3)
-		if authErr != nil {
-			errMessage := fmt.Sprintf("Error updating %v authentication: %v", step, authErr.Error())
-			vns3.Log.Error(errMessage)
-			return diag.FromErr(fmt.Errorf(errMessage))
-		}
 	}
 
 	// Begin configuration
@@ -457,6 +462,14 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 			vns3.Log.Info(fmt.Sprintf("VNS3 Setup success %+v", string(d)))
 		}
 
+		// now lets set the password
+		step, authErr := createVns3Auth(ctx, d, m, vns3)
+		if authErr != nil {
+			errMessage := fmt.Sprintf("Error updating %v authentication: %v", step, authErr.Error())
+			vns3.Log.Error(errMessage)
+			return diag.FromErr(fmt.Errorf(errMessage))
+		}
+
 	} else {
 		if !hasSource {
 			return diag.FromErr(fmt.Errorf("license_file or keyset.source is required to configure VNS3"))
@@ -479,7 +492,7 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		}
 	}
 
-	configDetail, _, err := vns3.ConfigurationApi.GetConfig(vns3.ConfigurationApi.GetConfigRequest(ctx))
+	configDetail, _, _ := vns3.ConfigurationApi.GetConfig(vns3.ConfigurationApi.GetConfigRequest(ctx))
 	configData := configDetail.GetResponse()
 	topologyChecksum := configData.GetTopologyChecksum()
 	d.Set("topology_checksum", topologyChecksum)
@@ -511,13 +524,12 @@ func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface
 func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
-
 	vns3, clienterror := getVns3Client(ctx, d, m)
 	if clienterror != nil {
 		return diag.FromErr(clienterror)
 	}
 
-	vns3 = setVns3AuthIfCreated(vns3, d)
+	//vns3 = setVns3AuthIfCreated(vns3, d)
 	configDetail, _, err := vns3.ConfigurationApi.GetConfig(vns3.ConfigurationApi.GetConfigRequest(ctx))
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("VNS3 Config check error: %+v", err))
@@ -536,7 +548,6 @@ func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface
 	keysetData := keysetDetail.GetResponse()
 	keysetChecksum := keysetData.GetChecksum()
 	d.Set("keyset_checksum", keysetChecksum)
-
 	return diags
 }
 
@@ -548,49 +559,12 @@ func resourceConfigUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(clienterror)
 	}
 
-	if d.HasChange("new_ui_password") {
-		oldPassword, _ := d.GetChange("new_ui_password")
-		setVns3ClientPassword(vns3, oldPassword.(string))
-		step, authErr := updateVns3Auth(ctx, d, vns3)
-		if authErr != nil {
-			errMessage := fmt.Sprintf("Error updating %v authentication: %v", step, authErr.Error())
-			vns3.Log.Error(errMessage)
-			return diag.FromErr(fmt.Errorf(errMessage))
-		}
-	}
+	step, authErr := updateVns3Auth(ctx, d, m, vns3)
 
-	if d.HasChange("generate_token") && d.Get("generate_token") == true {
-		tokenLifetime := d.Get("token_lifetime").(int)
-		tokenRefresh := d.Get("token_refresh").(bool)
-		vns3.Log.Debug("Generating new API token")
-		hasLifetime := tokenLifetime != 0
-		hasRefresh := tokenRefresh
-		var tokenRequest *cn.CreateAPITokenRequest
-		if hasLifetime || hasRefresh {
-			tokenRequest = cn.NewCreateAPITokenRequest()
-			if hasLifetime {
-				tokenRequest.SetExpires(int32(tokenLifetime))
-			}
-			if hasRefresh {
-				tokenRequest.SetRefreshes(tokenRefresh)
-			}
-		}
-		vns3 = setVns3AuthIfCreated(vns3, d)
-		apiRequest := vns3.AccessApi.CreateApiTokenRequest(ctx)
-		if tokenRequest != nil {
-			apiRequest = apiRequest.CreateAPITokenRequest(*tokenRequest)
-		}
-
-		tokenResponse, _, err := vns3.AccessApi.CreateApiToken(apiRequest)
-		if err != nil {
-			d.Set("generate_token", false)
-			token_error := fmt.Errorf("could not create new token %v", err)
-			return diag.FromErr(token_error)
-		}
-		accessTokenData := tokenResponse.GetResponse()
-
-		d.Set("token", accessTokenData.Token)
-		d.Set("generate_token", false)
+	if authErr != nil {
+		errMessage := fmt.Sprintf("Error updating %v authentication: %v", step, authErr.Error())
+		vns3.Log.Error(errMessage)
+		return diag.FromErr(fmt.Errorf(errMessage))
 	}
 
 	d.Set("generate_token", false) //for backwards compatibility
@@ -602,6 +576,13 @@ func resourceConfigUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 		return diags
 	}
 
+	// cache the password for later after new controller i sup
+	config := vns3.GetConfig()
+	password := (*config.Auth).(cn.BasicAuth).Password
+
+	// set the instance id as password for new controller instance
+	setVns3ClientPassword(vns3, d.Get("instance_id").(string))
+
 	// wait for new controller instance to come up
 	_, wait_err := vns3.ConfigurationApi.WaitForApi(&ctx, 60*20, 3, 5)
 	if wait_err != nil {
@@ -612,11 +593,15 @@ func resourceConfigUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	// take snashop of current controller
 	source := d.Get("private_ip").(string)
 	vns3.Log.Info(fmt.Sprintf("Init controller from source: %+v", source))
-	_, err := macros.InitControllerFromSource(vns3, source, d.Get("new_api_password").(string), 60*20)
+
+	// password is used to connect to "other" controller
+	_, err := macros.InitControllerFromSource(vns3, source, password, 60*20)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("VNS3 Setup error [fetch snapshot] %+v", err))
 	}
 
+	// set the password back (from instance id) into vns3 client
+	setVns3ClientPassword(vns3, password)
 	resourceConfigRead(ctx, d, m)
 	return diags
 }
