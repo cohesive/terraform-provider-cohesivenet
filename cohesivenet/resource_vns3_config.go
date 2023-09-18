@@ -296,7 +296,15 @@ func setVns3AuthIfCreated(vns3 *cn.VNS3Client, ctx context.Context, d *schema.Re
 	return vns3
 }
 
+func createVns3Auth(ctx context.Context, d *schema.ResourceData, m interface{}, vns3 *cn.VNS3Client) (string, error) {
+	return setVns3AuthProps(ctx, d, m, vns3, "create")
+}
+
 func updateVns3Auth(ctx context.Context, d *schema.ResourceData, m interface{}, vns3 *cn.VNS3Client) (string, error) {
+	return setVns3AuthProps(ctx, d, m, vns3, "update")
+}
+
+func setVns3AuthProps(ctx context.Context, d *schema.ResourceData, m interface{}, vns3 *cn.VNS3Client, action string) (string, error) {
 	newUIPassword := d.Get("new_ui_password").(string)
 	newUIUsername := d.Get("new_ui_username").(string)
 	newAPIPassword := d.Get("new_api_password").(string)
@@ -307,13 +315,13 @@ func updateVns3Auth(ctx context.Context, d *schema.ResourceData, m interface{}, 
 	adminUiRequest := cn.NewUpdateAdminUISettingsRequest()
 	shouldUpdateUi := false
 	vns3.Log.Debug(fmt.Sprintf("should change ui pass: %+v", d.HasChange("new_ui_password")))
-	if d.HasChange("new_ui_password") && newUIPassword != "" {
+	if (d.HasChange("new_ui_password") && newUIPassword != "") || (action == "create" && newUIPassword != "") {
 		adminUiRequest.SetAdminPassword(newUIPassword)
 		shouldUpdateUi = true
 	}
 
 	vns3.Log.Debug(fmt.Sprintf("should change ui username: %+v", d.HasChange("new_ui_username")))
-	if d.HasChange("new_ui_username") && newUIUsername != "" {
+	if d.HasChange("new_ui_username") && newUIUsername != "" || (action == "create" && newUIUsername != "") {
 		adminUiRequest.SetAdminUsername(newUIUsername)
 		shouldUpdateUi = true
 	}
@@ -330,7 +338,7 @@ func updateVns3Auth(ctx context.Context, d *schema.ResourceData, m interface{}, 
 	}
 
 	vns3.Log.Debug(fmt.Sprintf("should update new_api_password : %+v", d.HasChange("new_api_password")))
-	if d.HasChange("new_api_password") && newAPIPassword != "" {
+	if d.HasChange("new_api_password") && newAPIPassword != "" || (action == "create" && newAPIPassword != "") {
 		vns3.Log.Debug("Setting new API authentication")
 		updatePassword := cn.NewUpdatePasswordRequest()
 		updatePassword.SetPassword(newAPIPassword)
@@ -355,7 +363,7 @@ func updateVns3Auth(ctx context.Context, d *schema.ResourceData, m interface{}, 
 	}
 
 	vns3.Log.Debug(fmt.Sprintf("should update generate_token : %+v", d.HasChange("generate_token")))
-	if d.HasChange("generate_token") && createToken {
+	if d.HasChange("generate_token") && createToken || (action == "create" && createToken) {
 		vns3.Log.Debug("Generating new API token")
 		hasLifetime := tokenLifetime != 0
 		hasRefresh := tokenRefresh
@@ -455,7 +463,7 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		}
 
 		// now lets set the password
-		step, authErr := updateVns3Auth(ctx, d, m, vns3)
+		step, authErr := createVns3Auth(ctx, d, m, vns3)
 		if authErr != nil {
 			errMessage := fmt.Sprintf("Error updating %v authentication: %v", step, authErr.Error())
 			vns3.Log.Error(errMessage)
