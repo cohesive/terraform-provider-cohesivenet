@@ -462,14 +462,6 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 			vns3.Log.Info(fmt.Sprintf("VNS3 Setup success %+v", string(d)))
 		}
 
-		// now lets set the password
-		step, authErr := createVns3Auth(ctx, d, m, vns3)
-		if authErr != nil {
-			errMessage := fmt.Sprintf("Error updating %v authentication: %v", step, authErr.Error())
-			vns3.Log.Error(errMessage)
-			return diag.FromErr(fmt.Errorf(errMessage))
-		}
-
 	} else {
 		if !hasSource {
 			return diag.FromErr(fmt.Errorf("license_file or keyset.source is required to configure VNS3"))
@@ -490,6 +482,15 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		if peeringErr != nil {
 			return diag.FromErr(fmt.Errorf("VNS3 Setup error [peering] %+v", err))
 		}
+
+	}
+
+	// now lets set the password
+	step, authErr := createVns3Auth(ctx, d, m, vns3)
+	if authErr != nil {
+		errMessage := fmt.Sprintf("Error updating %v authentication: %v", step, authErr.Error())
+		vns3.Log.Error(errMessage)
+		return diag.FromErr(fmt.Errorf(errMessage))
 	}
 
 	configDetail, _, _ := vns3.ConfigurationApi.GetConfig(vns3.ConfigurationApi.GetConfigRequest(ctx))
