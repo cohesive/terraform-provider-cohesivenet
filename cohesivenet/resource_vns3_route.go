@@ -223,6 +223,8 @@ func flattenRouteData(routeResponse cn.RouteResponse) interface{} {
 		row["netmask"] = rt.Netmask
 		row["editable"] = rt.Editable
 		row["table"] = rt.Table
+		row["gateway"] = rt.Gateway
+		row["tunnel"] = rt.Tunnel
 		row["interface"] = rt.Interface
 		routes[i] = row
 		i++
