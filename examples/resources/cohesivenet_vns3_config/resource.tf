@@ -36,15 +36,15 @@ provider "cohesivenet" {
 
 resource "aws_instance" "vns3controller_1" {
 
-  ami               = var.ami_id_1
-  instance_type     = var.instance_type
-  subnet_id       = var.subnet_id
+  ami               = "var.ami_id_1"
+  instance_type     = "var.instance_type"
+  subnet_id       = "var.subnet_id"
   source_dest_check = false
   vpc_security_group_ids = [
-      var.security_group_id
+      "var.security_group_id"
   ]
   tags = {
-      Name = var.controller_2_name
+      Name = "var.controller_2_name"
     }
   lifecycle {
     create_before_destroy = true
@@ -54,15 +54,15 @@ resource "aws_instance" "vns3controller_1" {
 
 resource "aws_instance" "vns3controller_2" {
 
-  ami               = var.ami_id_2
-  instance_type     = var.instance_type
-  subnet_id       = var.subnet_id
+  ami               = "var.ami_id_2"
+  instance_type     = "var.instance_type"
+  subnet_id       = "var.subnet_id"
   source_dest_check = false
   vpc_security_group_ids = [
-      var.security_group_id
+      "var.security_group_id"
   ]
   tags = {
-    Name = var.controller_1_name
+    Name = "var.controller_1_name"
     }
   lifecycle {
     create_before_destroy = true
@@ -71,12 +71,10 @@ resource "aws_instance" "vns3controller_2" {
 }
 
 resource "aws_eip" "vns3_ip_1" {
-  vpc               = true
   instance          = aws_instance.vns3controller_1.id
 }
 
 resource "aws_eip" "vns3_ip_2" {
-  vpc               = true
   instance          = aws_instance.vns3controller_2.id
 }
 

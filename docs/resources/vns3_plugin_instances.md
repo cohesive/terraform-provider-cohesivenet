@@ -15,7 +15,7 @@ Deprecated in VNS3 Version 6 - refer to resource cohesivenet_vns3_plugin_instanc
 ## Example Usage
 
 ```terraform
-resource  "vns3_plugin_instances" instance {
+resource  "cohesivenet_vns3_plugin_instances" instance {
     name = "pluginname"
     plugin_id = vns3_plugin_images.image.id
     ip_address =  "198.51.100.11"

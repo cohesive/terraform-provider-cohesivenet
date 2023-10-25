@@ -15,7 +15,7 @@ description: |-
 ## Example Usage
 
 ```terraform
-resource "vns3_plugin_images" "image" {
+resource "cohesivenet_vns3_plugin_images" "image" {
   image {
     image_name = "test-tf-plugin"
     url  = ""
