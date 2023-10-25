@@ -1,4 +1,4 @@
-  resource "vns3_ipsec_endpoints" "endpoint" {
+  resource "cohesivenet_vns3_ipsec_endpoints" "endpoint" {
   endpoint {
       name = "endpoint_name"
       description = "endpoint_description"

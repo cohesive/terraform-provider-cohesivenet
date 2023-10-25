@@ -13,7 +13,7 @@ Launches a plugin instance from a plugin image already imported into the VNS3 co
 ## Example Usage
 
 ```terraform
-resource  "vns3_plugin_instance" instance {
+resource  "cohesivenet_vns3_plugin_instance" instance {
     name = "pluginname"
     plugin_id = vns3_plugin_images.image.id
     ip_address =  "198.51.100.11"

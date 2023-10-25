@@ -13,7 +13,7 @@ Creates eBGP peer in conjunction with vns3_ipsec_endpoints resource.
 ## Example Usage
 
 ```terraform
-resource "vns3_ipsec_ebpg_peers" "peer" {
+resource "cohesivenet_vns3_ipsec_ebpg_peers" "peer" {
   endpoint_id = vns3_ipsec_endpoints.endpoint.id
   ebgp_peer {
     ipaddress = "169.254.164.204"

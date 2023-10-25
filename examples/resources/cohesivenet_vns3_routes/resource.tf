@@ -1,4 +1,4 @@
- resource "vns3_routes" "route" {
+ resource "cohesivenet_vns3_routes" "route" {
   route {
     cidr = "192.168.1.0/24"
     description = "route_description"
