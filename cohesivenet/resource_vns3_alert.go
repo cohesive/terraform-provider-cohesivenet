@@ -126,15 +126,6 @@ func resourceAlertCreate(ctx context.Context, d *schema.ResourceData, m interfac
 	return diags
 }
 
-/*
-func resourceAlertRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-
-	var diags diag.Diagnostics
-
-	return diags
-}
-*/
-
 func resourceAlertRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c, error := getV1Client(ctx, d, m)
 	if error != nil {
@@ -195,15 +186,6 @@ func resourceAlertUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 
 	return resourceAlertRead(ctx, d, m)
 }
-
-/*
-func resourceAlertDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-
-	var diags diag.Diagnostics
-
-	return diags
-}
-*/
 
 func resourceAlertDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c, error := getV1Client(ctx, d, m)
