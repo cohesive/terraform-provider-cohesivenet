@@ -34,28 +34,29 @@ func resourceAlert() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: "Alert Id",
+				Description: "Id of the alert once created",
 			},
 			"webhook_id": &schema.Schema{
 				Type:        schema.TypeInt,
-				Optional:    true,
-				Description: "Alert Id",
+				Required:    true,
+				ForceNew:    true,
+				Description: "Associated Wehook Id",
 			},
 			"name": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Name of deployed image",
+				Description: "Arbitrary name of the alert",
 			},
 			"url": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    true,
-				Description: "URL of the image file to be imported",
+				Description: "URL of the Webhook endpoint",
 			},
 			"enabled": &schema.Schema{
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "URL of a dockerfile that will be used to build the image",
+				Description: "Is Alert enabled",
 			},
 			"events": &schema.Schema{
 				Type:     schema.TypeList,
@@ -63,23 +64,23 @@ func resourceAlert() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Description: "URL of a dockerfile that will be used to build the image",
+				Description: "List of Alert Events to be triggered",
 			},
 			"custom_properties": &schema.Schema{
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "Nested block for route attributes",
+				Description: "Nested block for custom properties",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": &schema.Schema{
 							Type:        schema.TypeString,
 							Required:    true,
-							Description: "Alert events",
+							Description: "Custom property name",
 						},
 						"value": &schema.Schema{
 							Type:        schema.TypeString,
 							Required:    true,
-							Description: "Alert events",
+							Description: "Custom property value",
 						},
 					},
 				},
