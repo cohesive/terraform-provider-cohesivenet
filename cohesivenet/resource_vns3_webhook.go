@@ -2,6 +2,7 @@ package cohesivenet
 
 import (
 	"context"
+	net "net/url"
 	"strconv"
 	"time"
 
@@ -146,19 +147,54 @@ func resourceWebhookCreate(ctx context.Context, d *schema.ResourceData, m interf
 	body := d.Get("body").(string)
 	url := d.Get("url").(string)
 	events := d.Get("events").([]interface{})
+
 	customProperties := d.Get("custom_properties").([]interface{})
+	customProps := make([]struct {
+		Name        string `json:"name,omitempty"`
+		Value       string `json:"value,omitempty"`
+		Description string `json:"description,omitempty"`
+	}, len(customProperties))
+
+	for i, cp := range customProperties {
+		custprop := cp.(map[string]interface{})
+		customProps[i].Name = custprop["name"].(string)
+		customProps[i].Value = custprop["value"].(string)
+		customProps[i].Description = custprop["description"].(string)
+	}
+
 	headers := d.Get("headers").([]interface{})
+	headrs := make([]struct {
+		Name  string `json:"name,omitempty"`
+		Value string `json:"value,omitempty"`
+	}, len(headers))
+
+	for i, hd := range headers {
+		header := hd.(map[string]interface{})
+		headrs[i].Name = header["name"].(string)
+		headrs[i].Value = header["value"].(string)
+	}
+
 	parameters := d.Get("parameters").([]interface{})
+	params := make([]struct {
+		Name  string `json:"name,omitempty"`
+		Value string `json:"value,omitempty"`
+	}, len(parameters))
+
+	for i, pm := range headers {
+		param := pm.(map[string]interface{})
+		params[i].Name = param["name"].(string)
+		params[i].Value = param["value"].(string)
+	}
 
 	webhook := cn.NewWebhook{
 		Name:             name,
 		ValidateCert:     validate_cert,
-		Body:             body,
+		Body:             net.QueryEscape(body),
 		URL:              url,
 		Events:           events,
-		CustomProperties: customProperties,
-		Headers:          headers,
-		Parameters:       parameters,
+		CustomProperties: customProps,
+		Headers:          headrs,
+		Parameters:       params,
 	}
 
 	newWebhook, errCreateWebhook := c.CreateWebhook(webhook)
@@ -229,19 +265,35 @@ func resourceWebhookUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		body := d.Get("body").(string)
 		url := d.Get("url").(string)
 		events := d.Get("events").([]interface{})
-		customProperties := d.Get("custom_properties").([]interface{})
-		headers := d.Get("headers").([]interface{})
-		parameters := d.Get("parameters").([]interface{})
+		customProperties := d.Get("custom_properties")
+		customProps := customProperties.([]struct {
+			Name        string `json:"name,omitempty"`
+			Value       string `json:"value,omitempty"`
+			Description string `json:"description,omitempty"`
+		})
+
+		headers := d.Get("headers")
+		headrs := headers.([]struct {
+			Name  string `json:"name,omitempty"`
+			Value string `json:"value,omitempty"`
+		})
+
+		parameters := d.Get("parameters")
+		params := parameters.([]struct {
+			Name  string `json:"name,omitempty"`
+			Value string `json:"value,omitempty"`
+		})
 
 		webhook := cn.NewWebhook{
-			Name:             name,
-			ValidateCert:     validate_cert,
-			Body:             body,
+			Name:         name,
+			ValidateCert: validate_cert,
+			//Body:             body,
+			Body:             net.QueryEscape(body),
 			URL:              url,
 			Events:           events,
-			CustomProperties: customProperties,
-			Headers:          headers,
-			Parameters:       parameters,
+			CustomProperties: customProps,
+			Headers:          headrs,
+			Parameters:       params,
 		}
 		webhookId := d.Id()
 
