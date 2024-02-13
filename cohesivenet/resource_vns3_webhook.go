@@ -39,7 +39,7 @@ func resourceWebhook() *schema.Resource {
 			"name": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Name of deployed image",
+				Description: "Name of webhook",
 			},
 			"validate_cert": &schema.Schema{
 				Type:        schema.TypeBool,
