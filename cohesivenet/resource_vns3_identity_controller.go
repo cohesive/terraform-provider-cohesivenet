@@ -263,6 +263,7 @@ func resourceIdentityControllerCreate(ctx context.Context, d *schema.ResourceDat
 	redirectHostname := d.Get("redirect_hostname").(string)
 	providerUrl := d.Get("provider_url").(string)
 	issuer := d.Get("issuer").(string)
+	host := d.Get("host").(string)
 	port := d.Get("port").(int)
 	encrypt := d.Get("encrypt").(bool)
 	encryptLdaps := d.Get("encrypt_ldaps").(bool)
@@ -304,6 +305,7 @@ func resourceIdentityControllerCreate(ctx context.Context, d *schema.ResourceDat
 		RedirectHostname:        redirectHostname,
 		ProviderUrl:             providerUrl,
 		Issuer:                  issuer,
+		Host:                    host,
 		Port:                    port,
 		Encrypt:                 encrypt,
 		EncryptLdaps:            encryptLdaps,
@@ -377,7 +379,7 @@ func resourceIdentityControllerUpdate(ctx context.Context, d *schema.ResourceDat
 		d.HasChange("userinfo_endpoint") ||
 		d.HasChange("jwks_uri") ||
 		d.HasChange("redirect_hostname") ||
-		d.HasChange("redirect_hostname") ||
+		d.HasChange("host") ||
 		d.HasChange("port") ||
 		d.HasChange("encrypt_ldaps") ||
 		d.HasChange("encrypt_auth") ||
@@ -417,6 +419,7 @@ func resourceIdentityControllerUpdate(ctx context.Context, d *schema.ResourceDat
 		redirectHostname := d.Get("redirect_hostname").(string)
 		providerUrl := d.Get("provider_url").(string)
 		issuer := d.Get("issuer").(string)
+		host := d.Get("host").(string)
 		port := d.Get("port").(int)
 		encrypt := d.Get("encrypt").(bool)
 		encryptLdaps := d.Get("encrypt_ldaps").(bool)
@@ -458,6 +461,7 @@ func resourceIdentityControllerUpdate(ctx context.Context, d *schema.ResourceDat
 			RedirectHostname:        redirectHostname,
 			ProviderUrl:             providerUrl,
 			Issuer:                  issuer,
+			Host:                    host,
 			Port:                    port,
 			Encrypt:                 encrypt,
 			EncryptLdaps:            encryptLdaps,
