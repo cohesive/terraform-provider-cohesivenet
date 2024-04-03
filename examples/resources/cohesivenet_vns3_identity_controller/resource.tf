@@ -20,7 +20,12 @@ resource "cohesivenet_vns3_identity_controller" "admin_ldap" {
   port = 389
   binddn = "Supportive"
   bindpw = "password"
-  encrypt = false
+  encrypt_ldaps = true
+  encrypt_auth = true
+  encrypt_auth_cert_data = file("/path/to/cert.crt")
+  encrypt_auth_key_data = file("/path/to/key.key")
+  encrypt_verify_ca = true
+  encrypt_ca_cert_data = file("/path/to/ca.crt")
   user_base = "ou=People,dc=google,dc=com"
   user_id_attribute = "uid"
 	user_list_filter = "*"

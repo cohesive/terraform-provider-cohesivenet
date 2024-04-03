@@ -29,13 +29,19 @@ resource "cohesivenet_vns3_identity_controller" "admin_oidc" {
 ```
 ```terraform
 resource "cohesivenet_vns3_identity_controller" "admin_ldap" {
+  provider = cohesivenet.controller_1
   identity_provider = "ldap"
   enabled = true
   host = "ldap.google.com"
   port = 389
   binddn = "Supportive"
   bindpw = "password"
-  encrypt = false
+  encrypt_ldaps = true
+  encrypt_auth = true
+  encrypt_auth_cert_data = file("/path/to/cert.crt")
+  encrypt_auth_key_data = file("/path/to/key.key")
+  encrypt_verify_ca = true
+  encrypt_ca_cert_data = file("/path/to/ca.crt")
   user_base = "ou=People,dc=google,dc=com"
   user_id_attribute = "uid"
 	user_list_filter = "*"
@@ -45,6 +51,7 @@ resource "cohesivenet_vns3_identity_controller" "admin_ldap" {
   group_member_attribute = "member"
 	group_member_attr_format = "UserDN"
 	group_search_scope = "subtree"
+
 }
 ```
 
