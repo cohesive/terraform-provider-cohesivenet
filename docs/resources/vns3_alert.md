@@ -6,7 +6,7 @@ description: |-
   Creates an alert from a predefined webhook
 ---
 
-# cohesivenet_vns3_https_certs (Resource)
+# cohesivenet_vns3_alert (Resource)
 
 Creates an alert from a predefined webhook
 
