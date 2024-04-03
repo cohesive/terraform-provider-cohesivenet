@@ -62,9 +62,9 @@ func Provider() *schema.Provider {
 			"cohesivenet_vns3_https_certs":        resourceHttpsCerts(),
 			"cohesivenet_vns3_alert":              resourceAlert(),
 			"cohesivenet_vns3_webhook":            resourceWebhook(),
-
 			"cohesivenet_vns3_identity_vpn":        resourceIdentityVpn(),
 			"cohesivenet_vns3_identity_controller": resourceIdentityController(),
+			"cohesivenet_vns3_license_upgrade":    resourceLicenseUpgrade(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"cohesivenet_vns3_ipsec_endpoints":   dataSourceEndpoints(),
