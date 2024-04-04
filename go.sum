@@ -667,6 +667,12 @@ github.com/cohesive/cohesivenet-client-go v0.0.0-20231116180847-deee2027809d h1:
 github.com/cohesive/cohesivenet-client-go v0.0.0-20231116180847-deee2027809d/go.mod h1:I88xrjKHNTkHnn6/idGOD9oPedfSy+AaQqjWSqLp2X8=
 github.com/cohesive/cohesivenet-client-go v0.0.0-20240213154901-a26e3021df2e h1:RNPi82dYxQsYi4hPyEBegttJpyh7vUwpn+qamUBkkmg=
 github.com/cohesive/cohesivenet-client-go v0.0.0-20240213154901-a26e3021df2e/go.mod h1:Hkvqqv+YdqzGrMlJLdtMqiCuNkPSCR+Ubd26OLSU50U=
+github.com/cohesive/cohesivenet-client-go v0.0.0-20240315070101-b2337826a001 h1:KxZASMwu5yFU2yLAIoEM7MCMXapBztzbqlRmbtoyicY=
+github.com/cohesive/cohesivenet-client-go v0.0.0-20240315070101-b2337826a001/go.mod h1:Hkvqqv+YdqzGrMlJLdtMqiCuNkPSCR+Ubd26OLSU50U=
+github.com/cohesive/cohesivenet-client-go v0.0.0-20240403152927-21d1bf4b5d01 h1:fW4ozSpEl8/5tuZnN4GzWWcWKSw/ZeXPPRk/2KU3NUI=
+github.com/cohesive/cohesivenet-client-go v0.0.0-20240403152927-21d1bf4b5d01/go.mod h1:Hkvqqv+YdqzGrMlJLdtMqiCuNkPSCR+Ubd26OLSU50U=
+github.com/cohesive/cohesivenet-client-go v0.0.0-20240403171710-0d6931fafe2b h1:rNf01qPdIvrHFm0wwFbRiBay9XdM5AqgOInScV0Wi+Q=
+github.com/cohesive/cohesivenet-client-go v0.0.0-20240403171710-0d6931fafe2b/go.mod h1:Hkvqqv+YdqzGrMlJLdtMqiCuNkPSCR+Ubd26OLSU50U=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/cyphar/filepath-securejoin v0.2.4 h1:Ugdm7cg7i6ZK6x3xDF1oEu1nfkyfH53EtKeQYTC3kyg=
 github.com/cyphar/filepath-securejoin v0.2.4/go.mod h1:aPGpWjXOXUn2NCNjFvBE6aRxGGx79pTxQpKOJNYHHl4=
