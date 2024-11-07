@@ -1,9 +1,9 @@
 # Base Setup
-This directory is a minimum install.  It deploys, licenses and configures two Peered VNS3 Controllers. 
+This directory is a minimum install.  It deploys, licenses and configures a Free Edition VNS3 controller. 
 
 ## Starting the Deployment
 
-Edit the `terraform.tfvars` file with the AWS ami id that is to be deployed.
+Edit the `terraform.tfvars` file with the AWS ami id provided in the AWS Marketplace VNS3 Free Edition subscription.
 
 Run `terraform init` to initialise the ternimal:
 ```bash
@@ -16,9 +16,7 @@ terraform apply
 ```
 Login information will be output after the deployment:  
 vns3_instance_id_c1 = “i-xxxxxxxxxxxx”  
-vns3_instance_id_c2 = “i-xxxxxxxxxxxx”  
 vns3_public_ip_c1 = “x.x.x.x”  
-vns3_public_ip_c2 = “x.x.x.x”  
 
 Run `terraform destroy` to tear down the infrastructure.
 ```bash
@@ -27,12 +25,7 @@ terraform destroy
 
 ## Expected Output
 
-- 1 AWS VPC
-- 2 Public subnets
-- 1 AWS IGW
-- 1 AWS Route Table
-- 1 Security Group
-- 2 Licensed and Peered VNS3 controllers
+- 1 Licensed Free Edition VNS3 controller
 
 
 

@@ -12,7 +12,7 @@ variable "controller_name" {
 }
 
 variable "vns3_license_file" {
-  default = "../sme6.txt"
+  default = "../sme6.txt" #Contact Cohesive Networks for a PoC license file
 }
 
 variable "keyset_token" {
@@ -21,7 +21,7 @@ variable "keyset_token" {
 }
 
 variable "vns3_instance_type" {
-  default = "t3.small"
+  default = "t3a.micro"
 }
 
 variable "vpc_cidr" {

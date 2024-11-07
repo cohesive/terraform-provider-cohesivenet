@@ -11,8 +11,9 @@ variable "controller_name" {
   default = "VNS3"
 }
 
+
 variable "vns3_license_file" {
-  default = "../sme6.txt"
+  default = "./vns3_free_license.txt"
 }
 
 variable "keyset_token" {
@@ -21,7 +22,7 @@ variable "keyset_token" {
 }
 
 variable "vns3_instance_type" {
-  default = "t3.small"
+  default = "t3a.micro"
 }
 
 variable "vpc_cidr" {
@@ -32,14 +33,7 @@ variable "az1" {
   default = "us-east-1a"
 }
 
-variable "az2" {
-  default = "us-east-1b"
-}
-
 variable "ami_id_1" {
   //set in tfvars
 }
 
-variable "ami_id_2" {
-  //set in tfvars
-}

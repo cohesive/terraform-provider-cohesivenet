@@ -27,11 +27,6 @@ terraform destroy
 
 ## Expected Output
 
-- 1 AWS VPC
-- 2 Public subnets
-- 1 AWS IGW
-- 1 AWS Route Table
-- 1 Security Group
 - 2 Licensed and Peered VNS3 controllers
 
 

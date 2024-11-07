@@ -12,7 +12,7 @@ variable "controller_name" {
 }
 
 variable "vns3_license_file" {
-  default = "../sme6.txt"
+  default = "../sme6.txt" #Contact Cohesive Networks for a PoC license file
 }
 
 variable "keyset_token" {
