@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-//Plugin image V2 API and go client
+// Plugin image V2 API and go client
 func resourcePluginImageNew() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourcePluginImageCreateNew,
@@ -82,6 +82,20 @@ func resourcePluginImageNew() *schema.Resource {
 				ForceNew:    true,
 				Description: "Upload docker file or zipped docker context directory",
 			},
+			"tags": &schema.Schema{
+				Type:        schema.TypeMap,
+				Optional:    true,
+				ForceNew:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Description: "Key-value pairs of tags for the plugin image",
+			},
+			"metadata": &schema.Schema{
+				Type:        schema.TypeMap,
+				Optional:    true,
+				ForceNew:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Description: "Key-value pairs of metadata for the plugin image",
+			},
 		},
 	}
 }
@@ -111,10 +125,32 @@ func resourcePluginImageCreateNew(ctx context.Context, d *schema.ResourceData, m
 	image_url := d.Get("image_url").(string)
 	description := d.Get("description").(string)
 	command := d.Get("command").(string)
+	documentation_url := d.Get("documentation_url").(string)
+	support_url := d.Get("support_url").(string)
 
 	newImage := cn.NewInstallPluginRequest(name, image_url)
 	newImage.SetDescription(description)
 	newImage.SetCommand(command)
+	newImage.SetDocumentationUrl(documentation_url)
+	newImage.SetSupportUrl(support_url)
+
+	// Get tags if they exist
+	if v, ok := d.GetOk("tags"); ok {
+		tags := make(map[string]string)
+		for key, value := range v.(map[string]interface{}) {
+			tags[key] = value.(string)
+		}
+		newImage.SetTags(tags)
+	}
+
+	// Get metadata if it exists
+	if v, ok := d.GetOk("metadata"); ok {
+		metadata := make(map[string]string)
+		for key, value := range v.(map[string]interface{}) {
+			metadata[key] = value.(string)
+		}
+		newImage.SetMetadata(metadata)
+	}
 
 	apiRequest := vns3.NetworkEdgePluginsApi.InstallPluginRequest(ctx)
 	apiRequest = apiRequest.InstallPluginRequest(*newImage)
@@ -172,13 +208,15 @@ func resourcePluginImageReadNew(ctx context.Context, d *schema.ResourceData, m i
 	return diags
 }
 
-/* TODO - Not sure of value TBD
+/*
+	TODO - Not sure of value TBD
+
 func resourcePluginImageUpdateNew(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	var diags diag.Diagnostics
+		var diags diag.Diagnostics
 
-	return diags
-}
+		return diags
+	}
 */
 func resourcePluginImageDeleteNew(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
