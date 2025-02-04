@@ -2,7 +2,7 @@ terraform {
   required_providers {
     cohesivenet = {
       source = "cohesive/cohesivenet"
-      version = "0.1.8"
+      version = "1.0.5"
     }
   }
 }

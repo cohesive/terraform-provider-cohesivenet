@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     cohesivenet = {
-      version = "0.1.14"
+      version = "1.0.5"
       source = "cohesive/cohesivenet"
     }
     aws = {
