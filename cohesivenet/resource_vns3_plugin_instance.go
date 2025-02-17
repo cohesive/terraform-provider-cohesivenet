@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 
 	cn "github.com/cohesive/cohesivenet-client-go/cohesivenet"
@@ -12,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-//Plugin instance V2 API and go client
+// Plugin instance V2 API and go client
 func resourceVns3PluginInstanceNew() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourcePluginInstanceCreateNew,
@@ -66,6 +67,25 @@ func resourceVns3PluginInstanceNew() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Plugin instance configuration file",
+			},
+			"plugin_config_files": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"filename": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Name of the configuration file",
+						},
+						"content": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Content of the configuration file",
+						},
+					},
+				},
+				Description: "List of plugin instance configuration files",
 			},
 		},
 	}
@@ -169,6 +189,7 @@ func resourcePluginInstanceReadNew(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	instance := detail.GetResponse()
+	log.Printf("CreatedAt: %v", *instance.CreatedAt)
 	instanceIdString := parseInstanceResponseId(instance)
 	d.SetId(instanceIdString)
 
@@ -187,6 +208,46 @@ func resourcePluginInstanceUpdateNew(ctx context.Context, d *schema.ResourceData
 	Id := d.Id()
 	iId, _ := strconv.Atoi(Id)
 	instanceId := int32(iId)
+
+	if d.HasChange("plugin_config_files") {
+		// Get available configs
+		configListRequest := vns3.NetworkEdgePluginsApi.GetPluginInstanceConfigFilesRequest(ctx, instanceId)
+		availableConfigs, _, err := vns3.NetworkEdgePluginsApi.GetPluginInstanceConfigFiles(configListRequest)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		configFiles := availableConfigs.GetResponse()
+
+		/*
+			// Parse the response JSON
+			var configResponse ConfigResponse
+			err = json.Unmarshal([]byte(availableConfigs.GetResponse()), &configResponse)
+			if err != nil {
+				return diag.FromErr(err)
+			}*/
+
+		// Process configs
+		configs := d.Get("plugin_config_files").([]interface{})
+		for _, config := range configs {
+			configMap := config.(map[string]interface{})
+			filename := configMap["filename"].(string)
+			content := configMap["content"].(string)
+
+			for _, availableConfig := range configFiles {
+				if strings.Contains(availableConfig.GetName(), filename) {
+					newInstanceConfig := cn.NewUpdateFileContentRequest(content)
+					request := vns3.NetworkEdgePluginsApi.UpdatePluginInstanceConfigContentRequest(ctx, instanceId, filename)
+					request = request.UpdateFileContentRequest(*newInstanceConfig)
+					_, _, err := vns3.NetworkEdgePluginsApi.UpdatePluginInstanceConfigFileContent(request)
+					if err != nil {
+						return diag.FromErr(err)
+					}
+					break
+				}
+			}
+		}
+		d.Set("last_updated", time.Now().Format(time.RFC850))
+	}
 
 	if d.HasChange("plugin_config") {
 		pluginConfig := d.Get("plugin_config").(string)
