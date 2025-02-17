@@ -143,22 +143,8 @@ func resourcePluginInstanceCreateNew(ctx context.Context, d *schema.ResourceData
 	}
 	log.Println(instanceDetail)
 
-	///all update to set new config
+	///allow update to set new config if specified on create
 	resourcePluginInstanceUpdateNew(ctx, d, m)
-	/*
-		//Set new config
-		//pluginConfig := d.Get("plugin_config").(string)
-		newInstanceConfig := cn.NewUpdateFileContentRequest(pluginConfig)
-		request := vns3.NetworkEdgePluginsApi.UpdatePluginInstanceConfigContentRequest(ctx, instanceId, "0")
-		request = request.UpdateFileContentRequest(*newInstanceConfig)
-		configDetail, _, err := vns3.NetworkEdgePluginsApi.UpdatePluginInstanceConfigFileContent(request)
-		if err != nil {
-			return diag.FromErr(err)
-		}
-
-		config := configDetail.GetResponse()
-		d.Set("plugin_config", config)
-	*/
 	resourcePluginInstanceReadNew(ctx, d, m)
 
 	return diags
@@ -189,7 +175,6 @@ func resourcePluginInstanceReadNew(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	instance := detail.GetResponse()
-	log.Printf("CreatedAt: %v", *instance.CreatedAt)
 	instanceIdString := parseInstanceResponseId(instance)
 	d.SetId(instanceIdString)
 
@@ -217,14 +202,6 @@ func resourcePluginInstanceUpdateNew(ctx context.Context, d *schema.ResourceData
 			return diag.FromErr(err)
 		}
 		configFiles := availableConfigs.GetResponse()
-
-		/*
-			// Parse the response JSON
-			var configResponse ConfigResponse
-			err = json.Unmarshal([]byte(availableConfigs.GetResponse()), &configResponse)
-			if err != nil {
-				return diag.FromErr(err)
-			}*/
 
 		// Process configs
 		configs := d.Get("plugin_config_files").([]interface{})
