@@ -128,8 +128,7 @@ jobs:
           fi
           echo $slack_message
           # Send the Slack message
-          curl -X POST -H "Content-type: application/json" --data "$slack_message" https://hooks.slack.com/services/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
-          #curl -X POST -H "Content-type: application/json" --data "$slack_message" ${{ secrets.SLACK_WEBHOOK_URL }}
+          curl -X POST -H "Content-type: application/json" --data "$slack_message" ${{ secrets.SECURITY_BOTS_SLACK_URL }}
         continue-on-error: true
 
       - name: Send Package Manager Results to Slack
@@ -163,8 +162,7 @@ jobs:
           fi
       
           # Send the Slack message
-          curl -X POST -H "Content-type: application/json" --data "$slack_message" https://hooks.slack.com/services/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
-          #curl -X POST -H "Content-type: application/json" --data "$slack_message" ${{ secrets.SLACK_WEBHOOK_URL }}
+          curl -X POST -H "Content-type: application/json" --data "$slack_message" ${{ secrets.SECURITY_BOTS_SLACK_URL }}
         continue-on-error: true
 
       - name: Send Code Results to Slack
@@ -195,6 +193,5 @@ jobs:
           fi
       
           # Send the Slack message
-          curl -X POST -H "Content-type: application/json" --data "$slack_message" https://hooks.slack.com/services/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
-          #curl -X POST -H "Content-type: application/json" --data "$slack_message" ${{ secrets.SLACK_WEBHOOK_URL }}
+          curl -X POST -H "Content-type: application/json" --data "$slack_message" ${{ secrets.SECURITY_BOTS_SLACK_URL }}
         continue-on-error: true
