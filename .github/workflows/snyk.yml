@@ -20,17 +20,18 @@ jobs:
             echo "curl is already installed."
           fi
 
+      - name: Set up Node.js (for Snyk)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
       - name: Install jq (latest version)
         run: |
           sudo apt-get update
           sudo apt-get install -y jq
 
       - name: Install Snyk
-        run: |
-          curl -fsSL https://packages.snyk.io/debian/gpg | sudo tee /etc/apt/trusted.gpg.d/snyk.asc
-          echo "deb https://packages.snyk.io/debian stable main" | sudo tee /etc/apt/sources.list.d/snyk.list
-          sudo apt update
-          sudo apt install snyk -y
+        run: npm install -g snyk
 
       - name: Run Snyk Terraform Scan
         run: snyk test --iac --json > snyk-results-iac.json 
