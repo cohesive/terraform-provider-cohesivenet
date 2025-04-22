@@ -80,6 +80,11 @@ func resourceEndpoints() *schema.Resource {
 							Optional:    true,
 							Description: "IPsec extra parameter settings for auth and encryption",
 						},
+						"private_ipaddress": &schema.Schema{
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "Remote Peer's IKE ID",
+						},
 						"vpn_type": &schema.Schema{
 							Type:        schema.TypeString,
 							Optional:    true,
@@ -88,7 +93,7 @@ func resourceEndpoints() *schema.Resource {
 						"route_based_int_address": &schema.Schema{
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: "If VTI or GRE a /30 address for the virtual interface",
+							Description: "If VTI a /30 address for the virtual interface",
 						},
 						"route_based_local": &schema.Schema{
 							Type:        schema.TypeString,
@@ -127,6 +132,7 @@ func resourceEndpointsCreate(ctx context.Context, d *schema.ResourceData, m inte
 		Ike_version:             endpoint["ike_version"].(int),
 		Nat_t_enabled:           endpoint["nat_t_enabled"].(bool),
 		Extra_config:            strings.Replace(endpoint["extra_config"].(string), ",", " ", -1),
+		Private_ipaddress:       endpoint["private_ipaddress"].(string),
 		Vpn_type:                endpoint["vpn_type"].(string),
 		Route_based_int_address: endpoint["route_based_int_address"].(string),
 		Route_based_local:       endpoint["route_based_local"].(string),
@@ -193,6 +199,7 @@ func resourceEndpointsUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			Ike_version:             endpoint["ike_version"].(int),
 			Nat_t_enabled:           endpoint["nat_t_enabled"].(bool),
 			Extra_config:            strings.Replace(endpoint["extra_config"].(string), ",", " ", -1),
+			Private_ipaddress:       endpoint["private_ipaddress"].(string),
 			Vpn_type:                endpoint["vpn_type"].(string),
 			Route_based_int_address: endpoint["route_based_int_address"].(string),
 			Route_based_local:       endpoint["route_based_local"].(string),
@@ -240,6 +247,7 @@ func flattenEndpointData(newEndpoint cn.NewEndpoint) []interface{} {
 	row["secret"] = newEndpoint.Response.Psk
 	row["pfs"] = newEndpoint.Response.Pfs
 	row["nat_t_enabled"] = newEndpoint.Response.NatTEnabled
+	row["private_ipaddress"] = newEndpoint.Response.PrivateIpaddress
 	row["vpn_type"] = newEndpoint.Response.VpnType
 	row["ike_version"] = newEndpoint.Response.IkeVersion
 	row["route_based_int_address"] = newEndpoint.Response.RouteBasedIntAddress

@@ -7,6 +7,7 @@
       pfs = true 
       ike_version = 2
       nat_t_enabled = true 
+      private_ipaddress = "192.168.54.186"
       extra_config = "phase1=aes256-sha2_256-dh16, phase2=aes256-sha2_256-dh16"
       vpn_type = "vti"
       route_based_int_address = "169.254.32.186/30"
