@@ -189,25 +189,24 @@ provider = cohesivenet.controller_2
 
 ### Required
 
-- `configuration_id` (String) Configuration id
-- `instance_id` (String) Instance id
+- `configuration_id` (String) Configuration id - Required for controller upgrades. This is the AWS AMI Id or Azure Machine Image Id.
+- `instance_id` (String) Instance id - Required for controller upgrades. This is the AWS Instance Id or Azure Virtual Machine Id.
 - `keyset_params` (Block Set, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--keyset_params))
-- `peer_id` (Number) Sets VNS3 controllers peer id
-- `topology_name` (String) Sets VNS3 topolgy name
+- `peer_id` (Number) Sets VNS3 controllers peer id in the VNS3 mesh network. Primary controller must be set to 1.
+- `topology_name` (String) Sets VNS3 topolgy name displayed in the VNS3 UI.
 
 ### Optional
 
-- `controller_name` (String) Sets VNS3 controller name
-- `generate_token` (Boolean) Optionally creates API token
+- `controller_name` (String) Sets VNS3 controller name displayed in the VNS3 UI. 
 - `last_updated` (String)
 - `license_file` (String) Path to VNS3 license file
 - `license_params` (Block Set, Max: 1) Nested block of configurable VNS3 license parameters (see [below for nested schema](#nestedblock--license_params))
 - `new_api_password` (String, Sensitive) Sets user defined API password
 - `new_ui_password` (String, Sensitive) Sets user defined UI password
 - `new_ui_username` (String) Sets user defined admin username
-- `token_lifetime` (Number) Sets API token lifetime. A value > 0 will generate token
-- `token_refresh` (Boolean) Sets API token refresh
-- `vns3` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--vns3))
+- `generate_token` (Boolean) Optionally creates API token
+- `token_lifetime` (Number) Sets API token lifetime in seconds. 1,37,30,60,90,365 Days are valid values
+- `token_refresh` (Boolean) Sets API token refresh option, token will be refreshed on every API call
 
 ### Read-Only
 
@@ -216,7 +215,6 @@ provider = cohesivenet.controller_2
 - `licensed` (Boolean)
 - `new_auth_set` (Boolean)
 - `private_ip` (String) ip of controller
-- `token` (String) Token
 - `topology_checksum` (String) Checksum
 
 <a id="nestedblock--keyset_params"></a>
@@ -224,11 +222,11 @@ provider = cohesivenet.controller_2
 
 Required:
 
-- `token` (String)
+- `token` (String) Secret used to create internal controller X509 cerstificates and used to peer controllers.
 
 Optional:
 
-- `source` (String)
+- `source` (String) Used when referencing Primary Controller in perring operation. 
 
 
 <a id="nestedblock--license_params"></a>
@@ -236,11 +234,13 @@ Optional:
 
 Optional:
 
-- `asns` (List of Number) Sets VNS3 default ASNs
-- `clients` (List of String) Sets VNS3 overlay client addresses
-- `controller_vip` (String) Sets VNS3 VIP
-- `controllers` (List of String) Specifies number of controllers in topology
-- `default` (Boolean)
+- `default` (Boolean) - Set to True to use default license, otherwise set to False to use custom license. When set to True, the following parameters are not required.
+
+- `asns` (List of Number) Sets VNS3 custom Autonomous System Numbers (ASN)
 - `subnet` (String) Sets VNS3 overlay subnet
+- `clients` (List of String) Sets VNS3 custom overlay client addresses
+- `controller_vip` (String) Sets custom VNS3 VIP
+- `controllers` (List of String) Specifies number of controllers in topology
+
 
 

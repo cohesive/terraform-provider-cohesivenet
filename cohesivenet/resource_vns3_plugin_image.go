@@ -2,6 +2,7 @@ package cohesivenet
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"strconv"
 	"time"
@@ -16,9 +17,14 @@ func resourcePluginImageNew() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourcePluginImageCreateNew,
 		ReadContext:   resourcePluginImageReadNew,
-		//Update TODO
-		//UpdateContext: resourcePluginImageUpdateNew,
+		UpdateContext: resourcePluginImageUpdateNew,
 		DeleteContext: resourcePluginImageDeleteNew,
+		CustomizeDiff: func(ctx context.Context, diff *schema.ResourceDiff, v interface{}) error {
+			if diff.Id() != "" && diff.HasChange("image_url") {
+				return fmt.Errorf("plugin image_url cannot be changed as it has dependant plugin instances, delete the instances and recreate the plugin image")
+			}
+			return nil
+		},
 		Schema: map[string]*schema.Schema{
 			"last_updated": &schema.Schema{
 				Type:     schema.TypeString,
@@ -37,37 +43,32 @@ func resourcePluginImageNew() *schema.Resource {
 			"name": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
 				Description: "Name of deployed image",
 			},
 			"image_url": &schema.Schema{
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				ForceNew:    true,
 				Description: "URL of the image file to be imported",
 			},
 			"description": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
-				ForceNew:    true,
 				Description: "Description of deployed image",
 			},
 			"command": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
-				ForceNew:    true,
 				Description: "URL of a dockerfile that will be used to build the image",
 			},
 			"documentation_url": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
-				ForceNew:    true,
 				Description: "Local build file to create new image",
 			},
 			"support_url": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
-				ForceNew:    true,
 				Description: "Local image to tag",
 			},
 			"catalog_id": &schema.Schema{
@@ -79,20 +80,17 @@ func resourcePluginImageNew() *schema.Resource {
 			"version": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
-				ForceNew:    true,
 				Description: "Upload docker file or zipped docker context directory",
 			},
 			"tags": &schema.Schema{
 				Type:        schema.TypeMap,
 				Optional:    true,
-				ForceNew:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: "Key-value pairs of tags for the plugin image",
 			},
 			"metadata": &schema.Schema{
 				Type:        schema.TypeMap,
 				Optional:    true,
-				ForceNew:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: "Key-value pairs of metadata for the plugin image",
 			},
@@ -208,16 +206,67 @@ func resourcePluginImageReadNew(ctx context.Context, d *schema.ResourceData, m i
 	return diags
 }
 
-/*
-	TODO - Not sure of value TBD
-
 func resourcePluginImageUpdateNew(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-		var diags diag.Diagnostics
+	var diags diag.Diagnostics
 
-		return diags
+	vns3, clienterror := getVns3Client(ctx, d, m)
+	if clienterror != nil {
+		return diag.FromErr(clienterror)
 	}
-*/
+	// synchronize creating a plugin image
+	vns3.ReqLock.Lock()
+	defer vns3.ReqLock.Unlock()
+
+	Id := d.Id()
+	iId, _ := strconv.Atoi(Id)
+	imageId := int32(iId)
+
+	if d.HasChange("name") ||
+		d.HasChange("description") ||
+		d.HasChange("command") ||
+		d.HasChange("documentation_url") ||
+		d.HasChange("support_url") ||
+		d.HasChange("tags") ||
+		d.HasChange("metadata") ||
+		d.HasChange("version") {
+
+		name := d.Get("name").(string)
+		description := d.Get("description").(string)
+		command := d.Get("command").(string)
+		documentation_url := d.Get("documentation_url").(string)
+		support_url := d.Get("support_url").(string)
+		version := d.Get("version").(string)
+
+		updatedImage := cn.NewUpdatePluginRequest()
+		updatedImage.SetName(name)
+		updatedImage.SetDescription(description)
+		updatedImage.SetCommand(command)
+		updatedImage.SetDocumentationUrl(documentation_url)
+		updatedImage.SetSupportUrl(support_url)
+		updatedImage.SetVersion(version)
+
+		// Get tags if they exist
+		if v, ok := d.GetOk("tags"); ok {
+			tags := make(map[string]string)
+			for key, value := range v.(map[string]interface{}) {
+				tags[key] = value.(string)
+			}
+			updatedImage.SetTags(tags)
+		}
+
+		apiRequest := vns3.NetworkEdgePluginsApi.PutUpdatePluginRequest(ctx, imageId)
+		apiRequest = apiRequest.UpdatePluginRequest(*updatedImage)
+		_, _, err := vns3.NetworkEdgePluginsApi.PutUpdatePlugin(apiRequest)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
+	return diags
+
+}
+
 func resourcePluginImageDeleteNew(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	var diags diag.Diagnostics

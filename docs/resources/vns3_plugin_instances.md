@@ -21,6 +21,12 @@ resource  "cohesivenet_vns3_plugin_instances" instance {
     ip_address =  "198.51.100.11"
     description = "plugindescription"
     command = "/usr/bin/supervisord"
+    
+    environment_variables = {
+      key="value", 
+      key="value", 
+      key="value"}
+    
     plugin_config = file("/path/to/file")
 
     plugin_config_files {

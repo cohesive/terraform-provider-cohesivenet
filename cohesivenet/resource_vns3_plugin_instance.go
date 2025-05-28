@@ -63,6 +63,13 @@ func resourceVns3PluginInstanceNew() *schema.Resource {
 				ForceNew:    true,
 				Description: "Command used to start instance",
 			},
+			"environment_variables": &schema.Schema{
+				Type:        schema.TypeMap,
+				Optional:    true,
+				ForceNew:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Description: "Key-value pairs of metadata for the plugin image",
+			},
 			"plugin_config": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -121,6 +128,23 @@ func resourcePluginInstanceCreateNew(ctx context.Context, d *schema.ResourceData
 	newInstance.SetDescription(description)
 	newInstance.SetIpAddress(ip_address)
 	newInstance.SetCommand(command)
+
+	if v, ok := d.GetOk("environment_variables"); ok {
+		env_vars := make([]cn.KeyValuePair, 0)
+		for key, value := range v.(map[string]interface{}) {
+			valueStr := value.(string)
+			anyValue := cn.AnyValue{
+				String: &valueStr,
+			}
+
+			kvp := cn.KeyValuePair{
+				Key:   &key,
+				Value: &anyValue,
+			}
+			env_vars = append(env_vars, kvp)
+		}
+		newInstance.SetEnvironment(env_vars)
+	}
 
 	apiRequest := vns3.NetworkEdgePluginsApi.StartPluginInstanceRequest(ctx)
 	apiRequest = apiRequest.StartPluginInstanceRequest(*newInstance)
