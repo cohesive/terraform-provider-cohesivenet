@@ -49,6 +49,8 @@ resource "cohesivenet_vns3_plugin_image" "image" {
 - `last_updated` (String)
 - `support_url` (String) Local image to tag
 - `version` (String) Upload docker file or zipped docker context directory
+- `tags` (Map of String) Tags to be applied to the image
+- `metadata` (Map of String) Metadata to be applied to the image
 
 ### Read-Only
 

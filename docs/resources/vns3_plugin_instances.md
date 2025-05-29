@@ -53,7 +53,7 @@ resource  "cohesivenet_vns3_plugin_instances" instance {
 - `last_updated` (String)
 - `name` (String) Name of instance
 - `plugin_id` (String) Id of instance
-- `plugin_config` (String) Plugin configuration file (updates only the first configuration file in th eplugin (use `plugin_config_files`))
+- `plugin_config` (String) Plugin configuration file (updates only the first configuration file in the plugin (use `plugin_config_files`))
 - `plugin_config_files` (Block List) Plugin configuration files (see [below for nested schema](#nestedblock--plugin_config_files))
     - `plugin_config_files_filename` (String) Plugin configuration files (Uses the NAME of the file as specified in the documentation for that plugin (https://docs.cohesive.net/docs/network-edge-plugins/))
     - `plugin_config_files_content` (String) Plugin configuration files
