@@ -21,6 +21,12 @@ resource  "cohesivenet_vns3_plugin_instances" instance {
     ip_address =  "198.51.100.11"
     description = "plugindescription"
     command = "/usr/bin/supervisord"
+    
+    environment_variables = {
+      key="value", 
+      key="value", 
+      key="value"}
+    
     plugin_config = file("/path/to/file")
 
     plugin_config_files {
@@ -47,7 +53,7 @@ resource  "cohesivenet_vns3_plugin_instances" instance {
 - `last_updated` (String)
 - `name` (String) Name of instance
 - `plugin_id` (String) Id of instance
-- `plugin_config` (String) Plugin configuration file (updates only the first configuration file in th eplugin (use `plugin_config_files`))
+- `plugin_config` (String) Plugin configuration file (updates only the first configuration file in the plugin (use `plugin_config_files`))
 - `plugin_config_files` (Block List) Plugin configuration files (see [below for nested schema](#nestedblock--plugin_config_files))
     - `plugin_config_files_filename` (String) Plugin configuration files (Uses the NAME of the file as specified in the documentation for that plugin (https://docs.cohesive.net/docs/network-edge-plugins/))
     - `plugin_config_files_content` (String) Plugin configuration files

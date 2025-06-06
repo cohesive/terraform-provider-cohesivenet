@@ -18,6 +18,17 @@ resource "cohesivenet_vns3_plugin_image" "image" {
     image_url  = ""
     description = "test-tf-plugin-description"
     command = "/usr/bin/supervisord"
+    documentation_url = "https://docs.cohesive.net/docs/network-edge-plugins/donamestuff/"
+    support_url = "https://support.cohesive.net"
+    version = "0.0.1"
+    tags = {
+        log-access = "true",
+        ssh = "true"
+    }
+    metadata = {
+        property1 = "string",
+        property2 = "string"
+  }
  }
 ```
 
@@ -38,6 +49,8 @@ resource "cohesivenet_vns3_plugin_image" "image" {
 - `last_updated` (String)
 - `support_url` (String) Local image to tag
 - `version` (String) Upload docker file or zipped docker context directory
+- `tags` (Map of String) Tags to be applied to the image
+- `metadata` (Map of String) Metadata to be applied to the image
 
 ### Read-Only
 
