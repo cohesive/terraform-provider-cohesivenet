@@ -43,13 +43,13 @@ func resourcePluginImageNew() *schema.Resource {
 			"name": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Name of deployed image",
+				Description: "Name of the plugin image",
 			},
 			"image_url": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "URL of the image file to be imported",
+				Description: "URL of the image to be imported",
 			},
 			"description": &schema.Schema{
 				Type:        schema.TypeString,
@@ -59,39 +59,39 @@ func resourcePluginImageNew() *schema.Resource {
 			"command": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "URL of a dockerfile that will be used to build the image",
+				Description: "Start command for the plugin image. Either /opt/cohesive/container_startup.sh or /usr/bin/supervisord",
 			},
 			"documentation_url": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Local build file to create new image",
+				Description: "URL of documentation for the plugin image",
 			},
 			"support_url": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Local image to tag",
+				Description: "URL of support for the plugin image",
 			},
 			"catalog_id": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    true,
-				Description: "Upload image file",
+				Description: "ID of image in the Cohesive Networks catalog",
 			},
 			"version": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Upload docker file or zipped docker context directory",
+				Description: "Version of the plugin image",
 			},
 			"tags": &schema.Schema{
-				Type:        schema.TypeMap,
-				Optional:    true,
-				Elem:        &schema.Schema{Type: schema.TypeString},
+				Type:     schema.TypeMap,
+				Optional: true,
+				//Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: "Key-value pairs of tags for the plugin image",
 			},
 			"metadata": &schema.Schema{
-				Type:        schema.TypeMap,
-				Optional:    true,
-				Elem:        &schema.Schema{Type: schema.TypeString},
+				Type:     schema.TypeMap,
+				Optional: true,
+				//Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: "Key-value pairs of metadata for the plugin image",
 			},
 		},
@@ -132,20 +132,59 @@ func resourcePluginImageCreateNew(ctx context.Context, d *schema.ResourceData, m
 	newImage.SetDocumentationUrl(documentation_url)
 	newImage.SetSupportUrl(support_url)
 
-	// Get tags if they exist
+	// Get tags if they exist and extract correct data type
 	if v, ok := d.GetOk("tags"); ok {
-		tags := make(map[string]string)
+		tags := make(map[string]interface{})
 		for key, value := range v.(map[string]interface{}) {
-			tags[key] = value.(string)
+			// Convert string representations of booleans back to actual booleans
+			if strVal, ok := value.(string); ok {
+				switch strVal {
+				case "true":
+					tags[key] = true
+				case "false":
+					tags[key] = false
+				default:
+					if intVal, err := strconv.Atoi(strVal); err == nil {
+						tags[key] = intVal
+					} else if floatVal, err := strconv.ParseFloat(strVal, 64); err == nil {
+						tags[key] = floatVal
+					} else {
+						// Keep as string
+						tags[key] = strVal
+					}
+				}
+			} else {
+				tags[key] = value
+			}
 		}
 		newImage.SetTags(tags)
 	}
 
-	// Get metadata if it exists
+	// Get metadata extract correct data types
 	if v, ok := d.GetOk("metadata"); ok {
-		metadata := make(map[string]string)
+		metadata := make(map[string]interface{})
 		for key, value := range v.(map[string]interface{}) {
-			metadata[key] = value.(string)
+			// Convert string representations of booleans back to actual booleans
+			if strVal, ok := value.(string); ok {
+				switch strVal {
+				case "true":
+					metadata[key] = true
+				case "false":
+					metadata[key] = false
+				default:
+					// Check if it's a number
+					if intVal, err := strconv.Atoi(strVal); err == nil {
+						metadata[key] = intVal
+					} else if floatVal, err := strconv.ParseFloat(strVal, 64); err == nil {
+						metadata[key] = floatVal
+					} else {
+						// Keep as string
+						metadata[key] = strVal
+					}
+				}
+			} else {
+				metadata[key] = value
+			}
 		}
 		newImage.SetMetadata(metadata)
 	}
@@ -246,11 +285,30 @@ func resourcePluginImageUpdateNew(ctx context.Context, d *schema.ResourceData, m
 		updatedImage.SetSupportUrl(support_url)
 		updatedImage.SetVersion(version)
 
-		// Get tags if they exist
+		// Get tags if they exist and extract correct data type
 		if v, ok := d.GetOk("tags"); ok {
-			tags := make(map[string]string)
+			tags := make(map[string]interface{})
 			for key, value := range v.(map[string]interface{}) {
-				tags[key] = value.(string)
+				// Convert string representations of booleans back to actual booleans
+				if strVal, ok := value.(string); ok {
+					switch strVal {
+					case "true":
+						tags[key] = true
+					case "false":
+						tags[key] = false
+					default:
+						if intVal, err := strconv.Atoi(strVal); err == nil {
+							tags[key] = intVal
+						} else if floatVal, err := strconv.ParseFloat(strVal, 64); err == nil {
+							tags[key] = floatVal
+						} else {
+							// Keep as string
+							tags[key] = strVal
+						}
+					}
+				} else {
+					tags[key] = value
+				}
 			}
 			updatedImage.SetTags(tags)
 		}
