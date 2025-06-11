@@ -61,7 +61,7 @@ func resourceVns3PluginInstanceNew() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    true,
-				Description: "Command used to start instance",
+				Description: "Start command for the plugin instance. Either /opt/cohesive/container_startup.sh or /usr/bin/supervisord",
 			},
 			"environment_variables": &schema.Schema{
 				Type:        schema.TypeMap,
