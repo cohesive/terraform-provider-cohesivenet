@@ -227,30 +227,6 @@ func resourcePluginInstanceExecutableDelete(ctx context.Context, d *schema.Resou
 
 	var diags diag.Diagnostics
 
-	/*
-		vns3, clienterror := getVns3Client(ctx, d, m)
-		if clienterror != nil {
-			return diag.FromErr(clienterror)
-		}
-		// synchronize creating a plugin image
-		vns3.ReqLock.Lock()
-		defer vns3.ReqLock.Unlock()
-
-		Id := d.Id()
-		iId, _ := strconv.Atoi(Id)
-		instanceId := int32(iId)
-
-		deleteInstance := cn.NewDeletePluginInstanceRequest()
-		deleteInstance.SetForce(true)
-
-		apiRequest := vns3.NetworkEdgePluginsApi.DeletePluginInstanceRequest(ctx, instanceId)
-		apiRequest = apiRequest.DeletePluginInstanceRequest(*deleteInstance)
-		_, _, err := vns3.NetworkEdgePluginsApi.DeletePluginInstance(apiRequest)
-
-		if err != nil {
-			return diag.FromErr(err)
-		}
-	*/
 	d.SetId("")
 
 	return diags
