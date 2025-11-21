@@ -2,7 +2,6 @@ package cohesivenet
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	cn "github.com/cohesive/cohesivenet-client-go/cohesivenet"
@@ -151,8 +150,10 @@ func resourceFirewallRulesRead(ctx context.Context, d *schema.ResourceData, m in
 	id := d.Id()
 	rule := findRule(rulesResponse, id)
 
+	// Handle empty response
 	if rule == nil {
-		return diag.FromErr(fmt.Errorf("could not find firewall rule %v", id))
+		d.SetId("")
+		return diags
 	}
 
 	d.Set("rule", rule.Rule)

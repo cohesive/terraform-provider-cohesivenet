@@ -168,6 +168,11 @@ func resourceEndpointsRead(ctx context.Context, d *schema.ResourceData, m interf
 
 	flatEndpoint := flattenEndpointData(endpoint)
 
+	if len(flatEndpoint) == 0 {
+		d.SetId("")
+		return diags
+	}
+
 	if err := d.Set("endpoint", flatEndpoint); err != nil {
 		return diag.FromErr(err)
 	}

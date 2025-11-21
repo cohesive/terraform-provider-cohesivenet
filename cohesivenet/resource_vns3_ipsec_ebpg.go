@@ -154,10 +154,16 @@ func resourceEbgpRead(ctx context.Context, d *schema.ResourceData, m interface{}
 
 	ebgPeer, err := c.GetEbgpPeer(endpointId, ebgpPeerId)
 	if err != nil {
-		return diag.FromErr(err)
+		d.SetId("")
+		return diags
 	}
 
 	flatPeer := flattenEbgpData(ebgPeer)
+
+	if len(flatPeer) == 0 {
+		d.SetId("")
+		return diags
+	}
 
 	if err := d.Set("ebgp_peer", flatPeer); err != nil {
 		return diag.FromErr(err)

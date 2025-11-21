@@ -156,6 +156,12 @@ func resourceRoutesRead(ctx context.Context, d *schema.ResourceData, m interface
 	}
 
 	flatRoutes := flattenRouteData(routesResponse)
+	// Handle empty response
+	if flatRoutes == 0 {
+		d.SetId("")
+		return diags
+	}
+
 	d.Set("route", flatRoutes)
 	return diags
 }
