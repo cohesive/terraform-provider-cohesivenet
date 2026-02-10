@@ -417,7 +417,7 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 
 	// wait for a while if still coming up
-	_, err := vns3.ConfigurationApi.WaitForApi(&ctx, 60*30, 3, 5)
+	_, err := vns3.ConfigurationApi.WaitForApi(&ctx, 60*20, 3, 5)
 	if err != nil {
 		host, _ := vns3.GetConfig().ServerURL(0, map[string]string{})
 		return diag.FromErr(fmt.Errorf("VNS3 is not available [host=%v] %v", host, err))
@@ -514,12 +514,13 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 }
 
 /*
-	func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-		// Warning or errors can be collected in a slice type
-		var diags diag.Diagnostics
+func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	// Warning or errors can be collected in a slice type
+	var diags diag.Diagnostics
 
-		return diags
-	}
+	return diags
+}
+
 */
 func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	// Warning or errors can be collected in a slice type

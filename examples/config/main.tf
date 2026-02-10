@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     cohesivenet = {
-      version = "1.1.0"
+      version = "1.0.5"
       source = "cohesive/cohesivenet"
     }
     aws = {
@@ -63,7 +63,6 @@ provider "cohesivenet" {
   alias    = "controller_2"
   host     = aws_eip.vns3_ip_2.public_ip
   password = aws_instance.vns3controller_2.id
-  token = cohesivenet_vns3_config.vns3_1.token
 }
 
 resource "cohesivenet_vns3_config" "vns3_1" {

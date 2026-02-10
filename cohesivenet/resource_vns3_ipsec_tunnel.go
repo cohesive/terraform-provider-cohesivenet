@@ -2,10 +2,8 @@ package cohesivenet
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"strconv"
-	"strings"
 	"time"
 
 	cn "github.com/cohesive/cohesivenet-client-go/cohesivenet/v1"
@@ -36,20 +34,12 @@ func resourceTunnel() *schema.Resource {
 			"endpoint_id": &schema.Schema{
 				Type:        schema.TypeInt,
 				Required:    true,
-				ForceNew:    true,
 				Description: "Endpoint ID to associate Tunnel",
 			},
 			"remote_subnet": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Remote Subnet CIDR of Tunnel",
-				ValidateFunc: func(v interface{}, k string) ([]string, []error) {
-					value := v.(string)
-					if value == "" {
-						return nil, []error{fmt.Errorf("remote_subnet cannot be empty")}
-					}
-					return nil, nil
-				},
 			},
 			"local_subnet": &schema.Schema{
 				Type:        schema.TypeString,
@@ -156,46 +146,16 @@ func resourceTunnelRead(ctx context.Context, d *schema.ResourceData, m interface
 	var diags diag.Diagnostics
 
 	remoteSubnet := d.Get("remote_subnet").(string)
-	if remoteSubnet == "" && d.HasChange("remote_subnet") {
-		old, _ := d.GetChange("remote_subnet")
-		remoteSubnet = old.(string)
-	}
-
 	endId, _ := d.GetOk("endpoint_id")
 	endpointId := endId.(int)
 	tunnelId := d.Id()
 
 	tunnelResponse, err := c.GetTunnel(endpointId, remoteSubnet, tunnelId)
 	if err != nil {
-		log.Printf("[WARN] Failed to retrieve tunnel %s: %v", tunnelId, err)
-		return diag.Diagnostics{
-			diag.Diagnostic{
-				Severity: diag.Warning,
-				Summary:  "Ipsec Tunnel not found on controller. Tunnel will be recreated",
-				Detail:   err.Error(),
-			},
-		}
-	}
-
-	if tunnelResponse == nil {
-		log.Printf("[WARN] Ipsec Tunnel %s returned nil response", tunnelId)
-		d.SetId("")
-		return diag.Diagnostics{
-			diag.Diagnostic{
-				Severity: diag.Warning,
-				Summary:  "Ipsec Tunnel returned empty response",
-				Detail:   fmt.Sprintf("Tunnel %s exists in state but controller returned no data", tunnelId),
-			},
-		}
+		return diag.FromErr(err)
 	}
 
 	flatTunnel := flattenTunnels(tunnelResponse)
-	if len(flatTunnel) == 0 {
-		// API didn't error but returned no matching tunnel
-		log.Printf("[WARN] Tunnel %s not found", tunnelId)
-		d.SetId("")
-		return diags
-	}
 
 	d.Set("remote_subnet", flatTunnel["remote_subnet"].(string))
 	d.Set("local_subnet", flatTunnel["local_subnet"].(string))
@@ -247,17 +207,7 @@ func resourceTunnelUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 
 		_, err := c.UpdateTunnel(endpointId, tunnelId, remote_subnet, &tun)
 		if err != nil {
-			diags := diag.Diagnostics{
-				diag.Diagnostic{
-					Severity: diag.Warning,
-					Summary:  "Tunnel update failed, refreshing state from controller",
-					Detail:   err.Error(),
-				},
-			}
-
-			//Refresh state to match controller.
-			readDiags := resourceTunnelRead(ctx, d, m)
-			return append(diags, readDiags...)
+			return diag.FromErr(err)
 		}
 
 		d.Set("last_updated", time.Now().Format(time.RFC850))
@@ -281,12 +231,6 @@ func resourceTunnelDelete(ctx context.Context, d *schema.ResourceData, m interfa
 
 	err := c.DeleteTunnel(endpointId, tunnelId)
 	if err != nil {
-		// If tunnel/endpoint not found, consider it already deleted. Forces state to be rewritten.
-		if strings.Contains(err.Error(), "not found") || strings.Contains(err.Error(), "404") {
-			log.Printf("[WARN] Tunnel %s or endpoint %d not found, removing from state", tunnelId, endpointId)
-			d.SetId("")
-			return diags
-		}
 		return diag.FromErr(err)
 	}
 

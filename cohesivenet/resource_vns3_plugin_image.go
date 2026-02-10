@@ -236,15 +236,7 @@ func resourcePluginImageReadNew(ctx context.Context, d *schema.ResourceData, m i
 	imageStatus := vns3.NetworkEdgePluginsApi.GetPluginRequest(ctx, PluginId)
 	imageDetail, _, err := vns3.NetworkEdgePluginsApi.GetPlugin(imageStatus)
 	if err != nil {
-		log.Printf("[WARN] Failed to get plugin %v", err)
-		d.SetId("")
-		return diag.Diagnostics{
-			diag.Diagnostic{
-				Severity: diag.Warning,
-				Summary:  "Plugin image not found on controller",
-				Detail:   err.Error(),
-			},
-		}
+		return diag.FromErr(err)
 	}
 	plugin := imageDetail.GetResponse()
 	pluginIdString, _ := parsePluginResponseId(plugin)

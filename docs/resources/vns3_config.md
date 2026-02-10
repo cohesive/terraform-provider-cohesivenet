@@ -189,7 +189,7 @@ provider = cohesivenet.controller_2
 
 ### Required
 
-- `configuration_id` (String) Configuration id - Required for controller upgrades. This is the AWS AMI Id or Azure Machine Image Id. The default password must be updated before an upgrade can be performed. 
+- `configuration_id` (String) Configuration id - Required for controller upgrades. This is the AWS AMI Id or Azure Machine Image Id.
 - `instance_id` (String) Instance id - Required for controller upgrades. This is the AWS Instance Id or Azure Virtual Machine Id.
 - `keyset_params` (Block Set, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--keyset_params))
 - `peer_id` (Number) Sets VNS3 controllers peer id in the VNS3 mesh network. Primary controller must be set to 1.
