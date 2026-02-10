@@ -43,6 +43,7 @@ func resourceVns3PluginInstanceNew() *schema.Resource {
 			"plugin_id": &schema.Schema{
 				Type:        schema.TypeInt,
 				Required:    true,
+				ForceNew:    true,
 				Description: "ID of plugin image",
 			},
 			"description": &schema.Schema{
@@ -188,13 +189,28 @@ func resourcePluginInstanceReadNew(ctx context.Context, d *schema.ResourceData, 
 	instanceId := int32(iId)
 	vns3.Log.Info(fmt.Sprintf("Reading Instance Id %v", string(instanceId)))
 	getInstanceRequest := vns3.NetworkEdgePluginsApi.GetPluginInstanceRequest(ctx, instanceId)
-	detail, httpResponse, err := vns3.NetworkEdgePluginsApi.GetPluginInstance(getInstanceRequest)
+	detail, _, err := vns3.NetworkEdgePluginsApi.GetPluginInstance(getInstanceRequest)
 	if err != nil {
-		if httpResponse.StatusCode == 404 {
-			d.SetId("")
-			return diags
-		} else {
-			return diag.FromErr(fmt.Errorf("VNS3 GET Plugin Instance error: %+v", err))
+		log.Printf("[WARN] Failed to get plugin instance %s: %v", Id, err)
+		d.SetId("")
+		return diag.Diagnostics{
+			diag.Diagnostic{
+				Severity: diag.Warning,
+				Summary:  "Plugin instance not found on controller",
+				Detail:   err.Error(),
+			},
+		}
+	}
+
+	if detail == nil {
+		log.Printf("[WARN] Plugin instance %s returned nil response", Id)
+		d.SetId("")
+		return diag.Diagnostics{
+			diag.Diagnostic{
+				Severity: diag.Warning,
+				Summary:  "Plugin instance returned empty response",
+				Detail:   fmt.Sprintf("Instance %s exists in state but controller returned no data", Id),
+			},
 		}
 	}
 

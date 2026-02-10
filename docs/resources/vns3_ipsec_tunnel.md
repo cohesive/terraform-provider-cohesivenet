@@ -36,7 +36,7 @@ resource "cohesivenet_vns3_ipsec_tunnel" "tunnel1" {
 ### Required
 
 - `endpoint_id` (Int) Endpoint ID to associate Tunnel
-- `remote_subnet` (String) Remote Subnet CIDR of Tunnel
+- `remote_subnet` (String) Remote Subnet CIDR of Tunnel. Cannot be empty. 
 
 ### Optional
 
