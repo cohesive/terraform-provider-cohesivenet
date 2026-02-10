@@ -2,6 +2,7 @@ package cohesivenet
 
 import (
 	"context"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -83,6 +84,7 @@ func resourceEndpoints() *schema.Resource {
 						"private_ipaddress": &schema.Schema{
 							Type:        schema.TypeString,
 							Optional:    true,
+							Computed:    true,
 							Description: "Remote Peer's IKE ID",
 						},
 						"vpn_type": &schema.Schema{
@@ -93,16 +95,19 @@ func resourceEndpoints() *schema.Resource {
 						"route_based_int_address": &schema.Schema{
 							Type:        schema.TypeString,
 							Optional:    true,
+							Computed:    true,
 							Description: "If VTI a /30 address for the virtual interface",
 						},
 						"route_based_local": &schema.Schema{
 							Type:        schema.TypeString,
 							Optional:    true,
+							Computed:    true,
 							Description: "Local subnet of IPsec tunnel",
 						},
 						"route_based_remote": &schema.Schema{
 							Type:        schema.TypeString,
 							Optional:    true,
+							Computed:    true,
 							Description: "Remote subnet of IPsec tunnel",
 						},
 					},
@@ -160,10 +165,17 @@ func resourceEndpointsRead(ctx context.Context, d *schema.ResourceData, m interf
 	var diags diag.Diagnostics
 
 	endpointId := d.Id()
-
 	endpoint, err := c.GetEndpoint(endpointId)
 	if err != nil {
-		return diag.FromErr(err)
+		log.Printf("[WARN] Failed to get endpoint %s: %v", endpointId, err)
+		d.SetId("")
+		return diag.Diagnostics{
+			diag.Diagnostic{
+				Severity: diag.Warning,
+				Summary:  "IPsec Endpoint not found on controller. Endpoint will be recreated",
+				Detail:   err.Error(),
+			},
+		}
 	}
 
 	flatEndpoint := flattenEndpointData(endpoint)
