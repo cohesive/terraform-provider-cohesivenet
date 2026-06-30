@@ -77,23 +77,10 @@ func resourceVns3PluginInstanceNew() *schema.Resource {
 				Description: "Plugin instance configuration file",
 			},
 			"plugin_config_files": &schema.Schema{
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"filename": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Name of the configuration file",
-						},
-						"content": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Content of the configuration file",
-						},
-					},
-				},
-				Description: "List of plugin instance configuration files",
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Description: "Map of plugin instance configuration files, keyed by filename, valued by file content",
 			},
 		},
 	}
@@ -244,11 +231,9 @@ func resourcePluginInstanceUpdateNew(ctx context.Context, d *schema.ResourceData
 		configFiles := availableConfigs.GetResponse()
 
 		// Process configs
-		configs := d.Get("plugin_config_files").([]interface{})
-		for _, config := range configs {
-			configMap := config.(map[string]interface{})
-			filename := configMap["filename"].(string)
-			content := configMap["content"].(string)
+		configs := d.Get("plugin_config_files").(map[string]interface{})
+		for filename, contentRaw := range configs {
+			content := contentRaw.(string)
 
 			for _, availableConfig := range configFiles {
 				if strings.Contains(availableConfig.GetName(), filename) {
