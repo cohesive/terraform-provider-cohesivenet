@@ -197,6 +197,12 @@ func resourceTunnelRead(ctx context.Context, d *schema.ResourceData, m interface
 		return diags
 	}
 
+	// Handle empty response
+	if len(flatTunnel) == 0 {
+		d.SetId("")
+		return diags
+	}
+
 	d.Set("remote_subnet", flatTunnel["remote_subnet"].(string))
 	d.Set("local_subnet", flatTunnel["local_subnet"].(string))
 	d.Set("ping_ipaddress", flatTunnel["ping_ipaddress"].(string))

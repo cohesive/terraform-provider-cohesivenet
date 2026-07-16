@@ -154,6 +154,12 @@ func resourceTrafficPairRead(ctx context.Context, d *schema.ResourceData, m inte
 
 	flatTrafficPair := flattenTrafficPairs(trafficPairResponse)
 
+	// Handle empty response
+	if len(flatTrafficPair) == 0 {
+		d.SetId("")
+		return diags
+	}
+
 	d.Set("remote_subnet", flatTrafficPair["remote_subnet"].(string))
 	d.Set("local_subnet", flatTrafficPair["local_subnet"].(string))
 	d.Set("ping_ipaddress", flatTrafficPair["ping_ipaddress"].(string))
