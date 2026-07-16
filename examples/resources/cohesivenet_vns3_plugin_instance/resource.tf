@@ -12,13 +12,8 @@ resource  "cohesivenet_vns3_plugin_instance" instance {
    
    plugin_config = file("/path/to/file")
 
-   plugin_config_files {
-      filename = "Enable Rules"
-      content = file("./enable.conf")
-   }
-
-   plugin_config_files {
-      filename = "Disable Rules"
-      content = file("./disable.conf")
+   plugin_config_files = {
+      "Enable Rules"  = file("./enable.conf")
+      "Disable Rules" = file("./disable.conf")
    }
  }
