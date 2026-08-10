@@ -102,6 +102,12 @@ func resourceRulesRead(ctx context.Context, d *schema.ResourceData, m interface{
 
 	rules := flattenRulesData(firewallResponse)
 
+	// Handle empty response
+	if len(rules) == 0 {
+		d.SetId("")
+		return diags
+	}
+
 	d.Set("rule", rules)
 
 	return diags

@@ -2,7 +2,6 @@ package cohesivenet
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -11,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-//Plugin instance V1 API and client - To be deprecated
+// Plugin instance V1 API and client - To be deprecated
 func resourceVns3PluginInstances() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourcePluginInstanceCreate,
@@ -129,7 +128,11 @@ func resourcePluginInstanceRead(ctx context.Context, d *schema.ResourceData, m i
 
 	instance := flattenPluginInstanceData(instanceResponse)
 
-	fmt.Println(instance)
+	// Handle empty response
+	if len(instance) == 0 {
+		d.SetId("")
+		return diags
+	}
 
 	d.SetId(instanceUuid)
 

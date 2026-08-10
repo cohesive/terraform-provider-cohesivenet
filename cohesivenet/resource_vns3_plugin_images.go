@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-//Image V1 API and client - To be deprecated
+// Image V1 API and client - To be deprecated
 func resourcePluginImage() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourcePluginImageCreate,
@@ -193,6 +193,12 @@ func resourcePluginImageRead(ctx context.Context, d *schema.ResourceData, m inte
 	}
 
 	image := flattenPluginImageData(imageResponse, url)
+
+	// Handle empty response
+	if image == 0 {
+		d.SetId("")
+		return diags
+	}
 
 	if err := d.Set("image", image); err != nil {
 		return diag.FromErr(err)
