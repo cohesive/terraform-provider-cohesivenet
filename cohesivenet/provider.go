@@ -40,7 +40,7 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("CN_VERIFY_CERT", false),
-				Description: "Verify the VNS3 controller's TLS certificate. Defaults to false to preserve existing behaviour (new controllers present a self-signed certificate); the default will change to true in 2.0. Set to true once a trusted certificate is installed on the controller; while false, the API token or password can be intercepted by a man-in-the-middle.",
+				Description: "Verify the VNS3 controller's TLS certificate. Defaults to false",
 			},
 			"vns3": &schema.Schema{
 				Type:       schema.TypeSet,
@@ -127,9 +127,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 				diags = append(diags, diag.Diagnostic{
 					Severity: diag.Warning,
 					Summary:  "TLS certificate verification is disabled by default",
-					Detail: "The provider does not verify the VNS3 controller's TLS certificate unless verify_cert = true is set, " +
-						"so the API token or password could be intercepted by a man-in-the-middle. Once a trusted certificate is installed " +
-						"on the controller, set verify_cert = true. To acknowledge and silence this warning, set verify_cert = false. " +
+					Detail: "The provider does not verify the VNS3 controller's TLS certificate unless verify_cert = true " +
 						"The default will change to true in version 2.0.",
 				})
 			}

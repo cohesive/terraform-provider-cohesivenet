@@ -67,7 +67,7 @@ func getVns3AuthSchema() map[string]*schema.Schema {
 			Type:        schema.TypeBool,
 			Optional:    true,
 			Default:     false,
-			Description: "Verify the controller's TLS certificate. Defaults to false to preserve existing behaviour; set to true once a trusted certificate is installed on the controller.",
+			Description: "Verify the controller's TLS certificate. Defaults to false.",
 		},
 	}
 }
@@ -95,7 +95,7 @@ func getV1Client(ctx context.Context, d *schema.ResourceData, m interface{}) (*c
 	}
 }
 
-//will be deprecated when all resources using Go client
+// will be deprecated when all resources using Go client
 func generateV1Client(vns3Auth map[string]any, Logger Logger) (*cnv1.Client, error) {
 	//check VNS3 controller host is specified
 	host, hasHost := parseHost(vns3Auth)
