@@ -27,6 +27,7 @@ func resourceVns3Peering() *schema.Resource {
 				Type:     schema.TypeSet,
 				MaxItems: 1,
 				Optional: true,
+				Deprecated: vns3BlockDeprecation,
 				Elem: &schema.Resource{
 					Schema: getVns3AuthSchema(),
 				},

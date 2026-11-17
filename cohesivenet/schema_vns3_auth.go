@@ -63,6 +63,12 @@ func getVns3AuthSchema() map[string]*schema.Schema {
 			Type:     schema.TypeInt,
 			Optional: true,
 		},
+		"verify_cert": &schema.Schema{
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "Verify the controller's TLS certificate. Defaults to false to preserve existing behaviour; set to true once a trusted certificate is installed on the controller.",
+		},
 	}
 }
 
@@ -105,15 +111,19 @@ func generateV1Client(vns3Auth map[string]any, Logger Logger) (*cnv1.Client, err
 	var v1Client *cnv1.Client
 	var err error
 	emptyString := ""
+	insecure := !parseVerifyCert(vns3Auth)
+	if insecure {
+		Logger.Debug("TLS certificate verification is disabled for VNS3 v1 connection")
+	}
 	if hasToken {
 		Logger.Debug("using API Token auth for VNS3 v1 connection")
 		if hasPassword && hasUsername {
 			Logger.Warn("ignoring user and password in vns3 config")
 		}
-		v1Client, err = cnv1.NewClient(&emptyString, &emptyString, &token, &host)
+		v1Client, err = cnv1.NewClientWithTLS(&emptyString, &emptyString, &token, &host, insecure)
 	} else if hasPassword && hasUsername {
 		Logger.Debug("using Basic auth for VNS3 v1 connection")
-		v1Client, err = cnv1.NewClient(&username, &password, &emptyString, &host)
+		v1Client, err = cnv1.NewClientWithTLS(&username, &password, &emptyString, &host, insecure)
 	} else {
 		return nil, fmt.Errorf("vns3 config requires either username & password or token specified")
 	}
@@ -158,9 +168,13 @@ func generateVNS3Client(vns3Auth map[string]any, Logger Logger) (*cn.VNS3Client,
 	if !hasTimeout || timeout == 0 {
 		timeout = 60
 	}
+	insecure := !parseVerifyCert(vns3Auth)
+	if insecure {
+		Logger.Debug("TLS certificate verification is disabled for VNS3 connection")
+	}
 	vns3Client := cn.NewVNS3Client(cfg, cn.ClientParams{
 		Timeout: timeout,
-		TLS:     false,
+		TLS:     !insecure, // TLS=true means verify certificates
 	})
 	vns3Client.Log = Logger
 	return vns3Client, nil
@@ -171,6 +185,14 @@ func hostToUrl(host string) string {
 		return "https://" + host + ":8000/api"
 	}
 	return host
+}
+
+func parseVerifyCert(vns3Auth map[string]any) bool {
+	verify, ok := vns3Auth["verify_cert"].(bool)
+	if !ok {
+		return false // default preserves existing behaviour
+	}
+	return verify
 }
 
 func parseHost(vns3Auth map[string]any) (string, bool) {
@@ -213,3 +235,5 @@ func parseToken(vns3Auth map[string]any) (string, bool) {
 	}
 	return "", false
 }
+
+const vns3BlockDeprecation = "The vns3 block is deprecated and will be removed in a future release. Configure host and credentials in the provider block instead."

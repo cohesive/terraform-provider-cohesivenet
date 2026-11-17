@@ -2,7 +2,9 @@ package cohesivenet
 
 import (
 	"context"
+	"os"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -34,10 +36,17 @@ func Provider() *schema.Provider {
 				Sensitive:   true,
 				DefaultFunc: schema.EnvDefaultFunc("CN_HOST", nil),
 			},
+			"verify_cert": &schema.Schema{
+				Type:        schema.TypeBool,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("CN_VERIFY_CERT", false),
+				Description: "Verify the VNS3 controller's TLS certificate. Defaults to false to preserve existing behaviour (new controllers present a self-signed certificate); the default will change to true in 2.0. Set to true once a trusted certificate is installed on the controller; while false, the API token or password can be intercepted by a man-in-the-middle.",
+			},
 			"vns3": &schema.Schema{
-				Type:     schema.TypeSet,
-				MaxItems: 1,
-				Optional: true,
+				Type:       schema.TypeSet,
+				MaxItems:   1,
+				Optional:   true,
+				Deprecated: vns3BlockDeprecation,
 				Elem: &schema.Resource{
 					Schema: getVns3AuthSchema(),
 				},
@@ -109,7 +118,21 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		vns3Auth["username"] = d.Get("username").(string)
 		vns3Auth["password"] = d.Get("password").(string)
 		vns3Auth["token"] = d.Get("token").(string)
+		vns3Auth["verify_cert"] = d.Get("verify_cert").(bool)
 		if vns3Auth["host"] != "" {
+			// Warn when verification is off only because of the default, so users
+			// make a deliberate choice. Explicitly setting verify_cert (config or env) stays silent.
+			_, envSet := os.LookupEnv("CN_VERIFY_CERT")
+			if shouldWarnUnverifiedDefault(d.GetRawConfig(), vns3Auth["verify_cert"].(bool), envSet) {
+				diags = append(diags, diag.Diagnostic{
+					Severity: diag.Warning,
+					Summary:  "TLS certificate verification is disabled by default",
+					Detail: "The provider does not verify the VNS3 controller's TLS certificate unless verify_cert = true is set, " +
+						"so the API token or password could be intercepted by a man-in-the-middle. Once a trusted certificate is installed " +
+						"on the controller, set verify_cert = true. To acknowledge and silence this warning, set verify_cert = false. " +
+						"The default will change to true in version 2.0.",
+				})
+			}
 			//create v1 client
 			v1client, err := generateV1Client(vns3Auth, Logger)
 			if err != nil {
@@ -125,4 +148,17 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		}
 	}
 	return meta, diags
+}
+
+// shouldWarnUnverifiedDefault reports whether verification is off only because
+// of the provider default: verify is false, the env var is not set and the
+// attribute is absent (null) in the configuration.
+func shouldWarnUnverifiedDefault(raw cty.Value, verify bool, envSet bool) bool {
+	if verify || envSet {
+		return false
+	}
+	if raw.IsNull() || !raw.IsKnown() || !raw.Type().IsObjectType() || !raw.Type().HasAttribute("verify_cert") {
+		return false
+	}
+	return raw.GetAttr("verify_cert").IsNull()
 }

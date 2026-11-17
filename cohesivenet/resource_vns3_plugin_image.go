@@ -32,10 +32,11 @@ func resourcePluginImageNew() *schema.Resource {
 				Computed: true,
 			},
 			"vns3": &schema.Schema{
-				Type:     schema.TypeSet,
-				MaxItems: 1,
-				Optional: true,
-				ForceNew: true,
+				Type:       schema.TypeSet,
+				MaxItems:   1,
+				Optional:   true,
+				ForceNew:   true,
+				Deprecated: vns3BlockDeprecation,
 				Elem: &schema.Resource{
 					Schema: getVns3AuthSchema(),
 				},
