@@ -30,6 +30,7 @@ func resourceVns3PluginInstances() *schema.Resource {
 				MaxItems: 1,
 				Optional: true,
 				ForceNew: true,
+				Deprecated: vns3BlockDeprecation,
 				Elem: &schema.Resource{
 					Schema: getVns3AuthSchema(),
 				},
