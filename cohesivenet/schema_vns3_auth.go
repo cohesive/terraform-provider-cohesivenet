@@ -120,10 +120,10 @@ func generateV1Client(vns3Auth map[string]any, Logger Logger) (*cnv1.Client, err
 		if hasPassword && hasUsername {
 			Logger.Warn("ignoring user and password in vns3 config")
 		}
-		v1Client, err = cnv1.NewClientWithTLS(&emptyString, &emptyString, &token, &host, insecure)
+		v1Client, err = cnv1.NewClient(&emptyString, &emptyString, &token, &host, insecure)
 	} else if hasPassword && hasUsername {
 		Logger.Debug("using Basic auth for VNS3 v1 connection")
-		v1Client, err = cnv1.NewClientWithTLS(&username, &password, &emptyString, &host, insecure)
+		v1Client, err = cnv1.NewClient(&username, &password, &emptyString, &host, insecure)
 	} else {
 		return nil, fmt.Errorf("vns3 config requires either username & password or token specified")
 	}
